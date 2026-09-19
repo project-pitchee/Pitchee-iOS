@@ -13,28 +13,12 @@ struct OnboardingView: View {
         case preferences = 1
     }
 
-    private enum VoicePreference: String, CaseIterable {
-        case masculine = "男性向声音"
-        case feminine = "女性向声音"
-
-        var detail: String {
-            switch self {
-            case .masculine:
-                "更偏向低沉、厚实的声音感受"
-            case .feminine:
-                "更偏向明亮、柔和的声音感受"
-            }
-        }
-    }
-
     private let onFinished: () -> Void
 
     @State private var navigationPath: [Page] = []
     @State private var selectedVoice: VoicePreference?
-    @State private var hasVoiceConsent = false
 
     @AppStorage("pitchee.voice.preference") private var savedVoicePreference = ""
-    @AppStorage("pitchee.voice.analysisConsent") private var savedVoiceConsent = false
 
     init(onFinished: @escaping () -> Void) {
         self.onFinished = onFinished
@@ -68,7 +52,6 @@ struct OnboardingView: View {
                     }
             }
         }
-        .preferredColorScheme(.light)
     }
 
     @ViewBuilder
@@ -131,7 +114,7 @@ struct OnboardingView: View {
         HStack(spacing: 6) {
             ForEach(Page.welcome.rawValue...Page.preferences.rawValue, id: \.self) { index in
                 Capsule()
-                    .fill(index == page.rawValue ? Color.black : Color.black.opacity(0.12))
+                    .fill(index == page.rawValue ? Color.primary : Color.primary.opacity(0.12))
                     .frame(width: index == page.rawValue ? 24 : 7, height: 7)
                     .animation(.easeInOut(duration: 0.2), value: page)
             }
@@ -149,11 +132,11 @@ struct OnboardingView: View {
                     .font(.system(size: 43, weight: .bold, design: .rounded))
                     .tracking(-1.2)
                     .lineSpacing(-2)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.primary)
 
                 Text("Pitchee 会把声音变成清晰、可追踪的反馈，陪你记录每一次变化。")
                     .font(.system(size: 17, weight: .regular, design: .rounded))
-                    .foregroundStyle(Color.black.opacity(0.56))
+                    .foregroundStyle(Color.primary.opacity(0.56))
                     .lineSpacing(5)
             }
 
@@ -169,7 +152,7 @@ struct OnboardingView: View {
                 OnboardingFeatureRow(
                     symbol: "lock.shield",
                     title: "你的声音由你掌控",
-                    detail: "分析前会清楚询问你的选择与授权。"
+                    detail: "在设备上分析，录音不会上传。"
                 )
             }
         }
@@ -178,13 +161,13 @@ struct OnboardingView: View {
     private var welcomeArtwork: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(Color(red: 0.95, green: 0.96, blue: 0.98))
+                .fill(Color(uiColor: .secondarySystemBackground))
                 .frame(height: 188)
 
             HStack(spacing: 8) {
                 ForEach(Array([38, 74, 118, 58, 94, 142, 66, 108, 48, 86, 128, 54].enumerated()), id: \.offset) { item in
                     Capsule()
-                        .fill(item.offset.isMultiple(of: 3) ? Color.black : Color.black.opacity(0.24))
+                        .fill(item.offset.isMultiple(of: 3) ? Color.primary : Color.primary.opacity(0.24))
                         .frame(width: 7, height: CGFloat(item.element))
                 }
             }
@@ -194,10 +177,10 @@ struct OnboardingView: View {
         .overlay(alignment: .topTrailing) {
             Text("声音分析")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundStyle(.black.opacity(0.55))
+                .foregroundStyle(.primary.opacity(0.55))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(.white.opacity(0.8), in: Capsule())
+                .background(Color(uiColor: .systemBackground).opacity(0.8), in: Capsule())
                 .padding(16)
         }
         .accessibilityHidden(true)
@@ -209,25 +192,24 @@ struct OnboardingView: View {
                 Text("让我们更加了解你")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .tracking(-0.8)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.primary)
 
-                Text("你的偏好会帮助我们用更适合你的方式呈现分析结果。")
+                Text("选择一个想探索的方向，也可以暂不确定。之后随时都能调整。")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundStyle(Color.black.opacity(0.56))
+                    .foregroundStyle(Color.primary.opacity(0.56))
                     .lineSpacing(4)
             }
             .padding(.bottom, 34)
 
             Text("你希望什么样的声音？")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundStyle(.black)
+                .foregroundStyle(.primary)
                 .padding(.bottom, 14)
 
             VStack(spacing: 12) {
                 ForEach(VoicePreference.allCases, id: \.self) { option in
                     VoicePreferenceCard(
-                        title: option.rawValue,
-                        detail: option.detail,
+                        option: option,
                         isSelected: selectedVoice == option
                     ) {
                         withAnimation(.easeInOut(duration: 0.2)) {
@@ -237,26 +219,8 @@ struct OnboardingView: View {
                 }
             }
 
-            consentSection
+            PrivacyPromiseView()
                 .padding(.top, 34)
-        }
-    }
-
-    private var consentSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(isOn: $hasVoiceConsent) {
-                Text("我同意将我的声音提供用于分析和改进")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .multilineTextAlignment(.leading)
-            }
-            .toggleStyle(.switch)
-            .tint(.accentColor)
-
-            Text("你的声音只会用于 Pitchee 的分析与产品改进，不会共享给第三方。你可以随时在设置中退出这项授权。")
-                .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundStyle(Color.black.opacity(0.5))
-                .lineSpacing(4)
-                .padding(.horizontal, 4)
         }
     }
 
@@ -298,46 +262,8 @@ struct OnboardingView: View {
         case .preferences:
             guard let selectedVoice else { return }
             savedVoicePreference = selectedVoice.rawValue
-            savedVoiceConsent = hasVoiceConsent
             onFinished()
         }
-    }
-}
-
-private struct VoicePreferenceCard: View {
-    let title: String
-    let detail: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    private let brandBlue = Color(red: 0.17, green: 0.45, blue: 0.95)
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 7) {
-                    Text(title)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundStyle(.black)
-
-                    Text(detail)
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundStyle(Color.black.opacity(0.5))
-                        .multilineTextAlignment(.leading)
-                }
-                Spacer(minLength: 12)
-            }
-            .frame(maxWidth: .infinity, minHeight: 86, alignment: .leading)
-            .padding(.horizontal, 22)
-            .padding(.vertical, 10)
-            .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(isSelected ? brandBlue : Color.black.opacity(0.17), lineWidth: isSelected ? 3 : 1.5)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
@@ -362,16 +288,16 @@ private struct OnboardingFeatureRow: View {
             Image(systemName: symbol)
                 .font(.system(size: 16, weight: .semibold))
                 .frame(width: 34, height: 34)
-                .foregroundStyle(.black)
-                .background(Color.black.opacity(0.07), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .foregroundStyle(.primary)
+                .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.primary)
                 Text(detail)
                     .font(.system(size: 13, weight: .regular, design: .rounded))
-                    .foregroundStyle(Color.black.opacity(0.5))
+                    .foregroundStyle(Color.primary.opacity(0.5))
             }
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct PitcheeApp: App {
@@ -13,5 +14,6 @@ struct PitcheeApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: RecordingAssessment.self)
     }
 }

@@ -7,23 +7,24 @@
 
 import Foundation
 
-nonisolated public struct PitcheeAnalysisResult: Decodable, Sendable {
+nonisolated public struct PitcheeAnalysisResult: Codable, Sendable {
     public let schemaVersion: Int
     public let modelVersion: String
     public let audio: Audio
     public let vad: VoiceActivity
-    public let pitch: Pitch
-    public let models: Models
+    public let f0: Pitch
+    public let vfp: VFP
+    public let naturalness: Naturalness
     public let composite: CompositeScore
 
-    public struct Audio: Decodable, Sendable {
+    public struct Audio: Codable, Sendable {
         public let sourceSampleRate: Int
         public let sourceChannels: Int
         public let inputSeconds: Double
         public let analyzedSeconds: Double
     }
 
-    public struct VoiceActivity: Decodable, Sendable {
+    public struct VoiceActivity: Codable, Sendable {
         public let segmentCount: Int
         public let speechSeconds: Double
         public let sileroSegmentCount: Int
@@ -32,31 +33,55 @@ nonisolated public struct PitcheeAnalysisResult: Decodable, Sendable {
         public let segments: [Segment]
     }
 
-    public struct Segment: Decodable, Sendable {
+    public struct Segment: Codable, Sendable {
         public let startSeconds: Double
         public let endSeconds: Double
         public let speechStartSeconds: Double
         public let speechEndSeconds: Double
     }
 
-    public struct Pitch: Decodable, Sendable {
+    public struct Pitch: Codable, Sendable {
+        public let windowSeconds: Double
         public let meanHz: Double?
         public let standardDeviationHz: Double?
         public let voicedFrameCount: Int
+        public let voicedWindowCount: Int
+        public let windows: [PitchWindow]
     }
 
-    public struct Models: Decodable, Sendable {
-        public let rawFemaleScore: Double
-        public let standardScore: Double
-        public let naturalnessScore: Double
-        public let vfpWindowCount: Int
-        public let vfpWindowDurationSeconds: Double
-        public let vfpWindowStartsSeconds: [Double]
-        public let vfpWindowRawScores: [Double]
-        public let naturalnessPatchCount: Int
+    public struct PitchWindow: Codable, Sendable {
+        public let startSeconds: Double
+        public let endSeconds: Double
+        public let f0Hz: Double?
     }
 
-    public struct CompositeScore: Decodable, Sendable {
+    public struct VFP: Codable, Sendable {
+        public let vfpStandardScore: Double
+        public let windowCount: Int
+        public let windowDurationSeconds: Double
+        public let windows: [VFPWindow]
+    }
+
+    public struct VFPWindow: Codable, Sendable {
+        public let startSeconds: Double
+        public let endSeconds: Double
+        public let vfpStandardScore: Double
+    }
+
+    public struct Naturalness: Codable, Sendable {
+        public let score: Double
+        public let windowCount: Int
+        public let windowDurationSeconds: Double
+        public let windows: [NaturalnessWindow]
+    }
+
+    public struct NaturalnessWindow: Codable, Sendable {
+        public let startSeconds: Double
+        public let endSeconds: Double
+        public let score: Double
+    }
+
+    public struct CompositeScore: Codable, Sendable {
         public let baseScore: Double
         public let finalScore: Double
         public let cap: Double?

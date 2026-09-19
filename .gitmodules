@@ -1,4 +1,4 @@
 [submodule "Dependencies/PitcheeCore"]
 	path = Dependencies/PitcheeCore
-	url = https://github.com/project-pitchee/Pitchee-core.git
+	url = https://github.com/project-pitchee/Core.git
 	shallow = true
