@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		55ED94313065A8780066A92F /* LaTeXSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 55ED94303065A8780066A92F /* LaTeXSwiftUI */; };
 		A10000000000000000000001 /* Artifacts/ONNXRuntime/onnxruntime.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Artifacts/ONNXRuntime/onnxruntime.xcframework */; };
 		A10000000000000000000002 /* PitcheeCore/models in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* PitcheeCore/models */; };
 		A10000000000000000000003 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* Foundation.framework */; };
@@ -68,6 +69,7 @@
 				A10000000000000000000006 /* CoreGraphics.framework in Frameworks */,
 				A10000000000000000000003 /* Foundation.framework in Frameworks */,
 				A10000000000000000000001 /* Artifacts/ONNXRuntime/onnxruntime.xcframework in Frameworks */,
+				55ED94313065A8780066A92F /* LaTeXSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,6 +147,7 @@
 			);
 			name = Pitchee;
 			packageProductDependencies = (
+				55ED94303065A8780066A92F /* LaTeXSwiftUI */,
 			);
 			productName = Pitchee;
 			productReference = B76D28C92FDC49E3009E536B /* Pitchee.app */;
@@ -174,6 +177,9 @@
 			);
 			mainGroup = B76D28C02FDC49E3009E536B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				55ED942F3065A8780066A92F /* XCRemoteSwiftPackageReference "LaTeXSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B76D28CA2FDC49E3009E536B /* Products */;
 			projectDirPath = "";
@@ -460,6 +466,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		55ED942F3065A8780066A92F /* XCRemoteSwiftPackageReference "LaTeXSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/colinc86/LaTeXSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		55ED94303065A8780066A92F /* LaTeXSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 55ED942F3065A8780066A92F /* XCRemoteSwiftPackageReference "LaTeXSwiftUI" */;
+			productName = LaTeXSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B76D28C12FDC49E3009E536B /* Project object */;
 }

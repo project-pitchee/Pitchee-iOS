@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LaTeXSwiftUI
 
 struct RecordingAnalysisView: View {
     @ObservedObject var viewModel: AnalysisViewModel
@@ -32,13 +33,14 @@ struct RecordingAnalysisView: View {
             }
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle(viewModel.isAnalyzing ? "正在分析" : "声音报告")
+        .navigationTitle(viewModel.isAnalyzing ? "正在分析" : "结果")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(viewModel.isAnalyzing)
         .toolbar {
             if let result = viewModel.result, !viewModel.isAnalyzing {
                 ToolbarItem(placement: .topBarTrailing) {
                     PitchImageExportButton { PitchTimeline(result: result) }
+                        .labelStyle(.iconOnly)
                 }
             }
         }
@@ -86,18 +88,52 @@ struct RecordingResultView: View {
     let volumeStatistics: RecordingVolumeStatistics?
     let saveError: String?
 
+    @State private var showsVoiceDetails = false
+    @State private var selectedSuggestion: ResultSuggestion?
+    @State private var selectedResource: ResultResource?
+
     var body: some View {
         FoldAwareArrangementView(
-            primary: { resultPane(overview) },
-            secondary: { resultPane(details) },
+            primary: { resultPane(resultOverview) },
+            secondary: { resultPane(resultSecondary) },
             regular: { resultScroll(allContent) }
         )
         .background(Color(uiColor: .systemGroupedBackground))
+        .sheet(isPresented: $showsVoiceDetails) {
+            voiceDetailsSheet
+        }
+        .sheet(item: $selectedSuggestion) { suggestion in
+            ResultSuggestionSheet(suggestion: suggestion)
+        }
+        .sheet(item: $selectedResource) { resource in
+            ResultResourceSheet(resource: resource)
+        }
     }
 
-    private var overview: some View {
-        VStack(alignment: .leading, spacing: 28) {
+    private var resultOverview: some View {
+        VStack(alignment: .leading, spacing: 24) {
             scoreSummary
+
+            Button {
+                showsVoiceDetails = true
+            } label: {
+                HStack(spacing: 12) {
+                    Label("声音详情", systemImage: "waveform.path.ecg")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer(minLength: 12)
+                    Text("音高与音量")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.tertiary)
+                }
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 15)
+                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(.plain)
 
             VoiceProfileReferenceChart(
                 femalePercentage: result.vfp.vfpStandardScore,
@@ -106,37 +142,28 @@ struct RecordingResultView: View {
             )
 
             if let saveError {
-                Label(saveError, systemImage: "exclamationmark.triangle")
+                Label(saveError, systemImage: "exclamationmark.triangle.fill")
                     .font(.subheadline)
                     .foregroundStyle(.orange)
-                    .padding(18)
+                    .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
+                    .background(Color.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
         }
     }
 
-    private var details: some View {
+    private var resultSecondary: some View {
         VStack(alignment: .leading, spacing: 28) {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("声音指标").font(.title3.weight(.bold))
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
-                    ResultMetric(title: "自然度", value: scoreText(result.naturalness.score), unit: "/ 100", symbol: "leaf")
-                    ResultMetric(title: "标准评分", value: scoreText(result.vfp.vfpStandardScore), unit: "/ 100", symbol: "slider.horizontal.3")
-                    ResultMetric(title: "有效语音", value: result.vad.speechSeconds.formatted(.number.precision(.fractionLength(1))), unit: "秒", symbol: "bubble.left")
-                }
-            }
-
-            recordingStatistics
-            explanationSection
-            scoreExplanation
+            suggestionsSection
+            resourcesSection
         }
     }
 
     private var allContent: some View {
         VStack(alignment: .leading, spacing: 28) {
-            overview
-            details
+            resultOverview
+            Divider()
+            resultSecondary
         }
     }
 
@@ -152,6 +179,213 @@ struct RecordingResultView: View {
     private func resultPane<Content: View>(_ content: Content) -> some View {
         resultScroll(content)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var suggestionsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("建议")
+                    .font(.title2.weight(.bold))
+                Text("根据这次录音，下一步可以这样练习")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 0) {
+                ForEach(suggestions) { suggestion in
+                    Button {
+                        selectedSuggestion = suggestion
+                    } label: {
+                        suggestionRow(suggestion)
+                    }
+                    .buttonStyle(.plain)
+
+                    if suggestion.id != suggestions.last?.id {
+                        Divider()
+                            .padding(.leading, 54)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+    }
+
+    private func suggestionRow(_ suggestion: ResultSuggestion) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: suggestion.symbol)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(suggestion.tint)
+                .frame(width: 30, height: 30)
+                .background(suggestion.tint.opacity(0.12), in: Circle())
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(suggestion.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                Text(suggestion.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.tertiary)
+                .padding(.top, 8)
+        }
+        .padding(.vertical, 15)
+        .contentShape(Rectangle())
+    }
+
+    private var resourcesSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("练习资源")
+                    .font(.title2.weight(.bold))
+                Text("把建议带到下一次练习里")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 12) {
+                ForEach(resources) { resource in
+                    Button {
+                        selectedResource = resource
+                    } label: {
+                        resourceRow(resource)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func resourceRow(_ resource: ResultResource) -> some View {
+        HStack(spacing: 14) {
+            ZStack(alignment: .bottomTrailing) {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(resource.tint.gradient)
+                    .frame(width: 92, height: 66)
+                Image(systemName: resource.symbol)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Text(resource.badge)
+                    .font(.caption2.weight(.bold).monospacedDigit())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                    .padding(6)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(resource.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                Text(resource.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(12)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .contentShape(Rectangle())
+    }
+
+    private var suggestions: [ResultSuggestion] {
+        let needsLongerRecording = result.vad.speechSeconds < 5
+        let naturalnessNeedsWork = result.naturalness.score < 70
+
+        return [
+            ResultSuggestion(
+                id: "duration",
+                title: needsLongerRecording ? "下次多录一会儿" : "保持相近的录音时长",
+                detail: needsLongerRecording
+                    ? "有效语音不足 5 秒，更多声音信息会让结果更稳定。"
+                    : "继续用相近时长录制，方便比较每次变化。",
+                symbol: "timer",
+                tint: .blue,
+                expandedDetail: needsLongerRecording
+                    ? "试着连续说 10 秒以上的自然句子。录音更完整，音高和自然度的估计会更稳定。"
+                    : "你已经提供了足够的语音信息。下次保持相近时长，趋势会更容易看懂。"
+            ),
+            ResultSuggestion(
+                id: "naturalness",
+                title: naturalnessNeedsWork ? "让语气更自然" : "继续保持自然语气",
+                detail: naturalnessNeedsWork
+                    ? "放慢语速，保持连续呼吸，再试着说一段熟悉的话。"
+                    : "这次自然度表现不错，保持放松和连贯的表达。",
+                symbol: "waveform",
+                tint: .orange,
+                expandedDetail: naturalnessNeedsWork
+                    ? "先放松下颌和肩膀，用熟悉的句子练习。不要刻意压低或抬高音高，先让表达保持连贯。"
+                    : "自然度是一个参考值。保持轻松的语速和连贯的呼吸，比追求单次分数更有帮助。"
+            )
+        ]
+    }
+
+    private var resources: [ResultResource] {
+        [
+            ResultResource(
+                id: "naturalness-video",
+                title: "自然度训练",
+                detail: "视频练习 · 放松与连贯表达",
+                badge: "01:09",
+                symbol: "play.fill",
+                tint: .blue,
+                body: "用一段短练习找到更放松的语气，再回到录音页试一次。"
+            ),
+            ResultResource(
+                id: "voice-research",
+                title: "声音研究",
+                detail: "文章 · 了解音高与自然度",
+                badge: "阅读",
+                symbol: "doc.text.image",
+                tint: .purple,
+                body: "了解音高、自然度与录音条件之间的关系，把结果当成长期练习的参考。"
+            )
+        ]
+    }
+
+    private var voiceDetailsSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("声音指标")
+                            .font(.title3.weight(.bold))
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
+                            ResultMetric(title: "自然度", value: scoreText(result.naturalness.score), unit: "/ 100", symbol: "leaf")
+                            ResultMetric(title: "标准评分", value: scoreText(result.vfp.vfpStandardScore), unit: "/ 100", symbol: "slider.horizontal.3")
+                            ResultMetric(title: "有效语音", value: result.vad.speechSeconds.formatted(.number.precision(.fractionLength(1))), unit: "秒", symbol: "bubble.left")
+                        }
+                    }
+
+                    recordingStatistics
+                    explanationSection
+                }
+                .frame(maxWidth: 560)
+                .frame(maxWidth: .infinity)
+                .padding(24)
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("声音详情")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { showsVoiceDetails = false }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 
     private var explanationSection: some View {
@@ -171,35 +405,63 @@ struct RecordingResultView: View {
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24))
     }
 
-    private var scoreExplanation: some View {
-        DisclosureGroup("评分如何得出") {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("标准评分反映模型识别的女性向声音特征；综合评分结合标准评分、自然度和平均音高计算。它不代表声音的整体好坏。")
-                Text("声音偏好只记录你的练习方向，当前不会切换评分模型。")
-                if result.composite.limited, let cap = result.composite.cap {
-                    Text("本次触发了评分上限规则，综合评分上限为 \(scoreText(cap)) 分。")
+    private var scoreSummary: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text("综合评分")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                NavigationLink {
+                    ScoreExplanationView(result: result)
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("查看评分如何得出")
             }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .padding(.top, 12)
+
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(scoreText(result.composite.finalScore))
+                    .font(.system(size: 78, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(Color.accentColor)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .contentTransition(.numericText())
+                Text("/ 100")
+                    .font(.title3.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+            }
+
+            ProgressView(value: scoreProgress, total: 1)
+                .tint(Color.accentColor)
+                .scaleEffect(x: 1, y: 1.35, anchor: .center)
+                .accessibilityLabel("综合评分进度")
+                .accessibilityValue("\(scoreText(result.composite.finalScore)) 分，共 100 分")
+
+            Text(scoreHeadline)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
-        .font(.subheadline.weight(.medium))
-        .padding(20)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("综合评分 \(scoreText(result.composite.finalScore)) 分，满分 100 分")
     }
 
-    private var scoreSummary: some View {
-        Text(scoreText(result.composite.finalScore))
-            .font(.system(size: 88, weight: .bold, design: .rounded))
-            .monospacedDigit()
-            .foregroundStyle(Color.accentColor)
-            .minimumScaleFactor(0.6)
-            .lineLimit(1)
-            .contentTransition(.numericText())
-            .accessibilityLabel("综合评分 \(scoreText(result.composite.finalScore)) 分，满分 100 分")
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
+    private var scoreProgress: Double {
+        min(max(result.composite.finalScore / 100, 0), 1)
+    }
+
+    private var scoreHeadline: String {
+        switch result.composite.finalScore {
+        case 90...: return "这次表现很亮眼，继续保持稳定的表达。"
+        case 70..<90: return "基础表现不错，针对下面的建议再练一次。"
+        default: return "把下面的一条建议带到下一次录音里，结果会更有参考价值。"
+        }
     }
 
     private var recordingStatistics: some View {
@@ -327,6 +589,390 @@ struct RecordingResultView: View {
                 Text(detail).font(.subheadline).foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+private struct ScoreExplanationView: View {
+    let result: PitcheeAnalysisResult
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                intro
+                currentMetrics
+                commonFormulaSection
+                currentRuleSection
+                otherRulesSection
+            }
+            .frame(maxWidth: 600, alignment: .leading)
+            .frame(maxWidth: .infinity)
+            .padding(24)
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .navigationTitle("评分说明")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var intro: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("综合评分如何得出")
+                .font(.title2.weight(.bold))
+            Text("综合评分把音色标准、自然度和平均音高放在一起计算，再根据本次命中的规则进行加分或封顶。它适合用来观察自己的练习趋势，不代表声音的整体好坏。")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var currentMetrics: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("本次指标")
+                .font(.title3.weight(.bold))
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 138), spacing: 12)], spacing: 12) {
+                explanationMetric("标准音色", value: scoreText(result.vfp.vfpStandardScore), unit: "/ 100", symbol: "slider.horizontal.3")
+                explanationMetric("自然度", value: scoreText(result.naturalness.score), unit: "/ 100", symbol: "leaf")
+                explanationMetric(
+                    "平均 F0",
+                    value: f0Text,
+                    unit: result.f0.meanHz == nil ? "" : "Hz",
+                    symbol: "waveform.path"
+                )
+                explanationMetric("Base", value: scoreText(result.composite.baseScore), unit: "/ 100", symbol: "function")
+                explanationMetric("Final", value: scoreText(result.composite.finalScore), unit: "/ 100", symbol: "checkmark.seal")
+            }
+        }
+    }
+
+    private func explanationMetric(_ title: String, value: String, unit: String, symbol: String) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Label(title, systemImage: symbol)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(value)
+                    .font(.title3.weight(.bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                Text(unit)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private var commonFormulaSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("基础公式")
+                .font(.title3.weight(.bold))
+            Text("所有评分规则都从这些归一化步骤开始。")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            FormulaBlock(lines: [
+                #"\mathrm{Standard} = \mathrm{vfp\_standard\_score}"#,
+                #"\mathrm{Naturalness} = \mathrm{naturalness\_score}"#,
+                #"F_0 = \mathrm{mean\_f0\_hz}"#,
+                #"\mathrm{Standard}_r = \frac{\mathrm{Standard}}{100}"#,
+                #"\mathrm{Naturalness}_r = \min\left(1, \max\left(0, \frac{\mathrm{Naturalness} - 40}{50}\right)\right)"#,
+                #"F_{0r} = \min\left(1, \max\left(0, \frac{F_0 - 110}{90}\right)\right)"#,
+                #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,\mathrm{Standard}_r + 0.20\,\mathrm{Naturalness}_r \\ &\quad + 0.15\,F_{0r} + 0.15\,\mathrm{Standard}_r\,\mathrm{Naturalness}_r\,F_{0r}\bigr)\end{aligned}"#,
+                #"\mathrm{Final} = \mathrm{rule}(\mathrm{Base}, \mathrm{Standard}, \mathrm{Naturalness}, F_0)"#
+            ])
+            Text("Standard 是模型识别的音色标准分；Naturalness 是自然度分；F0 是平均基频，单位为 Hz。带 _r 的变量会被限制在 0 到 1 之间。Base 是应用规则前的基础分，Final 是结果页显示的综合分。")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var currentRuleSection: some View {
+        let rule = currentRuleDocumentation
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text("本次命中规则")
+                    .font(.title3.weight(.bold))
+                Text("当前")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.accentColor.opacity(0.12), in: Capsule())
+            }
+            Text(rule.guidance)
+                .font(.body)
+                .fixedSize(horizontal: false, vertical: true)
+            ruleDetail("触发条件", text: rule.condition)
+            ruleDetail("计算公式", text: nil)
+            FormulaBlock(lines: rule.formulas)
+            ruleDetail("处理结果", text: rule.result)
+        }
+        .padding(18)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private func ruleDetail(_ title: String, text: String?) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            if let text {
+                Text(text)
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var otherRulesSection: some View {
+        DisclosureGroup {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(scoreRuleDocumentation.filter { $0.id != result.composite.rule }) { rule in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(rule.title)
+                            .font(.subheadline.weight(.semibold))
+                        Text(rule.condition)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(rule.result)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 12)
+
+                    if rule.id != scoreRuleDocumentation.filter({ $0.id != result.composite.rule }).last?.id {
+                        Divider()
+                    }
+                }
+            }
+            .padding(.top, 6)
+        } label: {
+            Label("其他评分规则", systemImage: "list.bullet.rectangle")
+                .font(.subheadline.weight(.semibold))
+        }
+        .padding(18)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private var currentRuleDocumentation: ScoreRuleDocumentation {
+        scoreRuleDocumentation.first { $0.id == result.composite.rule } ?? scoreRuleDocumentation[0]
+    }
+
+    private var f0Text: String {
+        guard let f0 = result.f0.meanHz, f0.isFinite, f0 > 0 else { return "—" }
+        return f0.formatted(.number.precision(.fractionLength(0)))
+    }
+
+    private func scoreText(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(1)))
+    }
+}
+
+private struct FormulaBlock: View {
+    let lines: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                LaTeX("\\[\(line)\\]")
+                    .font(.subheadline)
+                    .imageRenderingMode(.template)
+                    .blockMode(.blockViews)
+                    .errorMode(.rendered)
+                    .renderingStyle(.redactedOriginal)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color(uiColor: .tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(alignment: .leading) {
+            Capsule()
+                .fill(Color.accentColor)
+                .frame(width: 3)
+                .padding(.vertical, 10)
+        }
+    }
+}
+
+private struct ScoreRuleDocumentation: Identifiable {
+    let id: String
+    let title: String
+    let guidance: String
+    let condition: String
+    let formulas: [String]
+    let result: String
+}
+
+private let scoreRuleDocumentation: [ScoreRuleDocumentation] = [
+    ScoreRuleDocumentation(
+        id: "continuous",
+        title: "连续评分",
+        guidance: "这次没有触发特殊限制，综合分直接使用 Base。",
+        condition: "未命中其他封顶或提升规则",
+        formulas: [#"\mathrm{Final} = \mathrm{Base}"#],
+        result: "综合分采用 Base。"
+    ),
+    ScoreRuleDocumentation(
+        id: "pass_boost",
+        title: "加分",
+        guidance: "三项指标都已经过线，系统会把稳定、自然的表现向上提升。",
+        condition: "F0 > 165，Naturalness > 80，Standard > 50",
+        formulas: [
+            #"s_{F0} = \frac{F_0 - 165}{25}"#,
+            #"s_N = \frac{\mathrm{Naturalness} - 80}{20}"#,
+            #"s_S = \frac{\mathrm{Standard} - 50}{30}"#,
+            #"\mathrm{strength} = \min(s_{F0}, s_N, s_S, 1)"#,
+            #"\mathrm{promoted} = 60 + 40\,\mathrm{strength}"#,
+            #"\mathrm{Final} = \max(\mathrm{Base}, \mathrm{promoted})"#
+        ],
+        result: "综合分最高为 100；如果 promoted 高于 Base，就采用 promoted。"
+    ),
+    ScoreRuleDocumentation(
+        id: "high_f0_stylized_cap",
+        title: "高基频、低自然度封顶",
+        guidance: "音高已经上去了，但自然度还没跟上。下一次先放松语气，不必刻意抬高音调。",
+        condition: "F0 > 165，Naturalness < 50",
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 30)"#],
+        result: "综合分最高为 30。"
+    ),
+    ScoreRuleDocumentation(
+        id: "low_f0_natural_cap",
+        title: "低基频封顶",
+        guidance: "自然度已经不错，接下来可以把注意力放在音高上。",
+        condition: "F0 ≤ 165，Naturalness ≥ 50",
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
+        result: "综合分最高为 59。"
+    ),
+    ScoreRuleDocumentation(
+        id: "low_f0_stylized_cap",
+        title: "低基频、低自然度",
+        guidance: "这次音高和自然度都需要照顾。先放慢一点，完整自然地说完句子。",
+        condition: "F0 ≤ 165，Naturalness < 50",
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 20)"#],
+        result: "综合分最高为 20。"
+    ),
+    ScoreRuleDocumentation(
+        id: "high_f0_male_cap",
+        title: "音色分不足",
+        guidance: "音高和自然度已经达标，接下来重点练习音色，让声音更明亮、更轻松。",
+        condition: "F0 > 165，Naturalness ≥ 50，Standard < 50",
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
+        result: "综合分最高为 59。"
+    ),
+    ScoreRuleDocumentation(
+        id: "f0_unavailable",
+        title: "基频不可用",
+        guidance: "没有识别到稳定基频，下次可以在安静环境中离麦克风近一点。",
+        condition: "没有可靠的 F0",
+        formulas: [#"\mathrm{Final} = \mathrm{Standard}"#],
+        result: "综合分直接采用标准音色分 Standard。"
+    )
+]
+
+private struct ResultSuggestion: Identifiable {
+    let id: String
+    let title: String
+    let detail: String
+    let symbol: String
+    let tint: Color
+    let expandedDetail: String
+}
+
+private struct ResultResource: Identifiable {
+    let id: String
+    let title: String
+    let detail: String
+    let badge: String
+    let symbol: String
+    let tint: Color
+    let body: String
+}
+
+private struct ResultSuggestionSheet: View {
+    let suggestion: ResultSuggestion
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Image(systemName: suggestion.symbol)
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(suggestion.tint)
+                    .frame(width: 64, height: 64)
+                    .background(suggestion.tint.opacity(0.12), in: Circle())
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(suggestion.title)
+                        .font(.title2.weight(.bold))
+                    Text(suggestion.expandedDetail)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+            }
+            .frame(maxWidth: 560, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(24)
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("练习建议")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+}
+
+private struct ResultResourceSheet: View {
+    let resource: ResultResource
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(resource.tint.gradient)
+                    Image(systemName: resource.symbol)
+                        .font(.system(size: 34, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(height: 160)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(resource.title)
+                        .font(.title2.weight(.bold))
+                    Text(resource.body)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+            }
+            .frame(maxWidth: 560, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(24)
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle(resource.badge == "阅读" ? "文章" : "视频")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 
