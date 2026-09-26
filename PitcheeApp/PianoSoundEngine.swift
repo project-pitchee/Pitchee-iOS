@@ -35,10 +35,10 @@ final class PianoSoundEngine: ObservableObject {
     private var pendingPause: DispatchWorkItem?
 
     @discardableResult
-    func prepare() -> Bool {
+    func prepare() async -> Bool {
         pendingPause?.cancel()
         pendingPause = nil
-        guard configureAudioSession() else { return false }
+        guard await configureAudioSession(), !Task.isCancelled else { return false }
 
         if sourceNode == nil {
             guard let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1) else {
@@ -96,13 +96,17 @@ final class PianoSoundEngine: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: pause)
     }
 
-    private func configureAudioSession() -> Bool {
-        let session = AVAudioSession.sharedInstance()
+    private func configureAudioSession() async -> Bool {
         do {
-            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-            try session.setPreferredIOBufferDuration(0.005)
-            try session.setActive(true, options: [])
+            try await AudioSessionController.activate(
+                category: .playback,
+                mode: .default,
+                options: [.mixWithOthers],
+                preferredIOBufferDuration: 0.005
+            )
             return true
+        } catch is CancellationError {
+            return false
         } catch {
             logger.error("Unable to configure piano audio session: \(String(describing: error), privacy: .public)")
             return false

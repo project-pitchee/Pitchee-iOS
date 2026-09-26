@@ -130,9 +130,11 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             let analyzer = try await preparedAnalyzer()
             try await analyzer.resetRealtimeF0()
             guard !Task.isCancelled, state == .requestingPermission else { return }
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.record, mode: .measurement, options: [])
-            try session.setActive(true, options: .notifyOthersOnDeactivation)
+            try await AudioSessionController.activate(category: .record, mode: .measurement)
+            guard !Task.isCancelled, state == .requestingPermission else {
+                deactivateAudioSession()
+                return
+            }
 
             let url = FileManager.default.temporaryDirectory
                 .appendingPathComponent("pitchee-\(UUID().uuidString)")
@@ -229,10 +231,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     }
 
     private func deactivateAudioSession() {
-        try? AVAudioSession.sharedInstance().setActive(
-            false,
-            options: .notifyOthersOnDeactivation
-        )
+        AudioSessionController.deactivate()
     }
 
     private func analyze(

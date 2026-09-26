@@ -456,7 +456,6 @@ private struct PianoKeysView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var soundEngine = PianoSoundEngine()
     @State private var activeNote: PianoNote?
-    @State private var isVisible = false
     @State private var feedback = UIImpactFeedbackGenerator(style: .light)
 
     var body: some View {
@@ -482,22 +481,18 @@ private struct PianoKeysView: View {
         }
         .navigationTitle("piano.screen.title")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            isVisible = true
-            soundEngine.prepare()
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
             feedback.prepare()
+            await soundEngine.prepare()
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active, isVisible {
-                soundEngine.prepare()
-                feedback.prepare()
-            } else if phase != .active {
+            if phase != .active {
                 soundEngine.stopAll()
                 activeNote = nil
             }
         }
         .onDisappear {
-            isVisible = false
             soundEngine.stopAll()
             activeNote = nil
         }
