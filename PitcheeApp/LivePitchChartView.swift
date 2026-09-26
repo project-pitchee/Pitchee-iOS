@@ -19,13 +19,22 @@ struct LivePitchChartView: View {
         return pitch
     }
 
+    private var accessibilityValue: String {
+        if let currentPitch {
+            return String(localized: "recording.timeline.currentPitch.a11y \(Int(currentPitch))")
+        }
+        return isRecording
+            ? String(localized: "recording.timeline.noPitchDetected.a11y")
+            : String(localized: "recording.timeline.notRecording.a11y")
+    }
+
     var body: some View {
         let end = max(PitchTimeline.visibleSeconds, elapsedTime, samples.last?.elapsedTime ?? 0)
         PitchPlot(samples: samples, timeRange: (end - PitchTimeline.visibleSeconds)...end)
             .frame(height: 210)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("音高曲线，最近 3 秒")
-            .accessibilityValue(currentPitch.map { "\(Int($0)) 赫兹" } ?? (isRecording ? "未检测到音高" : "尚未录音或录音已结束"))
+            .accessibilityLabel("recording.timeline.a11y")
+            .accessibilityValue(accessibilityValue)
     }
 }
 
@@ -105,18 +114,18 @@ struct PitchTimelineImage: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("完整音高曲线").font(.system(size: 26, weight: .semibold))
-                    Text("时长 \(timeline.duration.formatted(.number.precision(.fractionLength(1)))) 秒 · F0 / Hz")
+                    Text("export.pitchImage.chart.title").font(.system(size: 26, weight: .semibold))
+                    Text("export.pitchImage.chart.duration \(timeline.duration.formatted(.number.precision(.fractionLength(1))))")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("Pitchee").font(.system(size: 20, weight: .medium)).foregroundStyle(.secondary)
+                Text("common.brand.name").font(.system(size: 20, weight: .medium)).foregroundStyle(.secondary)
             }
             ForEach(timeline.imageRows) { row in
                 PitchPlot(samples: row.samples, timeRange: row.range)
                     .frame(height: 150)
             }
-            Text("曲线空白处表示未检测到可靠音高。")
+            Text("export.pitchImage.chart.gapNote")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
         }
         .padding(32)
@@ -127,3 +136,23 @@ struct PitchTimelineImage: View {
         .tint(Color(red: 0.20, green: 0.36, blue: 0.78))
     }
 }
+
+#if DEBUG
+#Preview("Mock - Live Pitch", traits: .sizeThatFitsLayout) {
+    LivePitchChartView(
+        samples: DebugPreviewData.liveSamples,
+        elapsedTime: 3.5,
+        isRecording: true
+    )
+    .padding()
+}
+
+#Preview("Debug - Empty Pitch", traits: .sizeThatFitsLayout) {
+    LivePitchChartView(samples: [], elapsedTime: 0, isRecording: false)
+        .padding()
+}
+
+#Preview("Mock - Timeline Image", traits: .sizeThatFitsLayout) {
+    PitchTimelineImage(timeline: PitchTimeline(result: DebugPreviewData.result))
+}
+#endif

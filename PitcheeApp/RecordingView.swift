@@ -18,7 +18,7 @@ struct RecordingView: View {
             regular: { regularContent }
         )
         .background(Color(uiColor: .systemBackground))
-        .navigationTitle("录制")
+        .navigationTitle("recording.screen.title")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showsAnalysis) {
             RecordingAnalysisView(viewModel: viewModel)
@@ -38,18 +38,18 @@ struct RecordingView: View {
                 }
             }
         }
-        .alert("无法开始录音", isPresented: Binding(
+        .alert("recording.error.startFailed.title", isPresented: Binding(
             get: { viewModel.errorMessage != nil && !showsAnalysis && !viewModel.hasResult },
             set: { if !$0 { viewModel.clearError() } }
         )) {
-            Button("好", role: .cancel) { viewModel.clearError() }
+            Button("common.action.ok", role: .cancel) { viewModel.clearError() }
         } message: {
-            Text(viewModel.errorMessage ?? "请稍后再试。")
+            Text(viewModel.errorMessage ?? String(localized: "common.error.tryAgainLater"))
         }
     }
 
     private var analysisButton: some View {
-        Button("查看上次分析", systemImage: "clock.arrow.circlepath") {
+        Button("recording.toolbar.viewLastAnalysis", systemImage: "clock.arrow.circlepath") {
             showsAnalysis = true
         }
     }
@@ -96,11 +96,8 @@ struct RecordingView: View {
     private var chart: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("最近 3 秒").font(.caption).foregroundStyle(.secondary)
+                Text("recording.chart.recentWindow").font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                PitchImageExportButton { viewModel.pitchTimeline }
-                    .font(.caption)
-                    .disabled(viewModel.elapsedTime <= 0 || viewModel.isAnalyzing)
             }
             LivePitchChartView(
                 samples: viewModel.livePitchSamples,
@@ -112,10 +109,10 @@ struct RecordingView: View {
 
     private var referenceText: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("参考语料")
+            Text("recording.reference.title")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text("清晨，我推开窗户，看见阳光落在树叶上。远处传来轻轻的鸟鸣，街道也慢慢热闹起来。我想放慢脚步，用自然的声音，记录今天平凡而美好的生活。")
+            Text("recording.reference.passage")
                 .font(.body)
                 .lineSpacing(8)
                 .fixedSize(horizontal: false, vertical: true)
@@ -124,3 +121,46 @@ struct RecordingView: View {
     }
 
 }
+
+#if DEBUG
+import SwiftData
+
+private struct RecordingViewPreview: View {
+    @Environment(\.modelContext) private var modelContext
+    @StateObject private var viewModel: AnalysisViewModel
+    @State private var showsAnalysis = false
+
+    init(state: AnalysisViewModel.State) {
+        _viewModel = StateObject(wrappedValue: .preview(state: state))
+    }
+
+    var body: some View {
+        TabView {
+            NavigationStack {
+                RecordingView(viewModel: viewModel, showsAnalysis: $showsAnalysis)
+            }
+            .tabItem { Label("recording.screen.title", systemImage: "waveform.badge.microphone") }
+        }
+        .modifier(RecordingTabAccessory(
+            isVisible: !showsAnalysis,
+            viewModel: viewModel,
+            action: {
+                viewModel.primaryButtonTapped(modelContext: modelContext)
+                if viewModel.hasResult { showsAnalysis = true }
+            }
+        ))
+    }
+}
+
+#Preview("Debug - Ready") {
+    DebugPreviewHost { RecordingViewPreview(state: .idle) }
+}
+
+#Preview("Mock - Recording") {
+    DebugPreviewHost { RecordingViewPreview(state: .recording) }
+}
+
+#Preview("Mock - Completed") {
+    DebugPreviewHost { RecordingViewPreview(state: .completed) }
+}
+#endif

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    private enum Page: Int, Hashable {
+    private enum Page: Int, Hashable, CaseIterable {
         case welcome = 0
         case preferences = 1
     }
@@ -18,7 +18,7 @@ struct OnboardingView: View {
     @State private var navigationPath: [Page] = []
     @State private var selectedVoice: VoicePreference?
 
-    @AppStorage("pitchee.voice.preference") private var savedVoicePreference = ""
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
 
     init(onFinished: @escaping () -> Void) {
         self.onFinished = onFinished
@@ -35,7 +35,9 @@ struct OnboardingView: View {
                     .navigationDestination(for: Page.self) { page in
                         onboardingContent(for: page)
                             .toolbar(.visible, for: .navigationBar)
-                            .navigationTitle("")
+                            // An empty title here just hides the bar title; verbatim keeps
+                            // it out of the string catalog (it is not translatable copy).
+                            .navigationTitle(Text(verbatim: ""))
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar {
                                 if #available(iOS 26.0, *) {
@@ -96,7 +98,7 @@ struct OnboardingView: View {
                     .frame(width: 34, height: 34)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-                Text("PITCHEE")
+                Text("common.brand.wordmark")
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .tracking(1.8)
             }
@@ -120,7 +122,9 @@ struct OnboardingView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("第 \(page.rawValue + 1) 页，共 2 页")
+        // Both the current page and the total are passed in, so translators can
+        // reorder them and the label stays correct if the flow gains a page.
+        .accessibilityLabel("onboarding.pagination.pageIndicator.a11y \(page.rawValue + 1) \(Page.allCases.count)")
     }
 
     private var welcomePage: some View {
@@ -128,13 +132,13 @@ struct OnboardingView: View {
             Spacer(minLength: 18)
 
             VStack(alignment: .leading, spacing: 14) {
-                Text("用声音，\n更了解自己")
+                Text("onboarding.welcome.title")
                     .font(.system(size: 43, weight: .bold, design: .rounded))
                     .tracking(-1.2)
                     .lineSpacing(-2)
                     .foregroundStyle(.primary)
 
-                Text("Pitchee 会把声音变成清晰、可追踪的反馈，陪你记录每一次变化。")
+                Text("onboarding.welcome.subtitle")
                     .font(.system(size: 17, weight: .regular, design: .rounded))
                     .foregroundStyle(Color.primary.opacity(0.56))
                     .lineSpacing(5)
@@ -146,13 +150,13 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 12) {
                 OnboardingFeatureRow(
                     symbol: "waveform.path.ecg",
-                    title: "看见声音的变化",
-                    detail: "用数据和趋势，了解你的声音状态。"
+                    title: String(localized: "onboarding.welcome.featureTrend.title"),
+                    detail: String(localized: "onboarding.welcome.featureTrend.description")
                 )
                 OnboardingFeatureRow(
                     symbol: "lock.shield",
-                    title: "你的声音由你掌控",
-                    detail: "在设备上分析，录音不会上传。"
+                    title: String(localized: "onboarding.welcome.featurePrivacy.title"),
+                    detail: String(localized: "onboarding.welcome.featurePrivacy.description")
                 )
             }
         }
@@ -175,7 +179,7 @@ struct OnboardingView: View {
             .padding(.horizontal, 24)
         }
         .overlay(alignment: .topTrailing) {
-            Text("声音分析")
+            Text("onboarding.welcome.artworkBadge")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.primary.opacity(0.55))
                 .padding(.horizontal, 14)
@@ -189,19 +193,19 @@ struct OnboardingView: View {
     private var preferencesPage: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("让我们更加了解你")
+                Text("onboarding.preferences.title")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .tracking(-0.8)
                     .foregroundStyle(.primary)
 
-                Text("选择一个想探索的方向，也可以暂不确定。之后随时都能调整。")
+                Text("onboarding.preferences.subtitle")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundStyle(Color.primary.opacity(0.56))
                     .lineSpacing(4)
             }
             .padding(.bottom, 34)
 
-            Text("你希望什么样的声音？")
+            Text("onboarding.preferences.voicePrompt")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
                 .padding(.bottom, 14)
@@ -230,7 +234,9 @@ struct OnboardingView: View {
                 advance(from: page)
             } label: {
                 HStack(spacing: 10) {
-                    Text(page == .welcome ? "开始设置" : "完成设置")
+                    Text(page == .welcome
+                        ? String(localized: "onboarding.footer.startSetup")
+                        : String(localized: "onboarding.footer.finishSetup"))
                     Image(systemName: page == .welcome ? "arrow.right" : "checkmark")
                         .font(.system(size: 14, weight: .bold))
                 }
@@ -240,7 +246,9 @@ struct OnboardingView: View {
             .modifier(LiquidGlassProminentButtonStyleModifier())
             .controlSize(.large)
             .disabled(!canAdvance(for: page))
-            .accessibilityHint(page == .preferences && !canAdvance(for: page) ? "请选择声音偏好" : "")
+            .accessibilityHint(page == .preferences && !canAdvance(for: page)
+                ? String(localized: "onboarding.footer.voiceSelectionRequired.a11y")
+                : "")
         }
         .frame(maxWidth: 520)
         .padding(.horizontal, 24)
@@ -302,3 +310,25 @@ private struct OnboardingFeatureRow: View {
         }
     }
 }
+
+#if DEBUG
+private extension OnboardingView {
+    init(previewingPreferences: Bool) {
+        onFinished = {}
+        _navigationPath = State(initialValue: previewingPreferences ? [.preferences] : [])
+        _selectedVoice = State(initialValue: .feminine)
+    }
+}
+
+#Preview("Debug - Welcome") {
+    DebugPreviewHost {
+        OnboardingView(onFinished: {})
+    }
+}
+
+#Preview("Mock - Voice Preference") {
+    DebugPreviewHost {
+        OnboardingView(previewingPreferences: true)
+    }
+}
+#endif

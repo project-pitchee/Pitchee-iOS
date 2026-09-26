@@ -8,13 +8,13 @@
 import AVFoundation
 import Combine
 import Foundation
+import OSLog
 
 struct PianoNote: Identifiable, Hashable {
     let midi: Int
     let displayName: String
 
     var id: Int { midi }
-    var octave: Int { (midi / 12) - 1 }
     var frequency: Double {
         440 * pow(2, Double(midi - 69) / 12)
     }
@@ -28,18 +28,23 @@ struct PianoNote: Identifiable, Hashable {
 }
 
 final class PianoSoundEngine: ObservableObject {
+    private let logger = Logger(subsystem: "com.lvyzhan.Pitchee", category: "Piano")
     private let engine = AVAudioEngine()
     private let renderer = PianoToneRenderer(sampleRate: 48_000)
     private var sourceNode: AVAudioSourceNode?
     private var pendingPause: DispatchWorkItem?
 
-    func prepare() {
+    @discardableResult
+    func prepare() -> Bool {
         pendingPause?.cancel()
         pendingPause = nil
-        configureAudioSession()
+        guard configureAudioSession() else { return false }
 
         if sourceNode == nil {
-            let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1)!
+            guard let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1) else {
+                logger.error("Unable to create piano audio format")
+                return false
+            }
             let renderer = renderer
             let source = AVAudioSourceNode(format: format) { isSilent, _, frameCount, output in
                 let buffers = UnsafeMutableAudioBufferListPointer(output)
@@ -58,8 +63,14 @@ final class PianoSoundEngine: ObservableObject {
 
         if !engine.isRunning {
             engine.prepare()
-            try? engine.start()
+            do {
+                try engine.start()
+            } catch {
+                logger.error("Unable to start piano audio engine: \(String(describing: error), privacy: .public)")
+                return false
+            }
         }
+        return engine.isRunning
     }
 
     func play(note: PianoNote) {
@@ -85,10 +96,16 @@ final class PianoSoundEngine: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: pause)
     }
 
-    private func configureAudioSession() {
+    private func configureAudioSession() -> Bool {
         let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-        try? session.setPreferredIOBufferDuration(0.005)
-        try? session.setActive(true, options: [])
+        do {
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try session.setPreferredIOBufferDuration(0.005)
+            try session.setActive(true, options: [])
+            return true
+        } catch {
+            logger.error("Unable to configure piano audio session: \(String(describing: error), privacy: .public)")
+            return false
+        }
     }
 }

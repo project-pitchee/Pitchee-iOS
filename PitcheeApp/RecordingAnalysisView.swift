@@ -24,22 +24,27 @@ struct RecordingAnalysisView: View {
             } else {
                 stateScroll {
                     ContentUnavailableView {
-                        Label("这次没有完成分析", systemImage: "waveform.badge.exclamationmark")
+                        Label("analysis.emptyState.noResult.title", systemImage: "waveform.badge.exclamationmark")
                     } description: {
-                        Text(viewModel.errorMessage ?? "请返回录制，再录一段自然说话。")
+                        Text(viewModel.errorMessage ?? String(localized: "analysis.emptyState.noResult.description"))
                     }
                     .padding(.top, 60)
                 }
             }
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle(viewModel.isAnalyzing ? "正在分析" : "结果")
+        .navigationTitle(viewModel.isAnalyzing
+            ? String(localized: "analysis.navigation.analyzing")
+            : String(localized: "analysis.navigation.result"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(viewModel.isAnalyzing)
         .toolbar {
             if let result = viewModel.result, !viewModel.isAnalyzing {
                 ToolbarItem(placement: .topBarTrailing) {
-                    PitchImageExportButton { PitchTimeline(result: result) }
+                    RecordingExportButton(
+                        result: result,
+                        volumeStatistics: viewModel.volumeStatistics
+                    )
                         .labelStyle(.iconOnly)
                 }
             }
@@ -66,14 +71,14 @@ struct RecordingAnalysisView: View {
                 .frame(width: 112, height: 112)
                 .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 32))
             VStack(spacing: 10) {
-                Text("正在听懂你的声音")
+                Text("analysis.progress.title")
                     .font(.title2.weight(.bold))
-                Text("正在设备上分析音高与声音特征。\n首次分析可能需要一点时间。")
+                Text("analysis.progress.subtitle")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             ProgressView().controlSize(.large)
-            Label("声音留在你的设备上", systemImage: "lock.shield")
+            Label("analysis.progress.privacyNote", systemImage: "lock.shield")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -87,10 +92,22 @@ struct RecordingResultView: View {
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
     let saveError: String?
+    private let pitchStatistics: RecordingPitchStatistics
 
     @State private var showsVoiceDetails = false
     @State private var selectedSuggestion: ResultSuggestion?
     @State private var selectedResource: ResultResource?
+
+    init(
+        result: PitcheeAnalysisResult,
+        volumeStatistics: RecordingVolumeStatistics?,
+        saveError: String?
+    ) {
+        self.result = result
+        self.volumeStatistics = volumeStatistics
+        self.saveError = saveError
+        self.pitchStatistics = RecordingPitchStatistics(pitch: result.f0)
+    }
 
     var body: some View {
         FoldAwareArrangementView(
@@ -114,32 +131,7 @@ struct RecordingResultView: View {
         VStack(alignment: .leading, spacing: 24) {
             scoreSummary
 
-            Button {
-                showsVoiceDetails = true
-            } label: {
-                HStack(spacing: 12) {
-                    Label("声音详情", systemImage: "waveform.path.ecg")
-                        .font(.subheadline.weight(.semibold))
-                    Spacer(minLength: 12)
-                    Text("音高与音量")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.tertiary)
-                }
-                .foregroundStyle(.primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 15)
-                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
-            .buttonStyle(.plain)
-
-            VoiceProfileReferenceChart(
-                femalePercentage: result.vfp.vfpStandardScore,
-                meanPitchHz: result.f0.meanHz,
-                pitchRangeHz: pitchRangeHz
-            )
+            voiceProfileSection
 
             if let saveError {
                 Label(saveError, systemImage: "exclamationmark.triangle.fill")
@@ -149,6 +141,37 @@ struct RecordingResultView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
+        }
+    }
+
+    private var voiceProfileSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("analysis.voiceProfile.title")
+                    .font(.title3.weight(.bold))
+
+                Spacer(minLength: 8)
+
+                Button {
+                    showsVoiceDetails = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("analysis.voiceDetails.action")
+                            .font(.subheadline.weight(.semibold))
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("analysis.voiceDetails.action.a11y")
+            }
+
+            VoiceProfileReferenceChart(
+                femalePercentage: result.vfp.vfpStandardScore,
+                meanPitchHz: result.f0.meanHz,
+                pitchRangeHz: pitchRangeHz
+            )
         }
     }
 
@@ -184,9 +207,9 @@ struct RecordingResultView: View {
     private var suggestionsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("建议")
+                Text("analysis.suggestions.title")
                     .font(.title2.weight(.bold))
-                Text("根据这次录音，下一步可以这样练习")
+                Text("analysis.suggestions.subtitle")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -242,9 +265,9 @@ struct RecordingResultView: View {
     private var resourcesSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("练习资源")
+                Text("analysis.resources.title")
                     .font(.title2.weight(.bold))
-                Text("把建议带到下一次练习里")
+                Text("analysis.resources.subtitle")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -307,27 +330,27 @@ struct RecordingResultView: View {
         return [
             ResultSuggestion(
                 id: "duration",
-                title: needsLongerRecording ? "下次多录一会儿" : "保持相近的录音时长",
+                title: needsLongerRecording ? String(localized: "analysis.suggestions.shortRecording.title") : String(localized: "analysis.suggestions.adequateRecording.title"),
                 detail: needsLongerRecording
-                    ? "有效语音不足 5 秒，更多声音信息会让结果更稳定。"
-                    : "继续用相近时长录制，方便比较每次变化。",
+                    ? String(localized: "analysis.suggestions.shortRecording.subtitle")
+                    : String(localized: "analysis.suggestions.adequateRecording.subtitle"),
                 symbol: "timer",
                 tint: .blue,
                 expandedDetail: needsLongerRecording
-                    ? "试着连续说 10 秒以上的自然句子。录音更完整，音高和自然度的估计会更稳定。"
-                    : "你已经提供了足够的语音信息。下次保持相近时长，趋势会更容易看懂。"
+                    ? String(localized: "analysis.suggestions.shortRecording.description")
+                    : String(localized: "analysis.suggestions.adequateRecording.description")
             ),
             ResultSuggestion(
                 id: "naturalness",
-                title: naturalnessNeedsWork ? "让语气更自然" : "继续保持自然语气",
+                title: naturalnessNeedsWork ? String(localized: "analysis.suggestions.unnaturalSpeech.title") : String(localized: "analysis.suggestions.naturalSpeech.title"),
                 detail: naturalnessNeedsWork
-                    ? "放慢语速，保持连续呼吸，再试着说一段熟悉的话。"
-                    : "这次自然度表现不错，保持放松和连贯的表达。",
+                    ? String(localized: "analysis.suggestions.unnaturalSpeech.subtitle")
+                    : String(localized: "analysis.suggestions.naturalSpeech.subtitle"),
                 symbol: "waveform",
                 tint: .orange,
                 expandedDetail: naturalnessNeedsWork
-                    ? "先放松下颌和肩膀，用熟悉的句子练习。不要刻意压低或抬高音高，先让表达保持连贯。"
-                    : "自然度是一个参考值。保持轻松的语速和连贯的呼吸，比追求单次分数更有帮助。"
+                    ? String(localized: "analysis.suggestions.unnaturalSpeech.description")
+                    : String(localized: "analysis.suggestions.naturalSpeech.description")
             )
         ]
     }
@@ -336,21 +359,21 @@ struct RecordingResultView: View {
         [
             ResultResource(
                 id: "naturalness-video",
-                title: "自然度训练",
-                detail: "视频练习 · 放松与连贯表达",
+                title: String(localized: "analysis.resources.naturalnessTraining.title"),
+                detail: String(localized: "analysis.resources.naturalnessTraining.subtitle"),
                 badge: "01:09",
                 symbol: "play.fill",
                 tint: .blue,
-                body: "用一段短练习找到更放松的语气，再回到录音页试一次。"
+                body: String(localized: "analysis.resources.naturalnessTraining.description")
             ),
             ResultResource(
                 id: "voice-research",
-                title: "声音研究",
-                detail: "文章 · 了解音高与自然度",
-                badge: "阅读",
+                title: String(localized: "analysis.resources.voiceResearch.title"),
+                detail: String(localized: "analysis.resources.voiceResearch.subtitle"),
+                badge: String(localized: "analysis.resources.readBadge"),
                 symbol: "doc.text.image",
                 tint: .purple,
-                body: "了解音高、自然度与录音条件之间的关系，把结果当成长期练习的参考。"
+                body: String(localized: "analysis.resources.voiceResearch.description")
             )
         ]
     }
@@ -360,55 +383,37 @@ struct RecordingResultView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("声音指标")
+                        Text("analysis.voiceDetails.metrics.title")
                             .font(.title3.weight(.bold))
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
-                            ResultMetric(title: "自然度", value: scoreText(result.naturalness.score), unit: "/ 100", symbol: "leaf")
-                            ResultMetric(title: "标准评分", value: scoreText(result.vfp.vfpStandardScore), unit: "/ 100", symbol: "slider.horizontal.3")
-                            ResultMetric(title: "有效语音", value: result.vad.speechSeconds.formatted(.number.precision(.fractionLength(1))), unit: "秒", symbol: "bubble.left")
+                            ResultMetric(title: "common.metric.naturalness.title", value: scoreText(result.naturalness.score), unit: String(localized: "common.unit.pointsOutOf100"), symbol: "leaf")
+                            ResultMetric(title: "common.metric.standardScore.title", value: scoreText(result.vfp.vfpStandardScore), unit: String(localized: "common.unit.pointsOutOf100"), symbol: "slider.horizontal.3")
+                            ResultMetric(title: "common.metric.speechDuration.title", value: result.vad.speechSeconds.formatted(.number.precision(.fractionLength(1))), unit: String(localized: "common.unit.seconds"), symbol: "bubble.left")
                         }
                     }
 
                     recordingStatistics
-                    explanationSection
                 }
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
                 .padding(24)
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("声音详情")
+            .navigationTitle("analysis.voiceDetails.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") { showsVoiceDetails = false }
+                    Button("common.action.done") { showsVoiceDetails = false }
                 }
             }
         }
         .presentationDetents([.medium, .large])
     }
 
-    private var explanationSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("读懂这次声音").font(.title3.weight(.bold))
-            explanation("音高是声音的轮廓", symbol: "waveform.path", detail: result.f0.meanHz == nil
-                ? "这次没有得到可靠的平均音高。试着在安静环境中，连续说一段自然的话。"
-                : "平均音高反映声音的高低，不代表好坏。观察多次录音的变化，比追求某一个数值更有意义。")
-            Divider()
-            explanation("自然度是一个参考", symbol: "leaf", detail: "这是模型对声音自然程度的估计。建议在相似的环境下录制，再比较自己的变化。")
-            Divider()
-            explanation(result.vad.speechSeconds < 5 ? "下次，多说一会儿" : "试着记录同一段话", symbol: "arrow.trianglehead.repeat", detail: result.vad.speechSeconds < 5
-                ? "本次有效语音不足 5 秒。下次可以放慢节奏、多说几句，让分析获得更多声音信息。"
-                : "下次用相近的语速和音量说同一段话，会更容易比较两次声音的差异。")
-        }
-        .padding(22)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 24))
-    }
-
     private var scoreSummary: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("综合评分")
+                Text("common.metric.compositeScore.title")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -420,7 +425,7 @@ struct RecordingResultView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("查看评分如何得出")
+                .accessibilityLabel("analysis.score.explanation.a11y")
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -431,7 +436,7 @@ struct RecordingResultView: View {
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
                     .contentTransition(.numericText())
-                Text("/ 100")
+                Text("common.unit.pointsOutOf100")
                     .font(.title3.weight(.medium))
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 0)
@@ -440,8 +445,8 @@ struct RecordingResultView: View {
             ProgressView(value: scoreProgress, total: 1)
                 .tint(Color.accentColor)
                 .scaleEffect(x: 1, y: 1.35, anchor: .center)
-                .accessibilityLabel("综合评分进度")
-                .accessibilityValue("\(scoreText(result.composite.finalScore)) 分，共 100 分")
+                .accessibilityLabel("analysis.score.progress.a11y")
+                .accessibilityValue("analysis.score.progress.a11yValue \(scoreText(result.composite.finalScore))")
 
             Text(scoreHeadline)
                 .font(.subheadline)
@@ -449,7 +454,7 @@ struct RecordingResultView: View {
         }
         .padding(.horizontal, 4)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("综合评分 \(scoreText(result.composite.finalScore)) 分，满分 100 分")
+        .accessibilityLabel("analysis.score.summary.a11y \(scoreText(result.composite.finalScore))")
     }
 
     private var scoreProgress: Double {
@@ -458,19 +463,19 @@ struct RecordingResultView: View {
 
     private var scoreHeadline: String {
         switch result.composite.finalScore {
-        case 90...: return "这次表现很亮眼，继续保持稳定的表达。"
-        case 70..<90: return "基础表现不错，针对下面的建议再练一次。"
-        default: return "把下面的一条建议带到下一次录音里，结果会更有参考价值。"
+        case 90...: return String(localized: "analysis.score.headlineHigh")
+        case 70..<90: return String(localized: "analysis.score.headlineMedium")
+        default: return String(localized: "analysis.score.headlineLow")
         }
     }
 
     private var recordingStatistics: some View {
         VStack(alignment: .leading, spacing: 24) {
-            compactStatisticsSection(title: "Pitch", metrics: pitchMetrics)
+            compactStatisticsSection(title: "analysis.statistics.pitch.title", metrics: pitchMetrics)
 
-            compactStatisticsSection(title: "Volume", metrics: volumeMetrics)
+            compactStatisticsSection(title: "analysis.statistics.volume.title", metrics: volumeMetrics)
 
-            Text("音量使用 dBFS 表示，0 dBFS 为设备可记录的最大值；平均值和中位数下方显示高于环境底噪的音量。")
+            Text("analysis.statistics.volume.note")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -478,29 +483,27 @@ struct RecordingResultView: View {
     }
 
     private var pitchRangeHz: ClosedRange<Double>? {
-        let statistics = RecordingPitchStatistics(pitch: result.f0)
-        guard let low = statistics.low5Hz,
-              let high = statistics.high95Hz else { return nil }
+        guard let low = pitchStatistics.low5Hz,
+              let high = pitchStatistics.high95Hz else { return nil }
         return low...high
     }
 
     private var pitchMetrics: [CompactMetric] {
-        let statistics = RecordingPitchStatistics(pitch: result.f0)
-        let dominantBand = dominantPitchBand(statistics)
+        let dominantBand = dominantPitchBand(pitchStatistics)
         return [
-            CompactMetric(title: "平均音高", value: metricNumber(statistics.averageHz), unit: "Hz", symbol: "waveform.path"),
-            CompactMetric(title: "中位音高", value: metricNumber(statistics.medianHz), unit: "Hz", symbol: "equal"),
-            CompactMetric(title: "核心音域", value: pitchRangeText(statistics), unit: "Hz · 5–95%", symbol: "arrow.left.and.right"),
-            CompactMetric(title: "主要音域", value: dominantBand.name, unit: dominantBand.percentage, symbol: "scope")
+            CompactMetric(title: "common.metric.meanPitch.title", value: metricNumber(pitchStatistics.averageHz), unit: String(localized: "common.unit.hertz"), symbol: "waveform.path"),
+            CompactMetric(title: "common.metric.medianPitch.title", value: metricNumber(pitchStatistics.medianHz), unit: String(localized: "common.unit.hertz"), symbol: "equal"),
+            CompactMetric(title: "common.metric.corePitchRange.title", value: pitchRangeText(pitchStatistics), unit: String(localized: "common.unit.hertzPercentileRange"), symbol: "arrow.left.and.right"),
+            CompactMetric(title: "analysis.statistics.dominantPitchBand.label", value: dominantBand.name, unit: dominantBand.percentage, symbol: "scope")
         ]
     }
 
     private var volumeMetrics: [CompactMetric] {
         [
-            CompactMetric(title: "环境底噪", value: metricNumber(volumeStatistics?.environmentDBFS), unit: "dBFS", symbol: "wind"),
-            CompactMetric(title: "平均音量", value: metricNumber(volumeStatistics?.averageDBFS), unit: volumeUnit(volumeStatistics?.averageDBFS), symbol: "speaker.wave.2"),
-            CompactMetric(title: "中位音量", value: metricNumber(volumeStatistics?.medianDBFS), unit: volumeUnit(volumeStatistics?.medianDBFS), symbol: "equal"),
-            CompactMetric(title: "音量范围", value: volumeRangeText, unit: "dBFS · 5–95%", symbol: "arrow.left.and.right")
+            CompactMetric(title: "common.metric.environmentNoiseFloor.title", value: metricNumber(volumeStatistics?.environmentDBFS), unit: String(localized: "common.unit.dbfs"), symbol: "wind"),
+            CompactMetric(title: "analysis.statistics.averageVolume.label", value: metricNumber(volumeStatistics?.averageDBFS), unit: volumeUnit(volumeStatistics?.averageDBFS), symbol: "speaker.wave.2"),
+            CompactMetric(title: "analysis.statistics.medianVolume.label", value: metricNumber(volumeStatistics?.medianDBFS), unit: volumeUnit(volumeStatistics?.medianDBFS), symbol: "equal"),
+            CompactMetric(title: "analysis.statistics.volumeRange.label", value: volumeRangeText, unit: String(localized: "common.unit.dbfsPercentileRange"), symbol: "arrow.left.and.right")
         ]
     }
 
@@ -529,28 +532,28 @@ struct RecordingResultView: View {
     }
 
     private func metricNumber(_ value: Double?) -> String {
-        guard let value else { return "—" }
+        guard let value else { return String(localized: "common.placeholder.noValue") }
         return value.formatted(.number.precision(.fractionLength(1)))
     }
 
     private func pitchRangeText(_ statistics: RecordingPitchStatistics) -> String {
         guard let low = statistics.low5Hz,
-              let high = statistics.high95Hz else { return "—" }
+              let high = statistics.high95Hz else { return String(localized: "common.placeholder.noValue") }
         return "\(metricNumber(low))–\(metricNumber(high))"
     }
 
     private func dominantPitchBand(
         _ statistics: RecordingPitchStatistics
     ) -> (name: String, percentage: String) {
-        guard statistics.medianHz != nil else { return ("—", "") }
+        guard statistics.medianHz != nil else { return (String(localized: "common.placeholder.noValue"), "") }
         let bands = [
-            ("很高", statistics.veryHighPercentage),
-            ("女性", statistics.femininePercentage),
-            ("中性", statistics.androgynousPercentage),
-            ("男性", statistics.masculinePercentage),
-            ("很低", statistics.veryLowPercentage)
+            (String(localized: "analysis.pitchBands.veryHigh"), statistics.veryHighPercentage),
+            (String(localized: "analysis.pitchBands.feminine"), statistics.femininePercentage),
+            (String(localized: "analysis.pitchBands.androgynous"), statistics.androgynousPercentage),
+            (String(localized: "analysis.pitchBands.masculine"), statistics.masculinePercentage),
+            (String(localized: "analysis.pitchBands.veryLow"), statistics.veryLowPercentage)
         ]
-        guard let dominant = bands.max(by: { $0.1 < $1.1 }) else { return ("—", "") }
+        guard let dominant = bands.max(by: { $0.1 < $1.1 }) else { return (String(localized: "common.placeholder.noValue"), "") }
         return (
             dominant.0,
             dominant.1.formatted(.percent.precision(.fractionLength(0)))
@@ -559,18 +562,18 @@ struct RecordingResultView: View {
 
     private func volumeUnit(_ value: Double?) -> String {
         guard let value,
-              let environment = volumeStatistics?.environmentDBFS else { return "dBFS" }
+              let environment = volumeStatistics?.environmentDBFS else { return String(localized: "common.unit.dbfs") }
         let delta = (value - environment).formatted(
             .number
                 .sign(strategy: .always())
                 .precision(.fractionLength(1))
         )
-        return "dBFS · \(delta) dB"
+        return String(localized: "common.unit.dbfsWithDelta \(delta)")
     }
 
     private var volumeRangeText: String {
         guard let low = volumeStatistics?.low5DBFS,
-              let high = volumeStatistics?.high95DBFS else { return "—" }
+              let high = volumeStatistics?.high95DBFS else { return String(localized: "common.placeholder.noValue") }
         return "\(metricNumber(low))–\(metricNumber(high))"
     }
 
@@ -578,18 +581,6 @@ struct RecordingResultView: View {
         value.formatted(.number.precision(.fractionLength(0)))
     }
 
-    private func explanation(_ title: LocalizedStringKey, symbol: String, detail: LocalizedStringKey) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: symbol)
-                .foregroundStyle(Color.accentColor)
-                .frame(width: 24)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 7) {
-                Text(title).font(.subheadline.weight(.semibold))
-                Text(detail).font(.subheadline).foregroundStyle(.secondary)
-            }
-        }
-    }
 }
 
 private struct ScoreExplanationView: View {
@@ -599,7 +590,6 @@ private struct ScoreExplanationView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 intro
-                currentMetrics
                 commonFormulaSection
                 currentRuleSection
                 otherRulesSection
@@ -609,66 +599,26 @@ private struct ScoreExplanationView: View {
             .padding(24)
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle("评分说明")
+        .navigationTitle("scoring.explanation.title")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var intro: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("综合评分如何得出")
+            Text("scoring.explanation.intro.title")
                 .font(.title2.weight(.bold))
-            Text("综合评分把音色标准、自然度和平均音高放在一起计算，再根据本次命中的规则进行加分或封顶。它适合用来观察自己的练习趋势，不代表声音的整体好坏。")
+            Text("scoring.explanation.intro.description")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    private var currentMetrics: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("本次指标")
-                .font(.title3.weight(.bold))
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 138), spacing: 12)], spacing: 12) {
-                explanationMetric("标准音色", value: scoreText(result.vfp.vfpStandardScore), unit: "/ 100", symbol: "slider.horizontal.3")
-                explanationMetric("自然度", value: scoreText(result.naturalness.score), unit: "/ 100", symbol: "leaf")
-                explanationMetric(
-                    "平均 F0",
-                    value: f0Text,
-                    unit: result.f0.meanHz == nil ? "" : "Hz",
-                    symbol: "waveform.path"
-                )
-                explanationMetric("Base", value: scoreText(result.composite.baseScore), unit: "/ 100", symbol: "function")
-                explanationMetric("Final", value: scoreText(result.composite.finalScore), unit: "/ 100", symbol: "checkmark.seal")
-            }
-        }
-    }
-
-    private func explanationMetric(_ title: String, value: String, unit: String, symbol: String) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
-            Label(title, systemImage: symbol)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value)
-                    .font(.title3.weight(.bold))
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-                Text(unit)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
     private var commonFormulaSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("基础公式")
+            Text("scoring.baseFormula.title")
                 .font(.title3.weight(.bold))
-            Text("所有评分规则都从这些归一化步骤开始。")
+            Text("scoring.baseFormula.subtitle")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             FormulaBlock(lines: [
@@ -681,7 +631,7 @@ private struct ScoreExplanationView: View {
                 #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,\mathrm{Standard}_r + 0.20\,\mathrm{Naturalness}_r \\ &\quad + 0.15\,F_{0r} + 0.15\,\mathrm{Standard}_r\,\mathrm{Naturalness}_r\,F_{0r}\bigr)\end{aligned}"#,
                 #"\mathrm{Final} = \mathrm{rule}(\mathrm{Base}, \mathrm{Standard}, \mathrm{Naturalness}, F_0)"#
             ])
-            Text("Standard 是模型识别的音色标准分；Naturalness 是自然度分；F0 是平均基频，单位为 Hz。带 _r 的变量会被限制在 0 到 1 之间。Base 是应用规则前的基础分，Final 是结果页显示的综合分。")
+            Text("scoring.baseFormula.note")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -693,9 +643,9 @@ private struct ScoreExplanationView: View {
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("本次命中规则")
+                Text("scoring.currentRule.title")
                     .font(.title3.weight(.bold))
-                Text("当前")
+                Text("scoring.currentRule.badge")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Color.accentColor)
                     .padding(.horizontal, 8)
@@ -705,10 +655,10 @@ private struct ScoreExplanationView: View {
             Text(rule.guidance)
                 .font(.body)
                 .fixedSize(horizontal: false, vertical: true)
-            ruleDetail("触发条件", text: rule.condition)
-            ruleDetail("计算公式", text: nil)
+            ruleDetail(String(localized: "scoring.ruleDetail.condition"), text: rule.condition)
+            ruleDetail(String(localized: "scoring.ruleDetail.formula"), text: nil)
             FormulaBlock(lines: rule.formulas)
-            ruleDetail("处理结果", text: rule.result)
+            ruleDetail(String(localized: "scoring.ruleDetail.result"), text: rule.result)
         }
         .padding(18)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -750,7 +700,7 @@ private struct ScoreExplanationView: View {
             }
             .padding(.top, 6)
         } label: {
-            Label("其他评分规则", systemImage: "list.bullet.rectangle")
+            Label("scoring.otherRules.title", systemImage: "list.bullet.rectangle")
                 .font(.subheadline.weight(.semibold))
         }
         .padding(18)
@@ -761,14 +711,6 @@ private struct ScoreExplanationView: View {
         scoreRuleDocumentation.first { $0.id == result.composite.rule } ?? scoreRuleDocumentation[0]
     }
 
-    private var f0Text: String {
-        guard let f0 = result.f0.meanHz, f0.isFinite, f0 > 0 else { return "—" }
-        return f0.formatted(.number.precision(.fractionLength(0)))
-    }
-
-    private func scoreText(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(1)))
-    }
 }
 
 private struct FormulaBlock: View {
@@ -811,17 +753,17 @@ private struct ScoreRuleDocumentation: Identifiable {
 private let scoreRuleDocumentation: [ScoreRuleDocumentation] = [
     ScoreRuleDocumentation(
         id: "continuous",
-        title: "连续评分",
-        guidance: "这次没有触发特殊限制，综合分直接使用 Base。",
-        condition: "未命中其他封顶或提升规则",
+        title: String(localized: "scoring.rules.continuous.title"),
+        guidance: String(localized: "scoring.rules.continuous.description"),
+        condition: String(localized: "scoring.rules.continuous.condition"),
         formulas: [#"\mathrm{Final} = \mathrm{Base}"#],
-        result: "综合分采用 Base。"
+        result: String(localized: "scoring.rules.continuous.result")
     ),
     ScoreRuleDocumentation(
         id: "pass_boost",
-        title: "加分",
-        guidance: "三项指标都已经过线，系统会把稳定、自然的表现向上提升。",
-        condition: "F0 > 165，Naturalness > 80，Standard > 50",
+        title: String(localized: "scoring.rules.passBoost.title"),
+        guidance: String(localized: "scoring.rules.passBoost.description"),
+        condition: String(localized: "scoring.rules.passBoost.condition"),
         formulas: [
             #"s_{F0} = \frac{F_0 - 165}{25}"#,
             #"s_N = \frac{\mathrm{Naturalness} - 80}{20}"#,
@@ -830,47 +772,47 @@ private let scoreRuleDocumentation: [ScoreRuleDocumentation] = [
             #"\mathrm{promoted} = 60 + 40\,\mathrm{strength}"#,
             #"\mathrm{Final} = \max(\mathrm{Base}, \mathrm{promoted})"#
         ],
-        result: "综合分最高为 100；如果 promoted 高于 Base，就采用 promoted。"
+        result: String(localized: "scoring.rules.passBoost.result")
     ),
     ScoreRuleDocumentation(
         id: "high_f0_stylized_cap",
-        title: "高基频、低自然度封顶",
-        guidance: "音高已经上去了，但自然度还没跟上。下一次先放松语气，不必刻意抬高音调。",
-        condition: "F0 > 165，Naturalness < 50",
+        title: String(localized: "scoring.rules.highF0StylizedCap.title"),
+        guidance: String(localized: "scoring.rules.highF0StylizedCap.description"),
+        condition: String(localized: "scoring.rules.highF0StylizedCap.condition"),
         formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 30)"#],
-        result: "综合分最高为 30。"
+        result: String(localized: "scoring.rules.highF0StylizedCap.result")
     ),
     ScoreRuleDocumentation(
         id: "low_f0_natural_cap",
-        title: "低基频封顶",
-        guidance: "自然度已经不错，接下来可以把注意力放在音高上。",
-        condition: "F0 ≤ 165，Naturalness ≥ 50",
+        title: String(localized: "scoring.rules.lowF0NaturalCap.title"),
+        guidance: String(localized: "scoring.rules.lowF0NaturalCap.description"),
+        condition: String(localized: "scoring.rules.lowF0NaturalCap.condition"),
         formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
-        result: "综合分最高为 59。"
+        result: String(localized: "scoring.rules.lowF0NaturalCap.result")
     ),
     ScoreRuleDocumentation(
         id: "low_f0_stylized_cap",
-        title: "低基频、低自然度",
-        guidance: "这次音高和自然度都需要照顾。先放慢一点，完整自然地说完句子。",
-        condition: "F0 ≤ 165，Naturalness < 50",
+        title: String(localized: "scoring.rules.lowF0StylizedCap.title"),
+        guidance: String(localized: "scoring.rules.lowF0StylizedCap.description"),
+        condition: String(localized: "scoring.rules.lowF0StylizedCap.condition"),
         formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 20)"#],
-        result: "综合分最高为 20。"
+        result: String(localized: "scoring.rules.lowF0StylizedCap.result")
     ),
     ScoreRuleDocumentation(
         id: "high_f0_male_cap",
-        title: "音色分不足",
-        guidance: "音高和自然度已经达标，接下来重点练习音色，让声音更明亮、更轻松。",
-        condition: "F0 > 165，Naturalness ≥ 50，Standard < 50",
+        title: String(localized: "scoring.rules.highF0MaleCap.title"),
+        guidance: String(localized: "scoring.rules.highF0MaleCap.description"),
+        condition: String(localized: "scoring.rules.highF0MaleCap.condition"),
         formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
-        result: "综合分最高为 59。"
+        result: String(localized: "scoring.rules.highF0MaleCap.result")
     ),
     ScoreRuleDocumentation(
         id: "f0_unavailable",
-        title: "基频不可用",
-        guidance: "没有识别到稳定基频，下次可以在安静环境中离麦克风近一点。",
-        condition: "没有可靠的 F0",
+        title: String(localized: "scoring.rules.f0Unavailable.title"),
+        guidance: String(localized: "scoring.rules.f0Unavailable.description"),
+        condition: String(localized: "scoring.rules.f0Unavailable.condition"),
         formulas: [#"\mathrm{Final} = \mathrm{Standard}"#],
-        result: "综合分直接采用标准音色分 Standard。"
+        result: String(localized: "scoring.rules.f0Unavailable.result")
     )
 ]
 
@@ -921,11 +863,11 @@ private struct ResultSuggestionSheet: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(24)
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("练习建议")
+            .navigationTitle("analysis.suggestionDetail.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") { dismiss() }
+                    Button("common.action.done") { dismiss() }
                 }
             }
         }
@@ -964,11 +906,15 @@ private struct ResultResourceSheet: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(24)
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle(resource.badge == "阅读" ? "文章" : "视频")
+            .navigationTitle(
+                resource.id == "voice-research"
+                    ? String(localized: "analysis.resourceDetail.article.title")
+                    : String(localized: "analysis.resourceDetail.video.title")
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") { dismiss() }
+                    Button("common.action.done") { dismiss() }
                 }
             }
         }
@@ -976,7 +922,7 @@ private struct ResultResourceSheet: View {
     }
 }
 
-private struct VoiceProfileReferenceChart: View {
+struct VoiceProfileReferenceChart: View {
     let femalePercentage: Double
     let meanPitchHz: Double?
     let pitchRangeHz: ClosedRange<Double>?
@@ -992,38 +938,33 @@ private struct VoiceProfileReferenceChart: View {
     private var maleValue: Double { 100 - femaleValue }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("声音倾向参考")
-                .font(.title3.weight(.bold))
+        HStack(alignment: .center, spacing: 10) {
+            PitchGenderScale(meanHz: meanPitchHz, rangeHz: pitchRangeHz)
+                .frame(width: 40)
 
-            HStack(alignment: .center, spacing: 10) {
-                PitchGenderScale(meanHz: meanPitchHz, rangeHz: pitchRangeHz)
-                    .frame(width: 40)
-
-                GeometryReader { proxy in
-                    let largestDiameter = max(minimumDiameter, min(maximumDiameter, proxy.size.width - minimumDiameter - 18))
-                    HStack(alignment: .center, spacing: 18) {
-                        glassBubble(title: "Female", percentage: femaleValue, tint: Color.pink.opacity(0.12), maximumDiameter: largestDiameter)
-                        glassBubble(title: "Male", percentage: maleValue, tint: Color.blue.opacity(0.10), maximumDiameter: largestDiameter)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            GeometryReader { proxy in
+                let largestDiameter = max(minimumDiameter, min(maximumDiameter, proxy.size.width - minimumDiameter - 18))
+                HStack(alignment: .center, spacing: 18) {
+                    glassBubble(title: "analysis.voiceProfile.female.label", percentage: femaleValue, tint: Color.pink.opacity(0.12), maximumDiameter: largestDiameter)
+                    glassBubble(title: "analysis.voiceProfile.male.label", percentage: maleValue, tint: Color.blue.opacity(0.10), maximumDiameter: largestDiameter)
                 }
-                .frame(height: maximumDiameter)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(22)
-            .background(
-                LinearGradient(
-                    colors: [Color.pink.opacity(0.025), Color.blue.opacity(0.025)],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                ),
-                in: RoundedRectangle(cornerRadius: 24, style: .continuous)
-            )
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(
-                "声音倾向参考，平均音高 \(meanPitchText)，样本音高范围 \(pitchRangeText)，Female \(percentageText(femaleValue))，Male \(percentageText(maleValue))"
-            )
+            .frame(height: maximumDiameter)
         }
+        .padding(22)
+        .background(
+            LinearGradient(
+                colors: [Color.pink.opacity(0.025), Color.blue.opacity(0.025)],
+                startPoint: .leading,
+                endPoint: .trailing
+            ),
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "analysis.voiceProfile.reference.a11y \(meanPitchText) \(pitchRangeText) \(percentageText(femaleValue)) \(percentageText(maleValue))"
+        )
     }
 
     private func glassBubble(
@@ -1055,12 +996,12 @@ private struct VoiceProfileReferenceChart: View {
     }
 
     private var meanPitchText: String {
-        guard let meanPitchHz, meanPitchHz.isFinite else { return "无可靠数据" }
+        guard let meanPitchHz, meanPitchHz.isFinite else { return String(localized: "analysis.voiceProfile.noData") }
         return "\(meanPitchHz.formatted(.number.precision(.fractionLength(0)))) Hz"
     }
 
     private var pitchRangeText: String {
-        guard let pitchRangeHz else { return "无可靠数据" }
+        guard let pitchRangeHz else { return String(localized: "analysis.voiceProfile.noData") }
         return "\(pitchRangeHz.lowerBound.formatted(.number.precision(.fractionLength(0))))–\(pitchRangeHz.upperBound.formatted(.number.precision(.fractionLength(0)))) Hz"
     }
 }
@@ -1101,7 +1042,7 @@ private struct PitchGenderScale: View {
 
     var body: some View {
         VStack(spacing: 7) {
-            Text("350 Hz")
+            Text("analysis.pitchScale.maxLabel")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -1145,7 +1086,7 @@ private struct PitchGenderScale: View {
                             .frame(width: 20, height: 2)
                             .position(x: proxy.size.width / 2, y: markerY)
 
-                        Text("AVG")
+                        Text("analysis.pitchScale.averageMarker")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.secondary)
                             .minimumScaleFactor(0.7)
@@ -1159,7 +1100,7 @@ private struct PitchGenderScale: View {
             }
             .frame(height: trackHeight)
 
-            Text("50 Hz")
+            Text("analysis.pitchScale.minLabel")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -1243,3 +1184,37 @@ private struct ResultMetric: View {
     }
     private var suffix: some View { Text(unit).font(.caption).foregroundStyle(.secondary) }
 }
+
+#if DEBUG
+#Preview("Mock - Result") {
+    DebugAnalysisPreview(state: .completed) { model in
+        NavigationStack { RecordingAnalysisView(viewModel: model) }
+    }
+}
+
+#Preview("Mock - Analyzing") {
+    DebugAnalysisPreview(state: .analyzing) { model in
+        NavigationStack { RecordingAnalysisView(viewModel: model) }
+    }
+}
+
+#Preview("Debug - No Result") {
+    DebugAnalysisPreview(state: .idle) { model in
+        NavigationStack { RecordingAnalysisView(viewModel: model) }
+    }
+}
+
+#Preview("Mock - Result Save Error") {
+    NavigationStack {
+        RecordingResultView(
+            result: DebugPreviewData.result,
+            volumeStatistics: nil,
+            saveError: String(localized: "analysis.error.resultSaveFailed")
+        )
+    }
+}
+
+#Preview("Mock - Score Explanation") {
+    NavigationStack { ScoreExplanationView(result: DebugPreviewData.result) }
+}
+#endif

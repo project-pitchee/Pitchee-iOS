@@ -6,14 +6,12 @@
 //
 
 import AVFoundation
-import Accelerate
 import Foundation
 
 /// Records microphone audio and feeds contiguous 16 kHz PCM to Core's realtime
 /// SwiftF0 stream. File writes and sample conversion stay off the audio thread.
 nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
     typealias PitchHandler = @Sendable ([PitcheeF0Frame]) -> Void
-    typealias LevelHandler = @Sendable (Double) -> Void
     typealias ErrorHandler = @Sendable (Error) -> Void
 
     private let audioEngine = AVAudioEngine()
@@ -33,7 +31,6 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
         writingTo url: URL,
         analyzer: PitcheeCoreAnalyzer,
         onPitch: @escaping PitchHandler,
-        onLevel: @escaping LevelHandler,
         onError: @escaping ErrorHandler
     ) throws {
         let inputNode = audioEngine.inputNode
@@ -96,9 +93,6 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
                     self.recordingError = error
                 }
                 guard let samples = Self.monoSamples(from: copy) else { return }
-                var rms: Float = 0
-                vDSP_rmsqv(samples, 1, &rms, vDSP_Length(samples.count))
-                onLevel(min(1, max(0, (20 * log10(Double(max(rms, 0.000_001))) + 60) / 50)))
                 guard !converter.hasFailed else { return }
                 do {
                     let converted = try converter.convert(samples)

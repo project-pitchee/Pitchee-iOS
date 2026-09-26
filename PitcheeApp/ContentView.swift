@@ -10,19 +10,19 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
-    @AppStorage("pitchee.onboarding.completed") private var hasCompletedOnboarding = false
+    @AppStorage(AppStorageKey.onboardingCompletedVersion) private var completedOnboardingVersion = 0
 
     var body: some View {
         Group {
-            if hasCompletedOnboarding {
+            if completedOnboardingVersion >= OnboardingFlow.currentVersion {
                 MainTabView()
             } else {
                 OnboardingView {
-                    hasCompletedOnboarding = true
+                    completedOnboardingVersion = OnboardingFlow.currentVersion
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: hasCompletedOnboarding)
+        .animation(.easeInOut(duration: 0.25), value: completedOnboardingVersion)
     }
 }
 
@@ -100,13 +100,13 @@ private enum AppTab: Hashable {
     var title: LocalizedStringKey {
         switch self {
         case .trends:
-            "洞察"
+            "insights.screen.title"
         case .recording:
-            "录制"
+            "recording.screen.title"
         case .pianoKeys:
-            "钢琴键"
+            "piano.screen.title"
         case .about:
-            "关于"
+            "about.screen.title"
         }
     }
 
@@ -127,7 +127,11 @@ private enum AppTab: Hashable {
 private struct TrendsView: View {
     @Query(sort: \RecordingAssessment.recordedAt, order: .reverse)
     private var assessments: [RecordingAssessment]
-    @AppStorage("pitchee.opened.calendar.days") private var openedDateKeys = ""
+    @AppStorage(AppStorageKey.openedDateKeys) private var openedDateKeys = ""
+
+    /// Placeholder for a metric that has no value yet. Kept in one place so the
+    /// empty-state comparison in `metricValue(value:tint:)` keeps matching.
+    private static let noValue = String(localized: "common.placeholder.noValue")
 
     private let onRecordTapped: () -> Void
 
@@ -143,40 +147,40 @@ private struct TrendsView: View {
             }
 
             metricRow(
-                title: "综合评分",
-                value: assessments.first.map { scoreText($0.finalScore) } ?? "—",
+                title: String(localized: "common.metric.compositeScore.title"),
+                value: assessments.first.map { scoreText($0.finalScore) } ?? Self.noValue,
                 tint: .blue,
-                description: "声音表现的整体结果",
+                description: String(localized: "insights.metric.compositeScore.caption"),
                 current: assessments.first?.finalScore,
                 baseline: averages.finalScore.map(scoreText),
                 baselineValue: averages.finalScore
             )
 
             metricRow(
-                title: "自然度",
-                value: assessments.first.map { scoreText($0.naturalnessScore) } ?? "—",
+                title: String(localized: "common.metric.naturalness.title"),
+                value: assessments.first.map { scoreText($0.naturalnessScore) } ?? Self.noValue,
                 tint: .orange,
-                description: "声音听起来连贯、自然的程度",
+                description: String(localized: "insights.metric.naturalness.caption"),
                 current: assessments.first?.naturalnessScore,
                 baseline: averages.naturalnessScore.map(scoreText),
                 baselineValue: averages.naturalnessScore
             )
 
             metricRow(
-                title: "平均音高",
-                value: assessments.first?.meanPitchHz.map(scoreText) ?? "—",
+                title: String(localized: "common.metric.meanPitch.title"),
+                value: assessments.first?.meanPitchHz.map(scoreText) ?? Self.noValue,
                 tint: .purple,
-                description: "有效语音片段的平均基频，单位 Hz",
+                description: String(localized: "insights.metric.meanPitch.caption"),
                 current: assessments.first?.meanPitchHz,
                 baseline: averages.meanPitchHz.map(scoreText),
                 baselineValue: averages.meanPitchHz
             )
 
             metricRow(
-                title: "有效语音",
-                value: assessments.first.map { decimalText($0.speechSeconds) } ?? "—",
+                title: String(localized: "common.metric.speechDuration.title"),
+                value: assessments.first.map { decimalText($0.speechSeconds) } ?? Self.noValue,
                 tint: .green,
-                description: "录音中检测到的人声时长，单位秒",
+                description: String(localized: "insights.metric.speechDuration.caption"),
                 current: assessments.first?.speechSeconds,
                 baseline: averages.speechSeconds.map(decimalText),
                 baselineValue: averages.speechSeconds
@@ -184,7 +188,7 @@ private struct TrendsView: View {
 
             if assessments.isEmpty {
                 Section {
-                    Button("开始第一次录音", systemImage: "mic.fill", action: onRecordTapped)
+                    Button("insights.emptyState.startFirstRecording", systemImage: "mic.fill", action: onRecordTapped)
                         .buttonStyle(.borderedProminent)
                 }
             }
@@ -192,7 +196,7 @@ private struct TrendsView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color(uiColor: .systemBackground))
-        .navigationTitle("洞察")
+        .navigationTitle("insights.screen.title")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             if #available(iOS 27.1, *) {
@@ -218,14 +222,14 @@ private struct TrendsView: View {
     }
 
     private var averages: RecordingAssessmentAverages {
-        RecordingAssessmentAverages(assessments: assessments)
+        RecordingAssessmentAverages(assessments: Array(assessments.dropFirst()))
     }
 
     private var settingsLink: some View {
         NavigationLink {
             SettingsView()
         } label: {
-            Label("偏好与隐私", systemImage: "person.crop.circle")
+            Label("settings.screen.title", systemImage: "person.crop.circle")
         }
     }
 
@@ -262,7 +266,7 @@ private struct TrendsView: View {
                         endPoint: .trailing
                     )
                 )
-            Text("声音分析")
+            Text("insights.summary.analysisCount.title")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -281,11 +285,11 @@ private struct TrendsView: View {
                         )
                     )
 
-                Text("天")
+                Text("common.unit.days")
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(.orange)
             }
-            Text("打开天数")
+            Text("insights.summary.openedDays.title")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -378,7 +382,7 @@ private struct TrendsView: View {
     private func metricValue(value: String, tint: Color) -> some View {
         Text(value)
             .font(.system(.title, design: .rounded).weight(.bold))
-            .foregroundStyle(value == "—" ? Color(uiColor: .secondaryLabel) : tint)
+            .foregroundStyle(value == Self.noValue ? Color(uiColor: .secondaryLabel) : tint)
             .minimumScaleFactor(0.65)
             .lineLimit(1)
             .frame(width: 108, height: 72)
@@ -404,7 +408,7 @@ private struct TrendsView: View {
                 .foregroundStyle(.secondary)
 
             if let baseline {
-                Text("平均基准 \(baseline)")
+                Text("insights.metric.baselineAverage.caption \(baseline)")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -426,7 +430,7 @@ private struct TrendsView: View {
                     .foregroundStyle(.green)
             }
         } else {
-            Text("—")
+            Text(verbatim: Self.noValue)
                 .foregroundStyle(.secondary)
         }
     }
@@ -462,6 +466,7 @@ private struct PianoKeysView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
+                .environment(\.layoutDirection, .leftToRight)
         }
         .background {
             LinearGradient(
@@ -475,7 +480,7 @@ private struct PianoKeysView: View {
             )
             .ignoresSafeArea()
         }
-        .navigationTitle("钢琴键")
+        .navigationTitle("piano.screen.title")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             isVisible = true
@@ -499,6 +504,9 @@ private struct PianoKeysView: View {
     }
 
     private var noteGrid: some View {
+        // A piano keyboard is a physical object with a fixed orientation: the low
+        // notes stay on the left even in right-to-left languages. Without this the
+        // grid would fill from the trailing edge and the notes would read high to low.
         LazyVGrid(
             columns: [GridItem(.adaptive(minimum: 132), spacing: 12)],
             spacing: 12
@@ -569,7 +577,7 @@ private struct PianoNoteButton: View {
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .minimumScaleFactor(0.8)
 
-            Text(note.frequency.formatted(.number.precision(.fractionLength(1))) + " Hz")
+            Text(note.frequency.formatted(.number.precision(.fractionLength(1))) + " " + String(localized: "common.unit.hertz"))
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .foregroundStyle(.secondary)
         }
@@ -586,8 +594,8 @@ private struct PianoNoteButton: View {
         .animation(isActive ? nil : .easeOut(duration: 0.12), value: isActive)
         .accessibilityElement(children: .ignore)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel("音符 \(note.displayName)")
-        .accessibilityHint("轻点播放，按住可持续发声")
+        .accessibilityLabel("piano.note.name.a11y \(note.displayName)")
+        .accessibilityHint("piano.note.playbackHint.a11y")
         .accessibilityAction { onTap() }
     }
 }
@@ -686,16 +694,45 @@ private extension View {
 private struct AboutView: View {
     var body: some View {
         Form {
-            Section("应用") {
-                LabeledContent("版本", value: "1.0")
-                LabeledContent("分析引擎", value: "PitcheeCore")
+            Section("about.app.title") {
+                LabeledContent("about.app.version.label", value: "1.0")
+                LabeledContent("about.app.analysisEngine.label", value: "PitcheeCore")
             }
         }
-        .navigationTitle("关于")
+        .navigationTitle("about.screen.title")
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: RecordingAssessment.self, inMemory: true)
+#if DEBUG
+#Preview("Debug - Onboarding") {
+    DebugPreviewHost {
+        ContentView()
+    }
 }
+
+#Preview("Mock - Main With History") {
+    DebugPreviewHost(withHistory: true, completedOnboarding: true) {
+        ContentView()
+    }
+}
+
+#Preview("Debug - Trends Empty") {
+    DebugPreviewHost {
+        NavigationStack { TrendsView() }
+    }
+}
+
+#Preview("Mock - Trends With History") {
+    DebugPreviewHost(withHistory: true) {
+        NavigationStack { TrendsView() }
+    }
+}
+
+#Preview("Debug - Piano") {
+    NavigationStack { PianoKeysView() }
+}
+
+#Preview("Debug - About") {
+    NavigationStack { AboutView() }
+}
+#endif

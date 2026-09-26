@@ -1,3 +1,10 @@
+//
+//  PitchImageExportButton.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/9/26.
+//
+
 import SwiftUI
 import UniformTypeIdentifiers
 import UIKit
@@ -8,12 +15,12 @@ struct PitchImageExportButton: View {
     @State private var exportError: String?
 
     var body: some View {
-        Button("保存完整音高图", systemImage: "square.and.arrow.up") {
+        Button("export.pitchImage.saveChart", systemImage: "square.and.arrow.up") {
             let renderer = ImageRenderer(content: PitchTimelineImage(timeline: timeline()))
             renderer.scale = 2
             renderer.isOpaque = true
             guard let image = renderer.uiImage, let data = image.pngData() else {
-                exportError = "图片生成失败，请稍后重试。"
+                exportError = String(localized: "export.error.imageGenerationFailed")
                 return
             }
             exportedImage = ExportedPitchImage(image: image, data: data)
@@ -21,13 +28,13 @@ struct PitchImageExportButton: View {
         .sheet(item: $exportedImage) { image in
             PitchImageExportSheet(export: image)
         }
-        .alert("无法保存图片", isPresented: Binding(
+        .alert("export.error.imageSaveFailed.title", isPresented: Binding(
             get: { exportError != nil },
             set: { if !$0 { exportError = nil } }
         )) {
-            Button("好", role: .cancel) { exportError = nil }
+            Button("common.action.ok", role: .cancel) { exportError = nil }
         } message: {
-            Text(exportError ?? "请稍后再试。")
+            Text(exportError ?? String(localized: "common.error.tryAgainLater"))
         }
     }
 }
@@ -50,26 +57,26 @@ private struct PitchImageExportSheet: View {
                 Image(uiImage: export.image)
                     .resizable()
                     .scaledToFit()
-                    .accessibilityLabel("完整音高曲线图片")
+                    .accessibilityLabel("export.pitchImage.preview.a11y")
                     .padding()
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("完整音高图")
+            .navigationTitle("export.pitchImage.sheet.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("完成") { dismiss() }
+                    Button("common.action.done") { dismiss() }
                 }
             }
             .safeAreaInset(edge: .bottom) {
                 HStack(spacing: 16) {
-                    Button("存储到文件", systemImage: "folder") { showsFileExporter = true }
+                    Button("export.pitchImage.saveToFiles", systemImage: "folder") { showsFileExporter = true }
                     Spacer()
                     ShareLink(
                         item: Image(uiImage: export.image),
-                        preview: SharePreview("完整音高图", image: Image(uiImage: export.image))
+                        preview: SharePreview("export.pitchImage.share.subject", image: Image(uiImage: export.image))
                     ) {
-                        Label("保存或分享", systemImage: "square.and.arrow.up")
+                        Label("export.pitchImage.share", systemImage: "square.and.arrow.up")
                     }
                 }
                 .buttonStyle(.bordered)
@@ -82,19 +89,37 @@ private struct PitchImageExportSheet: View {
                 contentType: .png,
                 defaultFilename: "Pitchee-F0-\(export.id.uuidString.prefix(8)).png"
             ) { result in
-                if case .failure = result { saveError = "图片未能保存，请检查存储空间后重试。" }
+                if case .failure = result { saveError = String(localized: "export.error.imageSaveFailed.message") }
             }
-            .alert("无法保存图片", isPresented: Binding(
+            .alert("export.error.imageSaveFailed.title", isPresented: Binding(
                 get: { saveError != nil },
                 set: { if !$0 { saveError = nil } }
             )) {
-                Button("好", role: .cancel) { saveError = nil }
+                Button("common.action.ok", role: .cancel) { saveError = nil }
             } message: {
-                Text(saveError ?? "请稍后再试。")
+                Text(saveError ?? String(localized: "common.error.tryAgainLater"))
             }
         }
     }
 }
+
+#if DEBUG
+#Preview("Debug - Export Button", traits: .sizeThatFitsLayout) {
+    PitchImageExportButton {
+        PitchTimeline(result: DebugPreviewData.result)
+    }
+        .padding()
+}
+
+#Preview("Mock - Image Sheet") {
+    let renderer = ImageRenderer(content: PitchTimelineImage(timeline: PitchTimeline(result: DebugPreviewData.result)))
+    if let image = renderer.uiImage, let data = image.pngData() {
+        PitchImageExportSheet(export: ExportedPitchImage(image: image, data: data))
+    } else {
+        Text(verbatim: "Unable to render the mock pitch image.")
+    }
+}
+#endif
 
 private struct PitchPNGDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.png] }

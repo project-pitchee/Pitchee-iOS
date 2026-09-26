@@ -68,14 +68,12 @@ final class RecordingAssessment {
 /// mutable record. Saving a new assessment therefore makes the next query
 /// produce a fresh baseline automatically, without a second source of truth.
 struct RecordingAssessmentAverages {
-    let sampleCount: Int
     let finalScore: Double?
     let naturalnessScore: Double?
     let meanPitchHz: Double?
     let speechSeconds: Double?
 
     init(assessments: [RecordingAssessment]) {
-        sampleCount = assessments.count
         finalScore = Self.average(assessments.map(\.finalScore))
         naturalnessScore = Self.average(assessments.map(\.naturalnessScore))
         meanPitchHz = Self.average(assessments.compactMap(\.meanPitchHz))

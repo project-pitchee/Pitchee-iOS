@@ -1,4 +1,12 @@
+//
+//  LivePitchTests.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/9/19.
+//
+
 import AVFoundation
+import CPitcheeCore
 import Foundation
 
 @main
@@ -28,6 +36,13 @@ enum LivePitchTests {
         }
         let modelDirectory = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
         let analyzer = try PitcheeCoreAnalyzer(modelDirectory: modelDirectory)
+        do {
+            _ = try await analyzer.analyze(samples: [0.1, 0.2, 0.3], sampleRate: 16_000, channels: 2)
+            check(false, "partial stereo frames must fail at the C API boundary")
+        } catch let error as PitcheeCoreError {
+            check(error.statusCode == Int(PITCHEE_ERROR_INVALID_ARGUMENT.rawValue),
+                  "partial stereo frames return invalid argument")
+        }
         do {
             _ = try await analyzer.processRealtimeF0(samples: [0])
             check(false, "processing before stream creation must fail")

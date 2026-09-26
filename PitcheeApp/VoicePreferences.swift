@@ -8,18 +8,41 @@
 import SwiftUI
 
 enum VoicePreference: String, CaseIterable, Identifiable {
-    // Keep the existing stored values so earlier selections are preserved.
-    case masculine = "男性向声音"
-    case feminine = "女性向声音"
-    case undecided = "暂不确定"
+    case masculine
+    case feminine
+    case undecided
 
+    /// Stable identifier persisted in `UserDefaults` — never display text.
     var id: String { rawValue }
 
-    var detail: String {
+    /// Option title, looked up in the string catalog at render time.
+    var title: LocalizedStringKey {
         switch self {
-        case .masculine: "探索更低沉、厚实的声音"
-        case .feminine: "探索更明亮、柔和的声音"
-        case .undecided: "先了解自己的声音，慢慢找到方向"
+        case .masculine: "voiceProfile.option.masculine.title"
+        case .feminine: "voiceProfile.option.feminine.title"
+        case .undecided: "voiceProfile.option.undecided.title"
+        }
+    }
+
+    var detail: LocalizedStringKey {
+        switch self {
+        case .masculine: "voiceProfile.option.masculine.description"
+        case .feminine: "voiceProfile.option.feminine.description"
+        case .undecided: "voiceProfile.option.undecided.description"
+        }
+    }
+
+    /// Reads a value written by an older build, where the stored value was the
+    /// option's Chinese display text. Those literals are stored data, not copy,
+    /// so they are intentionally not localizable.
+    init?(legacyStoredValue: String) {
+        switch legacyStoredValue {
+        case "男性向声音": self = .masculine
+        case "女性向声音": self = .feminine
+        case "暂不确定": self = .undecided
+        default:
+            guard let match = VoicePreference(rawValue: legacyStoredValue) else { return nil }
+            self = match
         }
     }
 }
@@ -33,10 +56,10 @@ struct VoicePreferenceCard: View {
         Button(action: action) {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(LocalizedStringKey(option.rawValue))
+                    Text(option.title)
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text(LocalizedStringKey(option.detail))
+                    Text(option.detail)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -67,11 +90,11 @@ struct VoicePreferenceCard: View {
 struct PrivacyPromiseView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Label("隐私保护承诺", systemImage: "lock.shield")
+            Label("voiceProfile.privacyPromise.title", systemImage: "lock.shield")
                 .font(.headline)
-            promise("只在设备上分析", detail: "声音分析在本机完成，录音不会上传到服务器，也不会共享给第三方。", symbol: "iphone")
-            promise("录音仅用于本次分析", detail: "分析结束后清理临时录音，历史记录仅保存分析结果。", symbol: "waveform")
-            promise("选择始终由你掌控", detail: "声音偏好可随时修改。麦克风权限可在系统设置中关闭。", symbol: "slider.horizontal.3")
+            promise("voiceProfile.privacyPromise.onDevice.title", detail: "voiceProfile.privacyPromise.onDevice.description", symbol: "iphone")
+            promise("voiceProfile.privacyPromise.recordingUsage.title", detail: "voiceProfile.privacyPromise.recordingUsage.description", symbol: "waveform")
+            promise("voiceProfile.privacyPromise.userControl.title", detail: "voiceProfile.privacyPromise.userControl.description", symbol: "slider.horizontal.3")
         }
         .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -91,3 +114,32 @@ struct PrivacyPromiseView: View {
         }
     }
 }
+
+#if DEBUG
+private struct VoicePreferencesPreview: View {
+    @State private var selection: VoicePreference = .feminine
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(VoicePreference.allCases) { option in
+                    VoicePreferenceCard(option: option, isSelected: selection == option) {
+                        selection = option
+                    }
+                }
+                PrivacyPromiseView()
+            }
+            .padding()
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+    }
+}
+
+#Preview("Debug - Voice Preferences") {
+    VoicePreferencesPreview()
+}
+
+#Preview("Debug - Privacy Promise", traits: .sizeThatFitsLayout) {
+    PrivacyPromiseView().padding()
+}
+#endif

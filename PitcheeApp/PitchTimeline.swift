@@ -1,3 +1,10 @@
+//
+//  PitchTimeline.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/9/19.
+//
+
 import Foundation
 
 nonisolated struct LivePitchSample: Identifiable, Sendable {

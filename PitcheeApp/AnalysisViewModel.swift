@@ -25,7 +25,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     @Published private(set) var state: State = .idle
     @Published private(set) var elapsedTime: TimeInterval = 0
     @Published private(set) var livePitchSamples: [LivePitchSample] = []
-    @Published private(set) var inputLevel: Double = 0
     @Published private(set) var result: PitcheeAnalysisResult?
     @Published private(set) var volumeStatistics: RecordingVolumeStatistics?
     @Published var errorMessage: String?
@@ -38,6 +37,10 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private var analysisTask: Task<Void, Never>?
     private var permissionTask: Task<Void, Never>?
     private var recordedPitchSamples: [LivePitchSample] = []
+
+    #if DEBUG
+    private var usesPreviewData = DebugPreviewRuntime.isRunning
+    #endif
 
     var pitchTimeline: PitchTimeline {
         if let result { return PitchTimeline(result: result) }
@@ -61,6 +64,20 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     }
 
     func primaryButtonTapped(modelContext: ModelContext) {
+        #if DEBUG
+        if usesPreviewData {
+            switch state {
+            case .idle, .completed:
+                applyPreviewState(.recording)
+            case .recording:
+                applyPreviewState(.completed)
+            case .requestingPermission, .analyzing:
+                break
+            }
+            return
+        }
+        #endif
+
         switch state {
         case .recording:
             stopRecording(modelContext: modelContext)
@@ -81,7 +98,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         elapsedTime = 0
         livePitchSamples = []
         recordedPitchSamples = []
-        inputLevel = 0
         volumeStatistics = nil
         recordingStartedAt = nil
         state = .requestingPermission
@@ -94,7 +110,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             if granted {
                 await beginRecording()
             } else {
-                showError("请在系统设置中允许 Pitchee 使用麦克风，然后再试一次。")
+                showError(String(localized: "recording.error.microphonePermissionDenied"))
             }
         }
     }
@@ -130,16 +146,11 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                           self.recordingURL == url else { return }
                     self.appendLivePitch(frames)
                 }
-            }, onLevel: { [weak self] level in
-                Task { @MainActor [weak self] in
-                    guard let self, self.state == .recording, self.recordingURL == url else { return }
-                    self.inputLevel = level
-                }
             }, onError: { [weak self] error in
                 Task { @MainActor [weak self] in
                     guard let self, self.state == .recording, self.recordingURL == url else { return }
                     Self.logger.error("Realtime F0 failed: \(String(describing: error), privacy: .public)")
-                    self.errorMessage = "实时音高暂时不可用，录音仍在继续，结束后将进行完整分析。"
+                    self.errorMessage = String(localized: "recording.error.realtimePitchUnavailable")
                 }
             })
 
@@ -163,7 +174,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         if let recordingStartedAt { elapsedTime = Date().timeIntervalSince(recordingStartedAt) }
         let writeError = audioCapture.stop()
         self.audioCapture = nil
-        inputLevel = 0
         deactivateAudioSession()
 
         if let writeError {
@@ -171,12 +181,12 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             if let recordingURL { try? FileManager.default.removeItem(at: recordingURL) }
             recordingURL = nil
             recordingStartedAt = nil
-            showError("录音未能保存，请检查设备存储空间后重试。")
+            showError(String(localized: "recording.error.saveFailed"))
             return
         }
 
         guard let recordingURL else {
-            showError("录音文件没有生成，请再试一次。")
+            showError(String(localized: "recording.error.fileMissing"))
             return
         }
 
@@ -269,7 +279,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                         throw error
                     }
                 } catch {
-                    errorMessage = "测评已完成，但结果未能保存。请检查设备存储空间后再试。"
+                    errorMessage = String(localized: "analysis.error.resultSaveFailed")
                 }
                 state = .completed
             } catch {
@@ -304,25 +314,25 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             return analysisErrorMessage(for: error)
         }
         if error is LivePitchAudioCaptureError {
-            return "无法开始录音，请检查麦克风是否可用。"
+            return String(localized: "recording.error.microphoneUnavailable")
         }
-        return "无法开始录音，请稍后再试。"
+        return String(localized: "recording.error.startFailed")
     }
 
     private func analysisErrorMessage(for error: Error) -> String {
         guard let coreError = error as? PitcheeCoreError else {
-            return "分析结果无法读取（E-JSON），请稍后再试。"
+            return String(localized: "analysis.error.resultUnreadable")
         }
 
         switch coreError.statusCode {
         case 5: // PITCHEE_ERROR_NO_SPEECH
-            return "没有检测到人声，请录一段更清晰、包含连续说话的音频。"
+            return String(localized: "analysis.error.noSpeechDetected")
         case 3, 4: // PITCHEE_ERROR_ORT_UNAVAILABLE, PITCHEE_ERROR_MODEL
-            return "分析模型暂时不可用（E-\(coreError.statusCode)），请重启应用后再试。"
+            return String(localized: "analysis.error.modelUnavailable \(coreError.statusCode)")
         case 2, 6: // PITCHEE_ERROR_IO, PITCHEE_ERROR_UNSUPPORTED_FORMAT
-            return "录音格式无法读取（E-\(coreError.statusCode)），请重新录制。"
+            return String(localized: "analysis.error.recordingUnreadable \(coreError.statusCode)")
         default:
-            return "分析失败（E-\(coreError.statusCode)），请再录一段音频试试。"
+            return String(localized: "analysis.error.analysisFailed \(coreError.statusCode)")
         }
     }
 
@@ -334,3 +344,35 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         if let recordingURL { try? FileManager.default.removeItem(at: recordingURL) }
     }
 }
+
+#if DEBUG
+extension AnalysisViewModel {
+    /// Supplies real UI states without requesting microphone permission,
+    /// loading inference models, starting timers, or saving assessments.
+    static func preview(state: State = .idle) -> AnalysisViewModel {
+        let model = AnalysisViewModel()
+        model.usesPreviewData = true
+        model.applyPreviewState(state)
+        return model
+    }
+
+    private func applyPreviewState(_ state: State) {
+        self.state = state
+        errorMessage = nil
+        switch state {
+        case .idle, .requestingPermission:
+            elapsedTime = 0
+            livePitchSamples = []
+        case .recording:
+            elapsedTime = DebugPreviewData.liveSamples.last?.elapsedTime ?? 0
+            livePitchSamples = DebugPreviewData.liveSamples
+        case .analyzing, .completed:
+            elapsedTime = DebugPreviewData.result.audio.inputSeconds
+            livePitchSamples = DebugPreviewData.liveSamples
+        }
+        recordedPitchSamples = livePitchSamples
+        result = state == .completed ? DebugPreviewData.result : nil
+        volumeStatistics = state == .completed ? DebugPreviewData.volumeStatistics : nil
+    }
+}
+#endif

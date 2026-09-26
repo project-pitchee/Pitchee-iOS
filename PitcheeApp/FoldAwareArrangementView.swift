@@ -46,3 +46,29 @@ struct FoldAwareArrangementView<Primary: View, Secondary: View, Regular: View>: 
         }
     }
 }
+
+#if DEBUG
+#Preview("Debug - Adaptive Layout") {
+    FoldAwareArrangementView(
+        primary: {
+            Text(verbatim: "Primary pane")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.blue.opacity(0.08))
+        },
+        secondary: {
+            Text(verbatim: "Secondary pane")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.purple.opacity(0.08))
+        },
+        regular: {
+            VStack(spacing: 24) {
+                Image(systemName: "rectangle.split.2x1")
+                    .font(.largeTitle)
+                Text(verbatim: "Regular layout")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.blue.opacity(0.08))
+        }
+    )
+}
+#endif

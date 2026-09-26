@@ -72,8 +72,10 @@ private struct RecordingAccessoryContent: View {
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isRequestingPermission)
-            .accessibilityLabel(viewModel.isRecording ? "停止并分析" : (viewModel.isAnalyzing ? "查看分析进度" : "开始录音"))
-            .accessibilityHint(viewModel.isRecording ? "结束录音并打开声音报告" : "")
+            .accessibilityLabel(accessibilityLabel)
+            .accessibilityHint(viewModel.isRecording
+                ? String(localized: "recording.controls.stopAndAnalyze.hint")
+                : "")
         }
         .frame(maxWidth: 560)
         .padding(.horizontal, 18)
@@ -82,17 +84,49 @@ private struct RecordingAccessoryContent: View {
         .sensoryFeedback(.impact(weight: .light), trigger: viewModel.isRecording)
     }
 
+    private var accessibilityLabel: String {
+        if viewModel.isRecording { return String(localized: "recording.controls.stopAndAnalyze") }
+        if viewModel.isAnalyzing { return String(localized: "recording.controls.viewAnalysisProgress") }
+        return String(localized: "recording.controls.startRecording")
+    }
+
     private var title: String {
-        if viewModel.isRecording { return String(localized: "录音中") }
-        if viewModel.isRequestingPermission { return String(localized: "正在准备麦克风") }
-        if viewModel.isAnalyzing { return String(localized: "正在分析声音") }
-        return String(localized: "开始录音")
+        if viewModel.isRecording { return String(localized: "recording.controls.recordingInProgress") }
+        if viewModel.isRequestingPermission { return String(localized: "recording.controls.preparingMicrophone") }
+        if viewModel.isAnalyzing { return String(localized: "recording.controls.analyzingAudio") }
+        return String(localized: "recording.controls.startRecording")
     }
 
     private var subtitle: LocalizedStringKey {
-        if viewModel.isRecording { return "点击停止并分析" }
-        if viewModel.isRequestingPermission { return "请允许使用麦克风" }
-        if viewModel.isAnalyzing { return "点击查看进度" }
-        return "自然朗读参考语料"
+        if viewModel.isRecording { return "recording.controls.stopAndAnalyze.subtitle" }
+        if viewModel.isRequestingPermission { return "recording.controls.preparingMicrophone.subtitle" }
+        if viewModel.isAnalyzing { return "recording.controls.viewAnalysisProgress.subtitle" }
+        return "recording.controls.startRecording.subtitle"
     }
 }
+
+#if DEBUG
+#Preview("Mock - Tab Accessory") {
+    DebugAnalysisPreview(state: .recording) { model in
+        TabView {
+            NavigationStack {
+                Text("recording.reference.passage")
+                    .padding()
+                    .navigationTitle("recording.screen.title")
+            }
+            .tabItem { Label("recording.screen.title", systemImage: "waveform.badge.microphone") }
+        }
+        .modifier(RecordingTabAccessory(isVisible: true, viewModel: model, action: {}))
+    }
+}
+
+#Preview("Mock - Control States", traits: .sizeThatFitsLayout) {
+    VStack(spacing: 24) {
+        RecordingAccessoryContent(viewModel: .preview(state: .idle), action: {})
+        RecordingAccessoryContent(viewModel: .preview(state: .requestingPermission), action: {})
+        RecordingAccessoryContent(viewModel: .preview(state: .recording), action: {})
+        RecordingAccessoryContent(viewModel: .preview(state: .analyzing), action: {})
+    }
+    .padding(.vertical)
+}
+#endif

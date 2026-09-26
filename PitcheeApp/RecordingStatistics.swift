@@ -2,7 +2,7 @@
 //  RecordingStatistics.swift
 //  Pitchee
 //
-//  Created by Codex on 2026/9/19.
+//  Created by Ryo on 2026/9/19.
 //
 
 import Accelerate
@@ -27,9 +27,9 @@ nonisolated struct RecordingPitchStatistics: Sendable {
             .sorted()
 
         averageHz = pitch.meanHz.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
-        medianHz = Self.percentile(0.50, in: values)
-        high95Hz = Self.percentile(0.95, in: values)
-        low5Hz = Self.percentile(0.05, in: values)
+        medianHz = RecordingStatisticsMath.percentile(0.50, in: values)
+        high95Hz = RecordingStatisticsMath.percentile(0.95, in: values)
+        low5Hz = RecordingStatisticsMath.percentile(0.05, in: values)
 
         let count = Double(values.count)
         func percentage(where predicate: (Double) -> Bool) -> Double {
@@ -45,8 +45,10 @@ nonisolated struct RecordingPitchStatistics: Sendable {
         masculinePercentage = percentage { $0 >= 85 && $0 < 145 }
         veryLowPercentage = percentage { $0 < 85 }
     }
+}
 
-    private static func percentile(_ fraction: Double, in values: [Double]) -> Double? {
+nonisolated enum RecordingStatisticsMath {
+    static func percentile(_ fraction: Double, in values: [Double]) -> Double? {
         guard !values.isEmpty else { return nil }
         guard values.count > 1 else { return values[0] }
 
@@ -67,6 +69,16 @@ nonisolated struct RecordingVolumeStatistics: Sendable {
     let medianDBFS: Double?
     let high95DBFS: Double?
     let low5DBFS: Double?
+    let windows: [RecordingVolumeWindow]
+}
+
+/// A time-aligned loudness sample used by the export report. Voice and
+/// background values are kept separate so the report can show both curves on
+/// the same time axis without implying that silence is a voice measurement.
+nonisolated struct RecordingVolumeWindow: Sendable {
+    let centerSeconds: Double
+    let voiceDBFS: Double?
+    let backgroundDBFS: Double?
 }
 
 nonisolated enum RecordingVolumeAnalyzer {
@@ -89,6 +101,7 @@ nonisolated enum RecordingVolumeAnalyzer {
 
         var speechLevels: [Double] = []
         var environmentLevels: [Double] = []
+        var windows: [RecordingVolumeWindow] = []
 
         while file.framePosition < file.length {
             let startFrame = file.framePosition
@@ -113,8 +126,18 @@ nonisolated enum RecordingVolumeAnalyzer {
 
             if containsSpeech {
                 speechLevels.append(level)
+                windows.append(RecordingVolumeWindow(
+                    centerSeconds: centerSeconds,
+                    voiceDBFS: level,
+                    backgroundDBFS: nil
+                ))
             } else {
                 environmentLevels.append(level)
+                windows.append(RecordingVolumeWindow(
+                    centerSeconds: centerSeconds,
+                    voiceDBFS: nil,
+                    backgroundDBFS: level
+                ))
             }
         }
 
@@ -122,32 +145,19 @@ nonisolated enum RecordingVolumeAnalyzer {
         let sortedEnvironmentLevels = environmentLevels.sorted()
         // A continuous utterance may leave no clean non-speech window. In that
         // case the quietest voice window is the best available floor estimate.
-        let environment = percentile(0.50, in: sortedEnvironmentLevels)
-            ?? percentile(0.05, in: sortedSpeechLevels)
+        let environment = RecordingStatisticsMath.percentile(0.50, in: sortedEnvironmentLevels)
+            ?? RecordingStatisticsMath.percentile(0.05, in: sortedSpeechLevels)
 
         return RecordingVolumeStatistics(
             environmentDBFS: environment,
             averageDBFS: sortedSpeechLevels.isEmpty
                 ? nil
                 : sortedSpeechLevels.reduce(0, +) / Double(sortedSpeechLevels.count),
-            medianDBFS: percentile(0.50, in: sortedSpeechLevels),
-            high95DBFS: percentile(0.95, in: sortedSpeechLevels),
-            low5DBFS: percentile(0.05, in: sortedSpeechLevels)
+            medianDBFS: RecordingStatisticsMath.percentile(0.50, in: sortedSpeechLevels),
+            high95DBFS: RecordingStatisticsMath.percentile(0.95, in: sortedSpeechLevels),
+            low5DBFS: RecordingStatisticsMath.percentile(0.05, in: sortedSpeechLevels),
+            windows: windows
         )
-    }
-
-    private static func percentile(_ fraction: Double, in values: [Double]) -> Double? {
-        guard !values.isEmpty else { return nil }
-        guard values.count > 1 else { return values[0] }
-
-        let position = fraction * Double(values.count - 1)
-        let lowerIndex = Int(position.rounded(.down))
-        let upperIndex = Int(position.rounded(.up))
-        guard lowerIndex != upperIndex else { return values[lowerIndex] }
-
-        let remainder = position - Double(lowerIndex)
-        return values[lowerIndex]
-            + (values[upperIndex] - values[lowerIndex]) * remainder
     }
 }
 
