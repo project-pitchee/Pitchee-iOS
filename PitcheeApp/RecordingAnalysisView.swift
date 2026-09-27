@@ -1186,22 +1186,30 @@ private struct ResultMetric: View {
 }
 
 #if DEBUG
-#Preview("Mock - Result") {
-    DebugAnalysisPreview(state: .completed) { model in
-        NavigationStack { RecordingAnalysisView(viewModel: model) }
+private struct RecordingAnalysisPreview: View {
+    @StateObject private var viewModel: AnalysisViewModel
+
+    init(state: AnalysisViewModel.State) {
+        _viewModel = StateObject(wrappedValue: .preview(state: state))
     }
+
+    var body: some View {
+        NavigationStack {
+            RecordingAnalysisView(viewModel: viewModel)
+        }
+    }
+}
+
+#Preview("Mock - Result") {
+    RecordingAnalysisPreview(state: .completed)
 }
 
 #Preview("Mock - Analyzing") {
-    DebugAnalysisPreview(state: .analyzing) { model in
-        NavigationStack { RecordingAnalysisView(viewModel: model) }
-    }
+    RecordingAnalysisPreview(state: .analyzing)
 }
 
 #Preview("Debug - No Result") {
-    DebugAnalysisPreview(state: .idle) { model in
-        NavigationStack { RecordingAnalysisView(viewModel: model) }
-    }
+    RecordingAnalysisPreview(state: .idle)
 }
 
 #Preview("Mock - Result Save Error") {

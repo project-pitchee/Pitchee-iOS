@@ -6,23 +6,9 @@
 //
 
 #if DEBUG
-import Combine
-import Darwin
 import Foundation
 import SwiftData
 import SwiftUI
-
-enum DebugPreviewRuntime {
-    static var isRunning: Bool {
-        // Reading the process environment through Foundation asks Objective-C
-        // for `+[NSProcessInfo processInfo]`. Preview's JIT host can expose an
-        // incomplete NSProcessInfo class, which causes an uncaught selector
-        // exception before the first view is rendered. getenv is available in
-        // both the app and Canvas and avoids that runtime dependency.
-        guard let value = getenv("XCODE_RUNNING_FOR_PREVIEWS") else { return false }
-        return String(cString: value) == "1"
-    }
-}
 
 /// Deterministic data used only by SwiftUI previews.
 /// Keeping it here makes result, export, and chart previews show the same
@@ -153,30 +139,23 @@ enum DebugPreviewData {
     }
 }
 
-/// Owns a separate preferences suite and an in-memory store for each Canvas.
-/// AppStorage changes, onboarding completion, and history never leak between
-/// previews or into the app's normal data.
-@MainActor
-private final class DebugPreviewContext: ObservableObject {
-    struct Environment {
-        let container: ModelContainer
-        let defaults: UserDefaults
-    }
+/// Creates isolated preview defaults without putting state in the app's suite.
+enum DebugPreviewDefaults {
+    static let store: UserDefaults = {
+        let store = UserDefaults(suiteName: "com.lvyzhan.Pitchee.preview")!
+        store.register(defaults: [
+            AppStorageKey.onboardingCompletedVersion: 0,
+            AppStorageKey.voicePreference: VoicePreference.feminine.rawValue,
+            AppStorageKey.openedDateKeys: ""
+        ])
+        return store
+    }()
+}
 
-    let environment: Result<Environment, Error>
-    private let suiteName = "com.lvyzhan.Pitchee.preview.\(UUID().uuidString)"
-
-    init(withHistory: Bool, completedOnboarding: Bool) {
+/// Creates a fresh in-memory SwiftData store for previews that need it.
+enum DebugPreviewStore {
+    static func makeContainer(withHistory: Bool = false) -> ModelContainer? {
         do {
-            guard let defaults = UserDefaults(suiteName: suiteName) else {
-                throw CocoaError(.fileWriteUnknown)
-            }
-            defaults.register(defaults: [
-                AppStorageKey.onboardingCompletedVersion: completedOnboarding ? OnboardingFlow.currentVersion : 0,
-                AppStorageKey.voicePreference: VoicePreference.feminine.rawValue,
-                AppStorageKey.openedDateKeys: withHistory ? "2026-9-24,2026-9-25,2026-9-26" : ""
-            ])
-
             let container = try ModelContainer(
                 for: RecordingAssessment.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
@@ -192,67 +171,10 @@ private final class DebugPreviewContext: ObservableObject {
                 }
                 try container.mainContext.save()
             }
-            environment = .success(Environment(container: container, defaults: defaults))
+            return container
         } catch {
-            environment = .failure(error)
+            return nil
         }
-    }
-
-    deinit {
-        UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
-    }
-}
-
-@MainActor
-struct DebugPreviewHost<Content: View>: View {
-    @StateObject private var context: DebugPreviewContext
-    private let content: () -> Content
-
-    init(
-        withHistory: Bool = false,
-        completedOnboarding: Bool = false,
-        @ViewBuilder content: @escaping () -> Content
-    ) {
-        _context = StateObject(wrappedValue: DebugPreviewContext(
-            withHistory: withHistory,
-            completedOnboarding: completedOnboarding
-        ))
-        self.content = content
-    }
-
-    var body: some View {
-        switch context.environment {
-        case .success(let environment):
-            content()
-                .modelContainer(environment.container)
-                .defaultAppStorage(environment.defaults)
-        case .failure(let error):
-            VStack(spacing: 12) {
-                Text(verbatim: "Preview setup failed")
-                    .font(.headline)
-                Text(verbatim: error.localizedDescription)
-            }
-            .padding()
-        }
-    }
-}
-
-/// Keeps the mock model alive when Canvas updates the surrounding view.
-@MainActor
-struct DebugAnalysisPreview<Content: View>: View {
-    @StateObject private var viewModel: AnalysisViewModel
-    private let content: (AnalysisViewModel) -> Content
-
-    init(
-        state: AnalysisViewModel.State,
-        @ViewBuilder content: @escaping (AnalysisViewModel) -> Content
-    ) {
-        _viewModel = StateObject(wrappedValue: .preview(state: state))
-        self.content = content
-    }
-
-    var body: some View {
-        content(viewModel)
     }
 }
 #endif

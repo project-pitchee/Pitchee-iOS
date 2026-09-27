@@ -106,20 +106,6 @@ private struct RecordingAccessoryContent: View {
 }
 
 #if DEBUG
-#Preview("Mock - Tab Accessory") {
-    DebugAnalysisPreview(state: .recording) { model in
-        TabView {
-            NavigationStack {
-                Text("recording.reference.passage")
-                    .padding()
-                    .navigationTitle("recording.screen.title")
-            }
-            .tabItem { Label("recording.screen.title", systemImage: "waveform.badge.microphone") }
-        }
-        .modifier(RecordingTabAccessory(isVisible: true, viewModel: model, action: {}))
-    }
-}
-
 #Preview("Mock - Control States", traits: .sizeThatFitsLayout) {
     VStack(spacing: 24) {
         RecordingAccessoryContent(viewModel: .preview(state: .idle), action: {})

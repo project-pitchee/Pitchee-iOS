@@ -497,7 +497,7 @@ private enum ExportMetricOption: String, CaseIterable, Hashable, Identifiable {
         case .sampleRate:
             return ExportMetricValue(number(Double(result.audio.sourceSampleRate), fractionDigits: 0), String(localized: "common.unit.hertz"))
         case .channels:
-            return ExportMetricValue("\(result.audio.sourceChannels)", String(localized: "common.unit.channels"))
+            return ExportMetricValue(String(localized: "export.metric.channels.value \(result.audio.sourceChannels)"), "")
         case .meanPitch:
             return ExportMetricValue(number(pitchStatistics.averageHz), String(localized: "common.unit.hertz"))
         case .medianPitch:
@@ -507,7 +507,7 @@ private enum ExportMetricOption: String, CaseIterable, Hashable, Identifiable {
         case .pitchRange:
             return ExportMetricValue(range(pitchStatistics.low5Hz, pitchStatistics.high95Hz), String(localized: "common.unit.hertzPercentileRange"))
         case .voicedWindows:
-            return ExportMetricValue("\(result.f0.voicedWindowCount)", String(localized: "common.unit.count"))
+            return ExportMetricValue(String(localized: "export.metric.voicedWindows.value \(result.f0.voicedWindowCount)"), "")
         case .environmentLoudness:
             return ExportMetricValue(number(volumeStatistics?.environmentDBFS), String(localized: "common.unit.dbfs"))
         case .averageLoudness:
@@ -873,10 +873,12 @@ private struct ExportMetricValueRow: View {
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
-            Text(value.unit)
-                .font(.system(size: 8.5, weight: .regular))
-                .foregroundStyle(.black.opacity(0.52))
-                .lineLimit(1)
+            if !value.unit.isEmpty {
+                Text(value.unit)
+                    .font(.system(size: 8.5, weight: .regular))
+                    .foregroundStyle(.black.opacity(0.52))
+                    .lineLimit(1)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -1045,6 +1047,7 @@ private struct ExportCurvesChart: View {
                         .offset(x: 11, y: -1)
                 }
             }
+            .environment(\.layoutDirection, .leftToRight)
 
             HStack(spacing: 12) {
                 if showsFrequency { legend(String(localized: "export.chart.frequency.legend"), color: pitchColor) }

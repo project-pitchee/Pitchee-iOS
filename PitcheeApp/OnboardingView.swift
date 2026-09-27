@@ -321,14 +321,12 @@ private extension OnboardingView {
 }
 
 #Preview("Debug - Welcome") {
-    DebugPreviewHost {
-        OnboardingView(onFinished: {})
-    }
+    OnboardingView(onFinished: {})
+        .defaultAppStorage(DebugPreviewDefaults.store)
 }
 
-#Preview("Mock - Voice Preference") {
-    DebugPreviewHost {
-        OnboardingView(previewingPreferences: true)
-    }
+#Preview("Debug - Voice Preference") {
+    OnboardingView(previewingPreferences: true)
+        .defaultAppStorage(DebugPreviewDefaults.store)
 }
 #endif

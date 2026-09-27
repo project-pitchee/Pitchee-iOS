@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import UIKit
+import Charts
 
 struct ContentView: View {
     @AppStorage(AppStorageKey.onboardingCompletedVersion) private var completedOnboardingVersion = 0
@@ -125,12 +126,20 @@ private enum AppTab: Hashable {
 }
 
 private struct TrendsView: View {
+    private struct TrendPoint: Identifiable {
+        let id: UUID
+        let date: Date
+        let value: Double
+        let position: Double
+    }
+
     @Query(sort: \RecordingAssessment.recordedAt, order: .reverse)
     private var assessments: [RecordingAssessment]
     @AppStorage(AppStorageKey.openedDateKeys) private var openedDateKeys = ""
+    @State private var selectedRange: InsightsRange = .sevenDays
 
-    /// Placeholder for a metric that has no value yet. Kept in one place so the
-    /// empty-state comparison in `metricValue(value:tint:)` keeps matching.
+    /// Placeholder for a metric that has no value yet. Kept in one place so
+    /// cards use the same empty state as the rest of the app.
     private static let noValue = String(localized: "common.placeholder.noValue")
 
     private let onRecordTapped: () -> Void
@@ -139,64 +148,49 @@ private struct TrendsView: View {
         self.onRecordTapped = onRecordTapped
     }
 
+    private var visibleAssessments: [RecordingAssessment] {
+        InsightsData.assessments(assessments, in: selectedRange)
+    }
+
+    private var latestAssessment: RecordingAssessment? {
+        dailyBestAssessments.last
+    }
+
+    private var averages: RecordingAssessmentAverages {
+        RecordingAssessmentAverages(assessments: Array(dailyBestAssessments.dropLast()))
+    }
+
+    /// Keep one representative result per day so repeated recordings do not
+    /// make the trend chart look denser than the activity really was. The
+    /// highest overall score represents that day's best result.
+    private var dailyBestAssessments: [RecordingAssessment] {
+        InsightsData.dailyBest(visibleAssessments)
+    }
+
     var body: some View {
-        List {
-            Section {
-                summaryMetrics
-                .accessibilityElement(children: .combine)
-            }
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                InsightsRangePicker(selection: $selectedRange)
+                summaryCards
+                NavigationLink(value: InsightsDestination.metric(.composite)) {
+                    overallScoreCard
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("insights.metric.openDetails.hint")
+                metricCards
 
-            metricRow(
-                title: String(localized: "common.metric.compositeScore.title"),
-                value: assessments.first.map { scoreText($0.finalScore) } ?? Self.noValue,
-                tint: .blue,
-                description: String(localized: "insights.metric.compositeScore.caption"),
-                current: assessments.first?.finalScore,
-                baseline: averages.finalScore.map(scoreText),
-                baselineValue: averages.finalScore
-            )
-
-            metricRow(
-                title: String(localized: "common.metric.naturalness.title"),
-                value: assessments.first.map { scoreText($0.naturalnessScore) } ?? Self.noValue,
-                tint: .orange,
-                description: String(localized: "insights.metric.naturalness.caption"),
-                current: assessments.first?.naturalnessScore,
-                baseline: averages.naturalnessScore.map(scoreText),
-                baselineValue: averages.naturalnessScore
-            )
-
-            metricRow(
-                title: String(localized: "common.metric.meanPitch.title"),
-                value: assessments.first?.meanPitchHz.map(scoreText) ?? Self.noValue,
-                tint: .purple,
-                description: String(localized: "insights.metric.meanPitch.caption"),
-                current: assessments.first?.meanPitchHz,
-                baseline: averages.meanPitchHz.map(scoreText),
-                baselineValue: averages.meanPitchHz
-            )
-
-            metricRow(
-                title: String(localized: "common.metric.speechDuration.title"),
-                value: assessments.first.map { decimalText($0.speechSeconds) } ?? Self.noValue,
-                tint: .green,
-                description: String(localized: "insights.metric.speechDuration.caption"),
-                current: assessments.first?.speechSeconds,
-                baseline: averages.speechSeconds.map(decimalText),
-                baselineValue: averages.speechSeconds
-            )
-
-            if assessments.isEmpty {
-                Section {
-                    Button("insights.emptyState.startFirstRecording", systemImage: "mic.fill", action: onRecordTapped)
-                        .buttonStyle(.borderedProminent)
+                if visibleAssessments.isEmpty {
+                    emptyState
                 }
             }
+            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .padding(.bottom, 24)
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .background(Color(uiColor: .systemBackground))
-        .navigationTitle("insights.screen.title")
+        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
+        .navigationTitle(Text(verbatim: "Pitchee"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             if #available(iOS 27.1, *) {
@@ -212,87 +206,411 @@ private struct TrendsView: View {
             }
         }
         .onAppear(perform: recordTodayAsOpened)
+        .navigationDestination(for: InsightsDestination.self) { destination in
+            switch destination {
+            case .history:
+                RecordingHistoryView(range: $selectedRange, onRecordTapped: onRecordTapped)
+            case .activity:
+                InsightsActivityView(range: $selectedRange, onRecordTapped: onRecordTapped)
+            case .metric(let metric):
+                InsightsMetricDetailView(metric: metric, range: $selectedRange, onRecordTapped: onRecordTapped)
+            }
+        }
+    }
+
+    private var summaryCards: some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+            spacing: 12
+        ) {
+            NavigationLink(value: InsightsDestination.history) {
+                summaryCard(
+                    title: "insights.summary.analysisCount.title",
+                    value: visibleAssessments.count.formatted(),
+                    symbol: "waveform",
+                    tint: .blue
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("insights.history.openDetails.hint")
+            NavigationLink(value: InsightsDestination.activity) {
+                summaryCard(
+                    title: "insights.summary.openedDays.title",
+                    value: openedDays.formatted(),
+                    symbol: "calendar",
+                    tint: .orange
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("insights.activity.openDetails.hint")
+        }
+    }
+
+    private func summaryCard(
+        title: LocalizedStringKey,
+        value: String,
+        symbol: String,
+        tint: Color
+    ) -> some View {
+        dashboardCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: symbol)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(tint)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+
+                Text(value)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundStyle(tint)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
+
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var overallScoreCard: some View {
+        dashboardCard(minHeight: 0) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("common.metric.compositeScore.title")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text(latestAssessment.map { scoreText($0.finalScore) } ?? Self.noValue)
+                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .foregroundStyle(latestAssessment == nil ? Color.secondary : Color.blue)
+                        .minimumScaleFactor(0.7)
+
+                    scoreChangeText
+                }
+
+                if let baseline = averages.finalScore {
+                    Text("insights.metric.baselineAverage.caption \(scoreText(baseline))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("insights.metric.compositeScore.caption")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                scoreChart
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var scoreChart: some View {
+        trendChart(
+            points: scorePoints,
+            tint: .purple,
+            yDomain: 0...100,
+            height: 126,
+            showsXAxis: true
+        )
+        .accessibilityLabel(Text("common.metric.compositeScore.title"))
+        .accessibilityValue(chartAccessibilityValue)
+    }
+
+    @ViewBuilder
+    private var scoreChangeText: some View {
+        if let current = latestAssessment?.finalScore, let baseline = averages.finalScore, baseline != 0 {
+            let change = (current - baseline) / abs(baseline) * 100
+            // A tiny difference is normal rounding noise. Do not present it
+            // as a direction of travel (for example, “↓ 0%”).
+            if abs(change) >= 0.5 {
+                let symbol = change > 0 ? "↑" : "↓"
+                Text(verbatim: "\(symbol) \(abs(change).formatted(.number.precision(.fractionLength(0))))%")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(change > 0 ? Color.green : Color.red)
+            }
+        }
+    }
+
+    private var scorePoints: [TrendPoint] {
+        dailyBestAssessments.enumerated().map { index, assessment in
+            TrendPoint(id: assessment.id, date: chartDate(for: assessment), value: assessment.finalScore, position: Double(index))
+        }
+    }
+
+    private var chartAccessibilityValue: Text {
+        guard let first = scorePoints.first, let last = scorePoints.last else {
+            return Text(verbatim: "")
+        }
+        return Text("insights.chart.scoreTrend.a11y \(scoreText(first.value)) \(scoreText(last.value))")
+    }
+
+    @ViewBuilder
+    private func trendChart(
+        points: [TrendPoint],
+        tint: Color,
+        yDomain: ClosedRange<Double>,
+        height: CGFloat,
+        showsXAxis: Bool
+    ) -> some View {
+        if points.isEmpty {
+            EmptyView()
+        } else if showsXAxis {
+            baseTrendChart(points: points, tint: tint, yDomain: yDomain, height: height)
+                .chartXAxis {
+                    AxisMarks(values: points.map(\.position)) { value in
+                        AxisGridLine().foregroundStyle(.clear)
+                        AxisTick().foregroundStyle(.clear)
+                        AxisValueLabel(anchor: .top) {
+                            if let position = value.as(Double.self),
+                               let point = points.first(where: { $0.position == position }) {
+                                Text(point.date, format: .dateTime.month(.defaultDigits).day(.defaultDigits))
+                            }
+                        }
+                    }
+                }
+        } else {
+            baseTrendChart(points: points, tint: tint, yDomain: yDomain, height: height)
+                .chartXAxis(.hidden)
+        }
+    }
+
+    private func baseTrendChart(
+        points: [TrendPoint],
+        tint: Color,
+        yDomain: ClosedRange<Double>,
+        height: CGFloat
+    ) -> some View {
+        Chart(points) { point in
+            if points.count > 1 {
+                AreaMark(
+                    x: .value(String(localized: "insights.chart.date.label"), point.position),
+                    yStart: .value(String(localized: "insights.chart.baseline.label"), yDomain.lowerBound),
+                    yEnd: .value(String(localized: "insights.chart.value.label"), point.value)
+                )
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [tint.opacity(0.24), tint.opacity(0.03)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+
+            LineMark(
+                x: .value(String(localized: "insights.chart.date.label"), point.position),
+                y: .value(String(localized: "insights.chart.value.label"), point.value)
+            )
+            .interpolationMethod(.catmullRom)
+            .foregroundStyle(tint)
+            .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+
+            PointMark(
+                x: .value(String(localized: "insights.chart.date.label"), point.position),
+                y: .value(String(localized: "insights.chart.value.label"), point.value)
+            )
+            .foregroundStyle(tint)
+            .symbolSize(28)
+        }
+        .chartXScale(domain: xDomain(for: points))
+        .chartYScale(
+            domain: yDomain,
+            range: .plotDimension(startPadding: 4, endPadding: 6)
+        )
+        .chartYAxis(.hidden)
+        .chartPlotStyle { plot in
+            plot
+                .frame(height: height)
+                .clipped()
+        }
+    }
+
+    private var metricCards: some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+            spacing: 12
+        ) {
+            NavigationLink(value: InsightsDestination.metric(.naturalness)) {
+                metricCard(
+                    title: "common.metric.naturalness.title",
+                    value: latestAssessment.map { scoreText($0.naturalnessScore) } ?? Self.noValue,
+                    current: latestAssessment?.naturalnessScore,
+                    baseline: averages.naturalnessScore,
+                    baselineText: averages.naturalnessScore.map(scoreText),
+                    symbol: "waveform.path.ecg",
+                    tint: .purple,
+                    points: naturalnessPoints,
+                    yDomain: 0...100
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("insights.metric.openDetails.hint")
+            NavigationLink(value: InsightsDestination.metric(.pitch)) {
+                metricCard(
+                    title: "common.metric.meanPitch.title",
+                    value: latestAssessment?.meanPitchHz.map(decimalText) ?? Self.noValue,
+                    current: latestAssessment?.meanPitchHz,
+                    baseline: averages.meanPitchHz,
+                    baselineText: averages.meanPitchHz.map(decimalText),
+                    symbol: "tuningfork",
+                    tint: .teal,
+                    points: pitchPoints,
+                    yDomain: pitchChartDomain
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("insights.metric.openDetails.hint")
+        }
+    }
+
+    private var naturalnessPoints: [TrendPoint] {
+        dailyBestAssessments.enumerated().map { index, assessment in
+            TrendPoint(id: assessment.id, date: chartDate(for: assessment), value: assessment.naturalnessScore, position: Double(index))
+        }
+    }
+
+    private var pitchPoints: [TrendPoint] {
+        dailyBestAssessments
+            .compactMap { assessment -> (RecordingAssessment, Double)? in
+                guard let pitch = assessment.meanPitchHz else { return nil }
+                return (assessment, pitch)
+            }
+            .enumerated()
+            .map { index, item in
+                TrendPoint(
+                    id: item.0.id,
+                    date: chartDate(for: item.0),
+                    value: item.1,
+                    position: Double(index)
+                )
+            }
+    }
+
+    private func xDomain(for points: [TrendPoint]) -> ClosedRange<Double> {
+        guard let first = points.first?.position, let last = points.last?.position else {
+            return 0...1
+        }
+        if first == last { return (first - 0.5)...(last + 0.5) }
+        return (first - 0.15)...(last + 0.15)
+    }
+
+    private func chartDate(for assessment: RecordingAssessment) -> Date {
+        Calendar.current.startOfDay(for: assessment.recordedAt)
+    }
+
+    private var pitchChartDomain: ClosedRange<Double> {
+        let values = pitchPoints.map(\.value)
+        guard let minimum = values.min(), let maximum = values.max() else {
+            return 0...1
+        }
+        let padding = max((maximum - minimum) * 0.2, 1)
+        return max(0, minimum - padding)...(maximum + padding)
+    }
+
+    private func metricCard(
+        title: LocalizedStringKey,
+        value: String,
+        current: Double?,
+        baseline: Double?,
+        baselineText: String?,
+        symbol: String,
+        tint: Color,
+        points: [TrendPoint],
+        yDomain: ClosedRange<Double>
+    ) -> some View {
+        dashboardCard(minHeight: 0) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Image(systemName: symbol)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(tint)
+                    Text(title)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+
+                Text(value)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundStyle(value == Self.noValue ? Color.secondary : tint)
+                    .minimumScaleFactor(0.65)
+                    .lineLimit(1)
+
+                if let baseline {
+                    VStack(alignment: .leading, spacing: 3) {
+                        trendText(current: current, baseline: baseline)
+                            .font(.caption.weight(.semibold))
+                        if let baselineText {
+                            Text("insights.metric.baselineAverage.caption \(baselineText)")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                } else {
+                    Text("insights.metric.baselineAverage.caption \(Self.noValue)")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+
+                trendChart(
+                    points: points,
+                    tint: tint,
+                    yDomain: yDomain,
+                    height: 54,
+                    showsXAxis: false
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("insights.emptyState.startFirstRecording")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Button("insights.emptyState.startFirstRecording", systemImage: "mic.fill", action: onRecordTapped)
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private func dashboardCard<Content: View>(
+        minHeight: CGFloat = 138,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        content()
+            .padding(16)
+            .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .topLeading)
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var openedDays: Int {
-        openedDateKeys
-            .split(separator: ",")
-            .filter { !$0.isEmpty }
-            .count
-    }
-
-    private var averages: RecordingAssessmentAverages {
-        RecordingAssessmentAverages(assessments: Array(assessments.dropFirst()))
-    }
-
-    private var settingsLink: some View {
-        NavigationLink {
-            SettingsView()
-        } label: {
-            Label("settings.screen.title", systemImage: "person.crop.circle")
-        }
-    }
-
-    private var summaryMetrics: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 0) {
-                analysisCountStat
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                Divider()
-                    .frame(height: 54)
-
-                openedDaysStat
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 16)
-            }
-
-            VStack(alignment: .leading, spacing: 16) {
-                analysisCountStat
-                Divider()
-                openedDaysStat
-            }
-        }
-    }
-
-    private var analysisCountStat: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(assessments.count.formatted())
-                .font(.system(.largeTitle, design: .rounded).weight(.bold))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-            Text("insights.summary.analysisCount.title")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private var openedDaysStat: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .lastTextBaseline, spacing: 6) {
-                Text(openedDays.formatted())
-                    .font(.system(.largeTitle, design: .rounded).weight(.bold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.pink, .orange],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-
-                Text("common.unit.days")
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(.orange)
-            }
-            Text("insights.summary.openedDays.title")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        InsightsData.openedDates(from: openedDateKeys).filter { selectedRange.contains($0) }.count
     }
 
     private func scoreText(_ value: Double) -> String {
@@ -304,135 +622,24 @@ private struct TrendsView: View {
     }
 
     @ViewBuilder
-    private func metricRow(
-        title: String,
-        value: String,
-        tint: Color,
-        description: String,
-        current: Double?,
-        baseline: String?,
-        baselineValue: Double?
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            ViewThatFits(in: .horizontal) {
-                metricDetails(
-                    value: value,
-                    tint: tint,
-                    description: description,
-                    current: current,
-                    baseline: baseline,
-                    baselineValue: baselineValue,
-                    axis: .horizontal
-                )
-                metricDetails(
-                    value: value,
-                    tint: tint,
-                    description: description,
-                    current: current,
-                    baseline: baseline,
-                    baselineValue: baselineValue,
-                    axis: .vertical
-                )
-            }
-        }
-        .padding(.vertical, 10)
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-        .listRowBackground(Color.clear)
-        .listRowSeparator(.hidden)
-    }
-
-    @ViewBuilder
-    private func metricDetails(
-        value: String,
-        tint: Color,
-        description: String,
-        current: Double?,
-        baseline: String?,
-        baselineValue: Double?,
-        axis: Axis
-    ) -> some View {
-        if axis == .horizontal {
-            HStack(alignment: .center, spacing: 16) {
-                metricValue(value: value, tint: tint)
-                metricDescription(
-                    description: description,
-                    current: current,
-                    baseline: baseline,
-                    baselineValue: baselineValue
-                )
-                Spacer(minLength: 0)
-            }
-        } else {
-            VStack(alignment: .leading, spacing: 12) {
-                metricValue(value: value, tint: tint)
-                metricDescription(
-                    description: description,
-                    current: current,
-                    baseline: baseline,
-                    baselineValue: baselineValue
-                )
+    private func trendText(current: Double?, baseline: Double?) -> some View {
+        if let current, let baseline, baseline != 0 {
+            let change = (current - baseline) / abs(baseline) * 100
+            if abs(change) >= 0.5 {
+                let symbol = change > 0 ? "↑" : "↓"
+                Text(verbatim: "\(symbol) \(abs(change).formatted(.number.precision(.fractionLength(0))))%")
+                    .foregroundStyle(change > 0 ? Color.green : Color.red)
             }
         }
     }
 
-    private func metricValue(value: String, tint: Color) -> some View {
-        Text(value)
-            .font(.system(.title, design: .rounded).weight(.bold))
-            .foregroundStyle(value == Self.noValue ? Color(uiColor: .secondaryLabel) : tint)
-            .minimumScaleFactor(0.65)
-            .lineLimit(1)
-            .frame(width: 108, height: 72)
-            .background(
-                Color(uiColor: .secondarySystemBackground),
-                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-            )
-    }
-
-    @ViewBuilder
-    private func metricDescription(
-        description: String,
-        current: Double?,
-        baseline: String?,
-        baselineValue: Double?
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            trendIndicator(current: current, baseline: baselineValue)
-                .font(.title3.weight(.semibold))
-
-            Text(description)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            if let baseline {
-                Text("insights.metric.baselineAverage.caption \(baseline)")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
+    private var settingsLink: some View {
+        NavigationLink {
+            SettingsView()
+        } label: {
+            Image(systemName: "person.crop.circle")
         }
-    }
-
-    @ViewBuilder
-    private func trendIndicator(current: Double?, baseline: Double?) -> some View {
-        if let current, let baseline {
-            let change = current - baseline
-            if abs(change) < 0.05 {
-                Image(systemName: "arrow.right")
-                    .foregroundStyle(.secondary)
-            } else if change > 0 {
-                Image(systemName: "arrow.up")
-                    .foregroundStyle(.red)
-            } else {
-                Image(systemName: "arrow.down")
-                    .foregroundStyle(.green)
-            }
-        } else {
-            Text(verbatim: Self.noValue)
-                .foregroundStyle(.secondary)
-        }
+        .accessibilityLabel("settings.screen.title")
     }
 
     private func recordTodayAsOpened() {
@@ -700,26 +907,23 @@ private struct AboutView: View {
 
 #if DEBUG
 #Preview("Debug - Onboarding") {
-    DebugPreviewHost {
-        ContentView()
-    }
-}
-
-#Preview("Mock - Main With History") {
-    DebugPreviewHost(withHistory: true, completedOnboarding: true) {
-        ContentView()
-    }
+    ContentView()
+        .defaultAppStorage(DebugPreviewDefaults.store)
 }
 
 #Preview("Debug - Trends Empty") {
-    DebugPreviewHost {
-        NavigationStack { TrendsView() }
-    }
+    NavigationStack { TrendsView() }
+        .modelContainer(for: RecordingAssessment.self, inMemory: true)
+        .defaultAppStorage(DebugPreviewDefaults.store)
 }
 
 #Preview("Mock - Trends With History") {
-    DebugPreviewHost(withHistory: true) {
+    if let container = DebugPreviewStore.makeContainer(withHistory: true) {
         NavigationStack { TrendsView() }
+            .modelContainer(container)
+            .defaultAppStorage(DebugPreviewDefaults.store)
+    } else {
+        Text(verbatim: "Unable to create the preview store.")
     }
 }
 

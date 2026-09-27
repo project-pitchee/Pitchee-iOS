@@ -52,8 +52,7 @@ struct SettingsView: View {
 
 #if DEBUG
 #Preview("Debug - Settings") {
-    DebugPreviewHost {
-        NavigationStack { SettingsView() }
-    }
+    NavigationStack { SettingsView() }
+        .defaultAppStorage(DebugPreviewDefaults.store)
 }
 #endif

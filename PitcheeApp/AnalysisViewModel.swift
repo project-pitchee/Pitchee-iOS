@@ -39,7 +39,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private var recordedPitchSamples: [LivePitchSample] = []
 
     #if DEBUG
-    private var usesPreviewData = DebugPreviewRuntime.isRunning
+    private var usesPreviewData = false
     #endif
 
     var pitchTimeline: PitchTimeline {

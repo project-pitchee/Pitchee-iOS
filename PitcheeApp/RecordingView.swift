@@ -153,14 +153,12 @@ private struct RecordingViewPreview: View {
 }
 
 #Preview("Debug - Ready") {
-    DebugPreviewHost { RecordingViewPreview(state: .idle) }
+    RecordingViewPreview(state: .idle)
+        .modelContainer(for: RecordingAssessment.self, inMemory: true)
 }
 
 #Preview("Mock - Recording") {
-    DebugPreviewHost { RecordingViewPreview(state: .recording) }
-}
-
-#Preview("Mock - Completed") {
-    DebugPreviewHost { RecordingViewPreview(state: .completed) }
+    RecordingViewPreview(state: .recording)
+        .modelContainer(for: RecordingAssessment.self, inMemory: true)
 }
 #endif
