@@ -1,3 +1,10 @@
+//
+//  InsightsDataTests.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/9/27.
+//
+
 import Foundation
 import SwiftData
 
@@ -51,14 +58,15 @@ enum InsightsDataTests {
         check(InsightsData.monthCells(containing: date(2026, 2, 1), calendar: sundayCalendar).first! == date(2026, 2, 1),
               "Months starting on the first weekday need no padding")
 
-        func assessment(_ recordedAt: Date, score: Double, pitch: Double? = 175) throws -> RecordingAssessment {
+        func assessment(_ recordedAt: Date, score: Double, pitch: Double? = 175,
+                        standard: Double = 65, naturalness: Double = 70) throws -> RecordingAssessment {
             let result = PitcheeAnalysisResult(
                 schemaVersion: 2, modelVersion: "insights-tests",
                 audio: .init(sourceSampleRate: 16_000, sourceChannels: 1, inputSeconds: 12, analyzedSeconds: 12),
                 vad: .init(segmentCount: 0, speechSeconds: 10, sileroSegmentCount: 0, discardedBreathLikeCount: 0, trimmedSegmentCount: 0, segments: []),
                 f0: .init(windowSeconds: 0.5, meanHz: pitch, standardDeviationHz: nil, voicedFrameCount: 0, voicedWindowCount: 0, windows: []),
-                vfp: .init(vfpStandardScore: 65, windowCount: 0, windowDurationSeconds: 1, windows: []),
-                naturalness: .init(score: 70, windowCount: 0, windowDurationSeconds: 1, windows: []),
+                vfp: .init(vfpStandardScore: standard, windowCount: 0, windowDurationSeconds: 1, windows: []),
+                naturalness: .init(score: naturalness, windowCount: 0, windowDurationSeconds: 1, windows: []),
                 composite: .init(baseScore: score, finalScore: score, cap: nil, rule: "continuous", limited: false, boosted: false)
             )
             return try RecordingAssessment(recordedAt: recordedAt, result: result)
@@ -84,6 +92,29 @@ enum InsightsDataTests {
         latest.meanPitchHz = .infinity
         check(InsightsMetric.pitch.value(in: latest) == nil, "Non-finite pitch is excluded")
         latest.meanPitchHz = nil
+
+        let masculine = try assessment(date(2026, 9, 21, 8), score: 20, pitch: 120, standard: 20, naturalness: 100)
+        let feminine = try assessment(date(2026, 9, 21, 9), score: 100, pitch: 200, standard: 90, naturalness: 100)
+        let masculineTie = try assessment(date(2026, 9, 21, 10), score: 20, pitch: 120, standard: 20, naturalness: 100)
+        let missingPitch = try assessment(date(2026, 9, 27, 10), score: 65, pitch: nil)
+        let directional = [masculine, feminine, masculineTie, missingPitch]
+        let masculineBest = InsightsData.dailyBest(directional, calendar: calendar, preference: .masculine)
+        check(masculineBest.map(\.id) == [masculineTie.id, missingPitch.id], "Masculine daily best follows masculine scores and breaks ties by recency")
+        check(InsightsData.dailyBest(directional, calendar: calendar, preference: .feminine).first?.id == feminine.id,
+              "Switching direction reselects each day's representative")
+        check(InsightsMetric.composite.value(in: masculine, preference: .masculine) == 100, "History uses the directional score")
+        check(InsightsMetric.composite.value(in: masculine, preference: .feminine) == 20, "Switching back restores the saved engine score")
+        check(InsightsMetric.composite.value(in: missingPitch, preference: .masculine) == 35, "History applies the missing-pitch fallback")
+        check(InsightsMetric.naturalness.value(in: masculine, preference: .masculine) == 100, "Naturalness stays unchanged")
+        check(InsightsMetric.pitch.value(in: masculine, preference: .masculine) == 120, "Pitch stays unchanged")
+        check(RecordingAssessmentAverages(assessments: masculineBest, preference: .masculine).finalScore == 67.5,
+              "Dashboard average uses the same directional scores as the chart")
+        for recording in directional {
+            check(recording.finalScore(for: .masculine) == VoicePreference.masculine.score(for: recording.result!).finalScore,
+                  "History columns and decoded detail/export results agree")
+        }
+        check(masculine.finalScore == 20 && masculine.standardScore == 20 && masculine.result?.composite.finalScore == 20,
+              "Switching direction does not rewrite historical results")
 
         let container = try ModelContainer(for: RecordingAssessment.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         container.mainContext.insert(first)

@@ -1,3 +1,10 @@
+//
+//  InsightsDetailViews.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/9/27.
+//
+
 import Charts
 import SwiftData
 import SwiftUI
@@ -19,7 +26,6 @@ struct InsightsRangePicker: View {
 private struct InsightsPage<Content: View>: View {
     let title: String
     @Binding var range: InsightsRange
-    let onRecordTapped: () -> Void
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -37,11 +43,6 @@ private struct InsightsPage<Content: View>: View {
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("insights.record.action", systemImage: "mic.badge.plus", action: onRecordTapped)
-            }
-        }
     }
 }
 
@@ -86,16 +87,12 @@ private struct InsightsEmptyState: View {
     var title: LocalizedStringKey = "insights.history.empty.title"
     var description: LocalizedStringKey = "insights.history.empty.description"
     var symbol = "waveform"
-    let onRecordTapped: () -> Void
 
     var body: some View {
         ContentUnavailableView {
             Label(title, systemImage: symbol)
         } description: {
             Text(description)
-        } actions: {
-            Button("insights.record.action", systemImage: "mic.fill", action: onRecordTapped)
-                .buttonStyle(.borderedProminent)
         }
         .padding(.vertical, 24)
     }
@@ -105,7 +102,6 @@ struct RecordingHistoryView: View {
     @Query(sort: \RecordingAssessment.recordedAt, order: .reverse)
     private var assessments: [RecordingAssessment]
     @Binding var range: InsightsRange
-    let onRecordTapped: () -> Void
 
     private var visibleAssessments: [RecordingAssessment] {
         InsightsData.assessments(assessments, in: range)
@@ -116,7 +112,7 @@ struct RecordingHistoryView: View {
     }
 
     var body: some View {
-        InsightsPage(title: String(localized: "insights.history.title"), range: $range, onRecordTapped: onRecordTapped) {
+        InsightsPage(title: String(localized: "insights.history.title"), range: $range) {
             InsightsCard {
                 HStack(alignment: .top, spacing: 12) {
                     InsightsStat(title: "insights.summary.analysisCount.title", value: visibleAssessments.count.formatted(), tint: .blue)
@@ -126,7 +122,7 @@ struct RecordingHistoryView: View {
             }
 
             if visibleAssessments.isEmpty {
-                InsightsEmptyState(onRecordTapped: onRecordTapped)
+                InsightsEmptyState()
             } else {
                 LazyVStack(alignment: .leading, spacing: 20) {
                     ForEach(groupedDays, id: \.self) { day in
@@ -154,6 +150,15 @@ private struct InsightsRecordingList: View {
     let assessments: [RecordingAssessment]
     var metric: InsightsMetric = .composite
     var includesDate = false
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
+
+    private var voicePreference: VoicePreference {
+        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
+    }
+
+    private var metricTitle: String {
+        metric == .composite ? voicePreference.scoreTitleText : metric.title
+    }
 
     var body: some View {
         LazyVStack(spacing: 0) {
@@ -182,10 +187,10 @@ private struct InsightsRecordingList: View {
                         }
                         Spacer(minLength: 4)
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(metric.formatted(metric.value(in: assessment)))
+                            Text(metric.formatted(metric.value(in: assessment, preference: voicePreference)))
                                 .font(.system(.title3, design: .rounded).weight(.bold))
                                 .foregroundStyle(metric.tint)
-                            Text(metric.unit)
+                            Text(metric == .composite ? metricTitle : metric.unit)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -240,8 +245,16 @@ struct InsightsMetricDetailView: View {
     private var assessments: [RecordingAssessment]
     let metric: InsightsMetric
     @Binding var range: InsightsRange
-    let onRecordTapped: () -> Void
     @State private var selectedDate: Date?
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
+
+    private var voicePreference: VoicePreference {
+        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
+    }
+
+    private var metricTitle: String {
+        metric == .composite ? voicePreference.scoreTitleText : metric.title
+    }
 
     private struct Sample: Identifiable {
         let assessment: RecordingAssessment
@@ -251,12 +264,12 @@ struct InsightsMetricDetailView: View {
     }
 
     private var dailyAssessments: [RecordingAssessment] {
-        InsightsData.dailyBest(InsightsData.assessments(assessments, in: range))
+        InsightsData.dailyBest(InsightsData.assessments(assessments, in: range), preference: voicePreference)
     }
 
     private var samples: [Sample] {
         dailyAssessments.compactMap { assessment in
-            metric.value(in: assessment).map { Sample(assessment: assessment, value: $0) }
+            metric.value(in: assessment, preference: voicePreference).map { Sample(assessment: assessment, value: $0) }
         }
     }
 
@@ -266,10 +279,10 @@ struct InsightsMetricDetailView: View {
     }
 
     var body: some View {
-        InsightsPage(title: metric.title, range: $range, onRecordTapped: onRecordTapped) {
+        InsightsPage(title: metricTitle, range: $range) {
             InsightsCard {
                 VStack(alignment: .leading, spacing: 18) {
-                    Label(metric.title, systemImage: metric.symbol)
+                    Label(metricTitle, systemImage: metric.symbol)
                         .font(.headline)
                         .foregroundStyle(metric.tint)
                     VStack(alignment: .leading, spacing: 6) {
@@ -278,7 +291,7 @@ struct InsightsMetricDetailView: View {
                             .foregroundStyle(.secondary)
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             // A missing pitch for the latest day remains missing, as on the home card.
-                            Text(metric.formatted(selectedSample?.value ?? dailyAssessments.last.flatMap { metric.value(in: $0) }))
+                            Text(metric.formatted(selectedSample?.value ?? dailyAssessments.last.flatMap { metric.value(in: $0, preference: voicePreference) }))
                                 .font(.system(size: 44, weight: .bold, design: .rounded))
                                 .foregroundStyle(metric.tint)
                                 .minimumScaleFactor(0.6)
@@ -307,12 +320,15 @@ struct InsightsMetricDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("insights.metric.explanation.title").font(.headline)
                     Text(metric.explanation).font(.subheadline).foregroundStyle(.secondary)
+                    if metric == .composite, voicePreference != .undecided {
+                        Text(voicePreference.scoreDirectionDescription).font(.subheadline).foregroundStyle(.secondary)
+                    }
                     Text("insights.metric.dailyBest.description").font(.caption).foregroundStyle(.secondary)
                 }
             }
 
             if samples.isEmpty {
-                InsightsEmptyState(title: "insights.metric.empty.title", description: "insights.metric.empty.description", symbol: metric.symbol, onRecordTapped: onRecordTapped)
+                InsightsEmptyState(title: "insights.metric.empty.title", description: "insights.metric.empty.description", symbol: metric.symbol)
             }
             if !dailyAssessments.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
@@ -322,6 +338,7 @@ struct InsightsMetricDetailView: View {
             }
         }
         .onChange(of: range) { selectedDate = nil }
+        .onChange(of: savedVoicePreference) { selectedDate = nil }
     }
 
     private var average: Double? {
@@ -349,14 +366,14 @@ struct InsightsMetricDetailView: View {
                     AreaMark(
                         x: .value(String(localized: "insights.chart.date.label"), sample.date),
                         yStart: .value(String(localized: "insights.chart.baseline.label"), yDomain.lowerBound),
-                        yEnd: .value(metric.title, sample.value)
+                        yEnd: .value(metricTitle, sample.value)
                     )
                     .foregroundStyle(LinearGradient(colors: [metric.tint.opacity(0.20), metric.tint.opacity(0.02)], startPoint: .top, endPoint: .bottom))
-                    LineMark(x: .value(String(localized: "insights.chart.date.label"), sample.date), y: .value(metric.title, sample.value))
+                    LineMark(x: .value(String(localized: "insights.chart.date.label"), sample.date), y: .value(metricTitle, sample.value))
                         .foregroundStyle(metric.tint)
                         .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
                 }
-                PointMark(x: .value(String(localized: "insights.chart.date.label"), sample.date), y: .value(metric.title, sample.value))
+                PointMark(x: .value(String(localized: "insights.chart.date.label"), sample.date), y: .value(metricTitle, sample.value))
                     .foregroundStyle(metric.tint)
                     .symbolSize(sample.id == selectedSample?.id ? 80 : 35)
                     .accessibilityLabel(Text(sample.date, format: .dateTime.month().day()))
@@ -374,7 +391,7 @@ struct InsightsMetricDetailView: View {
         .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) }
         .chartXSelection(value: $selectedDate)
         .frame(height: 220)
-        .accessibilityLabel(metric.title)
+        .accessibilityLabel(metricTitle)
     }
 }
 
@@ -383,7 +400,6 @@ struct InsightsActivityView: View {
     private var assessments: [RecordingAssessment]
     @AppStorage(AppStorageKey.openedDateKeys) private var openedDateKeys = ""
     @Binding var range: InsightsRange
-    let onRecordTapped: () -> Void
     @State private var displayedMonth = Date.now
     @State private var selectedDay = Calendar.current.startOfDay(for: .now)
 
@@ -405,7 +421,7 @@ struct InsightsActivityView: View {
     }
 
     var body: some View {
-        InsightsPage(title: String(localized: "insights.activity.title"), range: $range, onRecordTapped: onRecordTapped) {
+        InsightsPage(title: String(localized: "insights.activity.title"), range: $range) {
             InsightsCard {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(alignment: .top, spacing: 12) {
@@ -538,16 +554,6 @@ struct InsightsActivityView: View {
     }
 }
 
-private extension InsightsMetric {
-    var tint: Color {
-        switch self {
-        case .composite: .blue
-        case .naturalness: .purple
-        case .pitch: .teal
-        }
-    }
-}
-
 #if DEBUG
 private struct InsightsDetailPreview: View {
     let destination: InsightsDestination
@@ -556,9 +562,9 @@ private struct InsightsDetailPreview: View {
     var body: some View {
         NavigationStack {
             switch destination {
-            case .history: RecordingHistoryView(range: $range, onRecordTapped: {})
-            case .activity: InsightsActivityView(range: $range, onRecordTapped: {})
-            case .metric(let metric): InsightsMetricDetailView(metric: metric, range: $range, onRecordTapped: {})
+            case .history: RecordingHistoryView(range: $range)
+            case .activity: InsightsActivityView(range: $range)
+            case .metric(let metric): InsightsMetricDetailView(metric: metric, range: $range)
             }
         }
         .defaultAppStorage(DebugPreviewDefaults.store)

@@ -13,31 +13,35 @@ struct RecordingAnalysisView: View {
 
     var body: some View {
         Group {
-            if viewModel.isAnalyzing {
+            if viewModel.isAwaitingFeedback, let direction = viewModel.studyFeedbackDirection {
+                ScoreStudyFeedbackView(direction: direction) { feedback in
+                    viewModel.submitStudyFeedback(feedback)
+                }
+            } else if viewModel.isAnalyzing {
                 stateScroll { analyzingState }
             } else if let result = viewModel.result {
                 RecordingResultView(
                     result: result,
                     volumeStatistics: viewModel.volumeStatistics,
-                    saveError: viewModel.errorMessage
+                    saveError: viewModel.analysisError
                 )
             } else {
                 stateScroll {
                     ContentUnavailableView {
                         Label("analysis.emptyState.noResult.title", systemImage: "waveform.badge.exclamationmark")
                     } description: {
-                        Text(viewModel.errorMessage ?? String(localized: "analysis.emptyState.noResult.description"))
+                        Text(viewModel.analysisError ?? String(localized: "analysis.emptyState.noResult.description"))
                     }
                     .padding(.top, 60)
                 }
             }
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle(viewModel.isAnalyzing
+        .navigationTitle(viewModel.isAnalyzing || viewModel.isAwaitingFeedback
             ? String(localized: "analysis.navigation.analyzing")
             : String(localized: "analysis.navigation.result"))
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(viewModel.isAnalyzing)
+        .navigationBarBackButtonHidden(viewModel.isAnalyzing || viewModel.isAwaitingFeedback)
         .toolbar {
             if let result = viewModel.result, !viewModel.isAnalyzing {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -48,9 +52,6 @@ struct RecordingAnalysisView: View {
                         .labelStyle(.iconOnly)
                 }
             }
-        }
-        .onDisappear {
-            if !viewModel.hasResult && !viewModel.isAnalyzing { viewModel.clearError() }
         }
     }
 
@@ -97,6 +98,15 @@ struct RecordingResultView: View {
     @State private var showsVoiceDetails = false
     @State private var selectedSuggestion: ResultSuggestion?
     @State private var selectedResource: ResultResource?
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
+
+    private var voicePreference: VoicePreference {
+        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
+    }
+
+    private var directionScore: VoiceDirectionScore {
+        voicePreference.score(for: result)
+    }
 
     init(
         result: PitcheeAnalysisResult,
@@ -170,7 +180,8 @@ struct RecordingResultView: View {
             VoiceProfileReferenceChart(
                 femalePercentage: result.vfp.vfpStandardScore,
                 meanPitchHz: result.f0.meanHz,
-                pitchRangeHz: pitchRangeHz
+                pitchRangeHz: pitchRangeHz,
+                targetPreference: voicePreference
             )
         }
     }
@@ -386,8 +397,8 @@ struct RecordingResultView: View {
                         Text("analysis.voiceDetails.metrics.title")
                             .font(.title3.weight(.bold))
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
-                            ResultMetric(title: "common.metric.naturalness.title", value: scoreText(result.naturalness.score), unit: String(localized: "common.unit.pointsOutOf100"), symbol: "leaf")
-                            ResultMetric(title: "common.metric.standardScore.title", value: scoreText(result.vfp.vfpStandardScore), unit: String(localized: "common.unit.pointsOutOf100"), symbol: "slider.horizontal.3")
+                            ResultMetric(title: "common.metric.naturalness.title", value: scoreText(directionScore.naturalnessScore), unit: String(localized: "common.unit.pointsOutOf100"), symbol: "leaf")
+                            ResultMetric(title: voicePreference.standardMetricTitle, value: scoreText(directionScore.standardScore), unit: String(localized: "common.unit.pointsOutOf100"), symbol: "slider.horizontal.3")
                             ResultMetric(title: "common.metric.speechDuration.title", value: result.vad.speechSeconds.formatted(.number.precision(.fractionLength(1))), unit: String(localized: "common.unit.seconds"), symbol: "bubble.left")
                         }
                     }
@@ -413,12 +424,12 @@ struct RecordingResultView: View {
     private var scoreSummary: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("common.metric.compositeScore.title")
+                Text(voicePreference.scoreTitle)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
                 NavigationLink {
-                    ScoreExplanationView(result: result)
+                    ScoreExplanationView(result: result, preference: voicePreference)
                 } label: {
                     Image(systemName: "questionmark.circle")
                         .font(.title3)
@@ -429,7 +440,7 @@ struct RecordingResultView: View {
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(scoreText(result.composite.finalScore))
+                Text(scoreText(directionScore.finalScore))
                     .font(.system(size: 78, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(Color.accentColor)
@@ -446,7 +457,7 @@ struct RecordingResultView: View {
                 .tint(Color.accentColor)
                 .scaleEffect(x: 1, y: 1.35, anchor: .center)
                 .accessibilityLabel("analysis.score.progress.a11y")
-                .accessibilityValue("analysis.score.progress.a11yValue \(scoreText(result.composite.finalScore))")
+                .accessibilityValue("analysis.score.progress.a11yValue \(scoreText(directionScore.finalScore))")
 
             Text(scoreHeadline)
                 .font(.subheadline)
@@ -454,15 +465,15 @@ struct RecordingResultView: View {
         }
         .padding(.horizontal, 4)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("analysis.score.summary.a11y \(scoreText(result.composite.finalScore))")
+        .accessibilityLabel("analysis.score.summary.a11y \(scoreText(directionScore.finalScore))")
     }
 
     private var scoreProgress: Double {
-        min(max(result.composite.finalScore / 100, 0), 1)
+        min(max(directionScore.finalScore / 100, 0), 1)
     }
 
     private var scoreHeadline: String {
-        switch result.composite.finalScore {
+        switch directionScore.finalScore {
         case 90...: return String(localized: "analysis.score.headlineHigh")
         case 70..<90: return String(localized: "analysis.score.headlineMedium")
         default: return String(localized: "analysis.score.headlineLow")
@@ -585,6 +596,16 @@ struct RecordingResultView: View {
 
 private struct ScoreExplanationView: View {
     let result: PitcheeAnalysisResult
+    let preference: VoicePreference
+
+    init(result: PitcheeAnalysisResult, preference: VoicePreference = .undecided) {
+        self.result = result
+        self.preference = preference
+    }
+
+    private var directionScore: VoiceDirectionScore {
+        preference.score(for: result)
+    }
 
     var body: some View {
         ScrollView {
@@ -599,7 +620,7 @@ private struct ScoreExplanationView: View {
             .padding(24)
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle("scoring.explanation.title")
+        .navigationTitle(preference.scoreExplanationTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -611,6 +632,12 @@ private struct ScoreExplanationView: View {
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            if preference != .undecided {
+                Text(preference.scoreDirectionDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.accentColor)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -621,17 +648,28 @@ private struct ScoreExplanationView: View {
             Text("scoring.baseFormula.subtitle")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            FormulaBlock(lines: [
-                #"\mathrm{Standard} = \mathrm{vfp\_standard\_score}"#,
-                #"\mathrm{Naturalness} = \mathrm{naturalness\_score}"#,
-                #"F_0 = \mathrm{mean\_f0\_hz}"#,
-                #"\mathrm{Standard}_r = \frac{\mathrm{Standard}}{100}"#,
-                #"\mathrm{Naturalness}_r = \min\left(1, \max\left(0, \frac{\mathrm{Naturalness} - 40}{50}\right)\right)"#,
+            FormulaBlock(lines: preference == .masculine ? [
+                #"\mathrm{Standard} = 100 - \mathrm{VFP}"#,
+                #"\mathrm{Naturalness} \in [0,100]"#,
+                #"F_0 = \overline{f_0}"#,
+                #"S_r = \frac{\mathrm{Standard}}{100}"#,
+                #"\begin{aligned}n &= \frac{\mathrm{Naturalness} - 40}{50} \\ N_r &= \min(1,\max(0,n))\end{aligned}"#,
+                #"F_{0r} = \min\left(1, \max\left(0, \frac{200 - F_0}{90}\right)\right)"#,
+                #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,S_r + 0.20\,N_r \\ &\quad + 0.15\,F_{0r} + 0.15\,S_r\,N_r\,F_{0r}\bigr)\end{aligned}"#,
+                #"\mathrm{Base} \xrightarrow{\mathrm{rule}} \mathrm{Final}"#
+            ] : [
+                #"\mathrm{Standard} = \mathrm{VFP}"#,
+                #"\mathrm{Naturalness} \in [0,100]"#,
+                #"F_0 = \overline{f_0}"#,
+                #"S_r = \frac{\mathrm{Standard}}{100}"#,
+                #"\begin{aligned}n &= \frac{\mathrm{Naturalness} - 40}{50} \\ N_r &= \min(1,\max(0,n))\end{aligned}"#,
                 #"F_{0r} = \min\left(1, \max\left(0, \frac{F_0 - 110}{90}\right)\right)"#,
-                #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,\mathrm{Standard}_r + 0.20\,\mathrm{Naturalness}_r \\ &\quad + 0.15\,F_{0r} + 0.15\,\mathrm{Standard}_r\,\mathrm{Naturalness}_r\,F_{0r}\bigr)\end{aligned}"#,
-                #"\mathrm{Final} = \mathrm{rule}(\mathrm{Base}, \mathrm{Standard}, \mathrm{Naturalness}, F_0)"#
+                #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,S_r + 0.20\,N_r \\ &\quad + 0.15\,F_{0r} + 0.15\,S_r\,N_r\,F_{0r}\bigr)\end{aligned}"#,
+                #"\mathrm{Base} \xrightarrow{\mathrm{rule}} \mathrm{Final}"#
             ])
-            Text("scoring.baseFormula.note")
+            Text(preference == .masculine
+                ? LocalizedStringKey("scoring.masculine.baseFormula.note")
+                : LocalizedStringKey("scoring.baseFormula.note"))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -680,7 +718,7 @@ private struct ScoreExplanationView: View {
     private var otherRulesSection: some View {
         DisclosureGroup {
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(scoreRuleDocumentation.filter { $0.id != result.composite.rule }) { rule in
+                ForEach(ruleDocumentation.filter { $0.id != directionScore.rule }) { rule in
                     VStack(alignment: .leading, spacing: 8) {
                         Text(rule.title)
                             .font(.subheadline.weight(.semibold))
@@ -693,7 +731,7 @@ private struct ScoreExplanationView: View {
                     }
                     .padding(.vertical, 12)
 
-                    if rule.id != scoreRuleDocumentation.filter({ $0.id != result.composite.rule }).last?.id {
+                    if rule.id != ruleDocumentation.filter({ $0.id != directionScore.rule }).last?.id {
                         Divider()
                     }
                 }
@@ -708,7 +746,11 @@ private struct ScoreExplanationView: View {
     }
 
     private var currentRuleDocumentation: ScoreRuleDocumentation {
-        scoreRuleDocumentation.first { $0.id == result.composite.rule } ?? scoreRuleDocumentation[0]
+        ruleDocumentation.first { $0.id == directionScore.rule } ?? ruleDocumentation[0]
+    }
+
+    private var ruleDocumentation: [ScoreRuleDocumentation] {
+        scoreRuleDocumentation(for: preference)
     }
 
 }
@@ -765,11 +807,11 @@ private let scoreRuleDocumentation: [ScoreRuleDocumentation] = [
         guidance: String(localized: "scoring.rules.passBoost.description"),
         condition: String(localized: "scoring.rules.passBoost.condition"),
         formulas: [
-            #"s_{F0} = \frac{F_0 - 165}{25}"#,
+            #"s_F = \frac{F_0 - 165}{25}"#,
             #"s_N = \frac{\mathrm{Naturalness} - 80}{20}"#,
             #"s_S = \frac{\mathrm{Standard} - 50}{30}"#,
-            #"\mathrm{strength} = \min(s_{F0}, s_N, s_S, 1)"#,
-            #"\mathrm{promoted} = 60 + 40\,\mathrm{strength}"#,
+            #"\mathrm{strength} = \min(s_F, s_N, s_S, 1)"#,
+            #"\mathrm{promoted} = 60 + 40 \times \mathrm{strength}"#,
             #"\mathrm{Final} = \max(\mathrm{Base}, \mathrm{promoted})"#
         ],
         result: String(localized: "scoring.rules.passBoost.result")
@@ -815,6 +857,76 @@ private let scoreRuleDocumentation: [ScoreRuleDocumentation] = [
         result: String(localized: "scoring.rules.f0Unavailable.result")
     )
 ]
+
+private let masculineScoreRuleDocumentation: [ScoreRuleDocumentation] = [
+    ScoreRuleDocumentation(
+        id: "masculine_continuous",
+        title: String(localized: "scoring.rules.masculineContinuous.title"),
+        guidance: String(localized: "scoring.rules.masculineContinuous.description"),
+        condition: String(localized: "scoring.rules.masculineContinuous.condition"),
+        formulas: [#"\mathrm{Final} = \mathrm{Base}"#],
+        result: String(localized: "scoring.rules.masculineContinuous.result")
+    ),
+    ScoreRuleDocumentation(
+        id: "masculine_pass_boost",
+        title: String(localized: "scoring.rules.masculinePassBoost.title"),
+        guidance: String(localized: "scoring.rules.masculinePassBoost.description"),
+        condition: String(localized: "scoring.rules.masculinePassBoost.condition"),
+        formulas: [
+            #"s_F = \frac{145 - F_0}{25}"#,
+            #"s_N = \frac{\mathrm{Naturalness} - 80}{20}"#,
+            #"s_S = \frac{\mathrm{Standard} - 50}{30}"#,
+            #"\mathrm{strength} = \min(s_F, s_N, s_S, 1)"#,
+            #"\mathrm{promoted} = 60 + 40 \times \mathrm{strength}"#,
+            #"\mathrm{Final} = \max(\mathrm{Base}, \mathrm{promoted})"#
+        ],
+        result: String(localized: "scoring.rules.masculinePassBoost.result")
+    ),
+    ScoreRuleDocumentation(
+        id: "masculine_high_pitch_stylized_cap",
+        title: String(localized: "scoring.rules.masculineHighPitchStylizedCap.title"),
+        guidance: String(localized: "scoring.rules.masculineHighPitchStylizedCap.description"),
+        condition: String(localized: "scoring.rules.masculineHighPitchStylizedCap.condition"),
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 20)"#],
+        result: String(localized: "scoring.rules.masculineHighPitchStylizedCap.result")
+    ),
+    ScoreRuleDocumentation(
+        id: "masculine_high_pitch_cap",
+        title: String(localized: "scoring.rules.masculineHighPitchCap.title"),
+        guidance: String(localized: "scoring.rules.masculineHighPitchCap.description"),
+        condition: String(localized: "scoring.rules.masculineHighPitchCap.condition"),
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
+        result: String(localized: "scoring.rules.masculineHighPitchCap.result")
+    ),
+    ScoreRuleDocumentation(
+        id: "masculine_low_pitch_stylized_cap",
+        title: String(localized: "scoring.rules.masculineLowPitchStylizedCap.title"),
+        guidance: String(localized: "scoring.rules.masculineLowPitchStylizedCap.description"),
+        condition: String(localized: "scoring.rules.masculineLowPitchStylizedCap.condition"),
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 30)"#],
+        result: String(localized: "scoring.rules.masculineLowPitchStylizedCap.result")
+    ),
+    ScoreRuleDocumentation(
+        id: "masculine_low_pitch_feminine_cap",
+        title: String(localized: "scoring.rules.masculineLowPitchFeminineCap.title"),
+        guidance: String(localized: "scoring.rules.masculineLowPitchFeminineCap.description"),
+        condition: String(localized: "scoring.rules.masculineLowPitchFeminineCap.condition"),
+        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
+        result: String(localized: "scoring.rules.masculineLowPitchFeminineCap.result")
+    ),
+    ScoreRuleDocumentation(
+        id: "masculine_f0_unavailable",
+        title: String(localized: "scoring.rules.masculineF0Unavailable.title"),
+        guidance: String(localized: "scoring.rules.masculineF0Unavailable.description"),
+        condition: String(localized: "scoring.rules.masculineF0Unavailable.condition"),
+        formulas: [#"\mathrm{Final} = \mathrm{Standard}"#],
+        result: String(localized: "scoring.rules.masculineF0Unavailable.result")
+    )
+]
+
+private func scoreRuleDocumentation(for preference: VoicePreference) -> [ScoreRuleDocumentation] {
+    preference == .masculine ? masculineScoreRuleDocumentation : scoreRuleDocumentation
+}
 
 private struct ResultSuggestion: Identifiable {
     let id: String
@@ -926,6 +1038,7 @@ struct VoiceProfileReferenceChart: View {
     let femalePercentage: Double
     let meanPitchHz: Double?
     let pitchRangeHz: ClosedRange<Double>?
+    var targetPreference: VoicePreference = .undecided
 
     private let minimumDiameter: CGFloat = 78
     private let maximumDiameter: CGFloat = 150
@@ -944,13 +1057,20 @@ struct VoiceProfileReferenceChart: View {
 
             GeometryReader { proxy in
                 let largestDiameter = max(minimumDiameter, min(maximumDiameter, proxy.size.width - minimumDiameter - 18))
-                HStack(alignment: .center, spacing: 18) {
-                    glassBubble(title: "analysis.voiceProfile.female.label", percentage: femaleValue, tint: Color.pink.opacity(0.12), maximumDiameter: largestDiameter)
-                    glassBubble(title: "analysis.voiceProfile.male.label", percentage: maleValue, tint: Color.blue.opacity(0.10), maximumDiameter: largestDiameter)
+                VStack(spacing: 8) {
+                    if targetPreference != .undecided {
+                        Label(targetPreference.chartTargetLabel, systemImage: "scope")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    HStack(alignment: .center, spacing: 18) {
+                        glassBubble(title: "analysis.voiceProfile.female.label", percentage: femaleValue, tint: Color.pink.opacity(0.12), maximumDiameter: largestDiameter)
+                        glassBubble(title: "analysis.voiceProfile.male.label", percentage: maleValue, tint: Color.blue.opacity(0.10), maximumDiameter: largestDiameter)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(height: maximumDiameter)
+            .frame(height: maximumDiameter + (targetPreference == .undecided ? 0 : 24))
         }
         .padding(22)
         .background(
@@ -965,6 +1085,7 @@ struct VoiceProfileReferenceChart: View {
         .accessibilityLabel(
             "analysis.voiceProfile.reference.a11y \(meanPitchText) \(pitchRangeText) \(percentageText(femaleValue)) \(percentageText(maleValue))"
         )
+        .accessibilityValue(Text(targetPreference.chartTargetLabel))
     }
 
     private func glassBubble(

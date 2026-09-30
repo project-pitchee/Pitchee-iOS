@@ -36,9 +36,7 @@ private struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationStack {
-                TrendsView {
-                    selectedTab = .recording
-                }
+                TrendsView()
             }
             .tabItem {
                 Label(AppTab.trends.title, systemImage: AppTab.trends.systemImage)
@@ -62,7 +60,7 @@ private struct MainTabView: View {
             .tag(AppTab.pianoKeys)
 
             NavigationStack {
-                AboutView()
+                SettingsView()
             }
             .tabItem {
                 Label(AppTab.about.title, systemImage: AppTab.about.systemImage)
@@ -79,13 +77,13 @@ private struct MainTabView: View {
     }
 
     private func recordingAction() {
-        if recordingModel.isAnalyzing {
+        if recordingModel.needsAnalysisScreen {
             selectedTab = .recording
             showsRecordingAnalysis = true
             return
         }
         recordingModel.primaryButtonTapped(modelContext: modelContext)
-        if recordingModel.isAnalyzing {
+        if recordingModel.needsAnalysisScreen {
             selectedTab = .recording
             showsRecordingAnalysis = true
         }
@@ -137,16 +135,15 @@ private struct TrendsView: View {
     private var assessments: [RecordingAssessment]
     @AppStorage(AppStorageKey.openedDateKeys) private var openedDateKeys = ""
     @State private var selectedRange: InsightsRange = .sevenDays
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
+
+    private var voicePreference: VoicePreference {
+        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
+    }
 
     /// Placeholder for a metric that has no value yet. Kept in one place so
     /// cards use the same empty state as the rest of the app.
     private static let noValue = String(localized: "common.placeholder.noValue")
-
-    private let onRecordTapped: () -> Void
-
-    init(onRecordTapped: @escaping () -> Void = {}) {
-        self.onRecordTapped = onRecordTapped
-    }
 
     private var visibleAssessments: [RecordingAssessment] {
         InsightsData.assessments(assessments, in: selectedRange)
@@ -157,14 +154,14 @@ private struct TrendsView: View {
     }
 
     private var averages: RecordingAssessmentAverages {
-        RecordingAssessmentAverages(assessments: Array(dailyBestAssessments.dropLast()))
+        RecordingAssessmentAverages(assessments: Array(dailyBestAssessments.dropLast()), preference: voicePreference)
     }
 
     /// Keep one representative result per day so repeated recordings do not
     /// make the trend chart look denser than the activity really was. The
     /// highest overall score represents that day's best result.
     private var dailyBestAssessments: [RecordingAssessment] {
-        InsightsData.dailyBest(visibleAssessments)
+        InsightsData.dailyBest(visibleAssessments, preference: voicePreference)
     }
 
     var body: some View {
@@ -192,28 +189,15 @@ private struct TrendsView: View {
         .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         .navigationTitle(Text(verbatim: "Pitchee"))
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            if #available(iOS 27.1, *) {
-                ToolbarItem(placement: .topBarPinnedTrailing) {
-                    settingsLink
-                }
-                .axisBehavior(.verticalPreferred)
-                .visibilityPriority(.high)
-            } else {
-                ToolbarItem(placement: .topBarTrailing) {
-                    settingsLink
-                }
-            }
-        }
         .onAppear(perform: recordTodayAsOpened)
         .navigationDestination(for: InsightsDestination.self) { destination in
             switch destination {
             case .history:
-                RecordingHistoryView(range: $selectedRange, onRecordTapped: onRecordTapped)
+                RecordingHistoryView(range: $selectedRange)
             case .activity:
-                InsightsActivityView(range: $selectedRange, onRecordTapped: onRecordTapped)
+                InsightsActivityView(range: $selectedRange)
             case .metric(let metric):
-                InsightsMetricDetailView(metric: metric, range: $selectedRange, onRecordTapped: onRecordTapped)
+                InsightsMetricDetailView(metric: metric, range: $selectedRange)
             }
         }
     }
@@ -282,7 +266,7 @@ private struct TrendsView: View {
         dashboardCard(minHeight: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("common.metric.compositeScore.title")
+                    Text(voicePreference.scoreTitle)
                         .font(.headline)
                         .foregroundStyle(.primary)
                     Spacer()
@@ -292,7 +276,7 @@ private struct TrendsView: View {
                 }
 
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(latestAssessment.map { scoreText($0.finalScore) } ?? Self.noValue)
+                    Text(latestAssessment.map { scoreText($0.finalScore(for: voicePreference)) } ?? Self.noValue)
                         .font(.system(size: 42, weight: .bold, design: .rounded))
                         .foregroundStyle(latestAssessment == nil ? Color.secondary : Color.blue)
                         .minimumScaleFactor(0.7)
@@ -324,13 +308,13 @@ private struct TrendsView: View {
             height: 126,
             showsXAxis: true
         )
-        .accessibilityLabel(Text("common.metric.compositeScore.title"))
+        .accessibilityLabel(Text(voicePreference.scoreTitle))
         .accessibilityValue(chartAccessibilityValue)
     }
 
     @ViewBuilder
     private var scoreChangeText: some View {
-        if let current = latestAssessment?.finalScore, let baseline = averages.finalScore, baseline != 0 {
+        if let current = latestAssessment?.finalScore(for: voicePreference), let baseline = averages.finalScore, baseline != 0 {
             let change = (current - baseline) / abs(baseline) * 100
             // A tiny difference is normal rounding noise. Do not present it
             // as a direction of travel (for example, “↓ 0%”).
@@ -345,7 +329,7 @@ private struct TrendsView: View {
 
     private var scorePoints: [TrendPoint] {
         dailyBestAssessments.enumerated().map { index, assessment in
-            TrendPoint(id: assessment.id, date: chartDate(for: assessment), value: assessment.finalScore, position: Double(index))
+            TrendPoint(id: assessment.id, date: chartDate(for: assessment), value: assessment.finalScore(for: voicePreference), position: Double(index))
         }
     }
 
@@ -582,12 +566,10 @@ private struct TrendsView: View {
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("insights.emptyState.startFirstRecording")
+            Text("insights.history.empty.description")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Button("insights.emptyState.startFirstRecording", systemImage: "mic.fill", action: onRecordTapped)
-                .buttonStyle(.borderedProminent)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -631,15 +613,6 @@ private struct TrendsView: View {
                     .foregroundStyle(change > 0 ? Color.green : Color.red)
             }
         }
-    }
-
-    private var settingsLink: some View {
-        NavigationLink {
-            SettingsView()
-        } label: {
-            Image(systemName: "person.crop.circle")
-        }
-        .accessibilityLabel("settings.screen.title")
     }
 
     private func recordTodayAsOpened() {
@@ -893,18 +866,6 @@ private extension View {
     }
 }
 
-private struct AboutView: View {
-    var body: some View {
-        Form {
-            Section("about.app.title") {
-                LabeledContent("about.app.version.label", value: "1.0")
-                LabeledContent("about.app.analysisEngine.label", value: "PitcheeCore")
-            }
-        }
-        .navigationTitle("about.screen.title")
-    }
-}
-
 #if DEBUG
 #Preview("Debug - Onboarding") {
     ContentView()
@@ -932,6 +893,6 @@ private struct AboutView: View {
 }
 
 #Preview("Debug - About") {
-    NavigationStack { AboutView() }
+    NavigationStack { SettingsView() }
 }
 #endif

@@ -1,6 +1,6 @@
 # 本地化键名映射表 (Localization key mapping)
 
-本表与 `Resources/Localizable.xcstrings` 同步生成，共 **290** 个键。改名前每个键就是中文原文本身。
+本表与 `Resources/Localizable.xcstrings` 同步生成，共 **289** 个键。改名前每个键就是中文原文本身。
 
 | 命名空间 (feature) | 键数量 |
 | --- | --- |
@@ -11,7 +11,7 @@
 | `common` | 24 |
 | `onboarding` | 14 |
 | `voiceProfile` | 13 |
-| `insights` | 9 |
+| `insights` | 8 |
 | `settings` | 5 |
 | `about` | 4 |
 | `piano` | 3 |
@@ -20,12 +20,12 @@
 
 | 新键 (new key) | 旧键 (was) | 简体中文 zh-Hans | English | 位置 |
 | --- | --- | --- | --- | --- |
-| `about.app.analysisEngine.label` | 分析引擎 | 分析引擎 | Analysis engine | ContentView.swift:699, GeneratedStringSymbols_Localizable.swift:27 |
+| `about.app.analysisEngine.label` | 分析引擎 | 分析引擎 | Analysis Engine | ContentView.swift:699, GeneratedStringSymbols_Localizable.swift:27 |
 | `about.app.title` | 应用 | 应用 | App | ContentView.swift:697, GeneratedStringSymbols_Localizable.swift:36 |
 | `about.app.version.label` | 版本 | 版本 | Version | ContentView.swift:698, GeneratedStringSymbols_Localizable.swift:45 |
 | `about.screen.title` | 关于 | 关于 | About | ContentView.swift:109, ContentView.swift:702, GeneratedStringSymbols_Localizable.swift:54 |
 | `analysis.emptyState.noResult.description` | 请返回录制，再录一段自然说话。 | 请返回录制，再录一段自然说话。 | Go back to recording and record another sample of natural speech. | GeneratedStringSymbols_Localizable.swift:63, RecordingAnalysisView.swift:29 |
-| `analysis.emptyState.noResult.title` | 这次没有完成分析 | 这次没有完成分析 | This analysis wasn't completed | GeneratedStringSymbols_Localizable.swift:72, RecordingAnalysisView.swift:27 |
+| `analysis.emptyState.noResult.title` | 这次没有完成分析 | 这次没有完成分析 | This Analysis Wasn't Completed | GeneratedStringSymbols_Localizable.swift:72, RecordingAnalysisView.swift:27 |
 | `analysis.error.analysisFailed %lld` | 分析失败（E-\(coreError.statusCode)），请再录一段音频试试。 | 分析失败（E-%1$lld），请再录一段音频试试。 | Analysis failed (E-%1$lld). Record another clip and try again. | AnalysisViewModel.swift:335, GeneratedStringSymbols_Localizable.swift:81 |
 | `analysis.error.modelUnavailable %lld` | 分析模型暂时不可用（E-\(coreError.statusCode)），请重启应用后再试。 | 分析模型暂时不可用（E-%1$lld），请重启应用后再试。 | The analysis model is temporarily unavailable (E-%1$lld). Restart the app and try again. | AnalysisViewModel.swift:331, GeneratedStringSymbols_Localizable.swift:90 |
 | `analysis.error.noSpeechDetected` | 没有检测到人声，请录一段更清晰、包含连续说话的音频。 | 没有检测到人声，请录一段更清晰、包含连续说话的音频。 | No speech was detected. Please record a clearer clip with continuous speech. | AnalysisViewModel.swift:329, GeneratedStringSymbols_Localizable.swift:99 |
@@ -37,25 +37,25 @@
 | `analysis.pitchBands.androgynous` | 中性 | 中性 | Neutral | GeneratedStringSymbols_Localizable.swift:153, RecordingAnalysisView.swift:552 |
 | `analysis.pitchBands.feminine` | 女性 | 女性 | Feminine | GeneratedStringSymbols_Localizable.swift:162, RecordingAnalysisView.swift:551 |
 | `analysis.pitchBands.masculine` | 男性 | 男性 | Masculine | GeneratedStringSymbols_Localizable.swift:171, RecordingAnalysisView.swift:553 |
-| `analysis.pitchBands.veryHigh` | 很高 | 很高 | Very high | GeneratedStringSymbols_Localizable.swift:180, RecordingAnalysisView.swift:550 |
-| `analysis.pitchBands.veryLow` | 很低 | 很低 | Very low | GeneratedStringSymbols_Localizable.swift:189, RecordingAnalysisView.swift:554 |
+| `analysis.pitchBands.veryHigh` | 很高 | 很高 | Very High | GeneratedStringSymbols_Localizable.swift:180, RecordingAnalysisView.swift:550 |
+| `analysis.pitchBands.veryLow` | 很低 | 很低 | Very Low | GeneratedStringSymbols_Localizable.swift:189, RecordingAnalysisView.swift:554 |
 | `analysis.pitchScale.averageMarker` | AVG | 平均 | AVG | GeneratedStringSymbols_Localizable.swift:198, RecordingAnalysisView.swift:1089 |
 | `analysis.pitchScale.maxLabel` | 350 Hz | 350 Hz | 350 Hz | GeneratedStringSymbols_Localizable.swift:207, RecordingAnalysisView.swift:1045 |
 | `analysis.pitchScale.minLabel` | 50 Hz | 50 Hz | 50 Hz | GeneratedStringSymbols_Localizable.swift:216, RecordingAnalysisView.swift:1103 |
 | `analysis.progress.privacyNote` | 声音留在你的设备上 | 声音留在你的设备上 | Your voice stays on your device | GeneratedStringSymbols_Localizable.swift:225, RecordingAnalysisView.swift:81 |
 | `analysis.progress.subtitle` | 正在设备上分析音高与声音特征。\n首次分析可能需要一点时间。 | 正在设备上分析音高与声音特征。\n首次分析可能需要一点时间。 | Analyzing pitch and voice features on your device.\nThe first analysis may take a little while. | GeneratedStringSymbols_Localizable.swift:234, RecordingAnalysisView.swift:76 |
-| `analysis.progress.title` | 正在听懂你的声音 | 正在听懂你的声音 | Listening to your voice | GeneratedStringSymbols_Localizable.swift:243, RecordingAnalysisView.swift:74 |
+| `analysis.progress.title` | 正在听懂你的声音 | 正在听懂你的声音 | Listening to Your Voice | GeneratedStringSymbols_Localizable.swift:243, RecordingAnalysisView.swift:74 |
 | `analysis.resourceDetail.article.title` | 文章 | 文章 | Article | GeneratedStringSymbols_Localizable.swift:252, RecordingAnalysisView.swift:911 |
 | `analysis.resourceDetail.video.title` | 视频 | 视频 | Video | GeneratedStringSymbols_Localizable.swift:261, RecordingAnalysisView.swift:912 |
 | `analysis.resources.naturalnessTraining.description` | 用一段短练习找到更放松的语气，再回到录音页试一次。 | 用一段短练习找到更放松的语气，再回到录音页试一次。 | Use a short exercise to find a more relaxed tone, then go back to the recording screen and try again. | GeneratedStringSymbols_Localizable.swift:270, RecordingAnalysisView.swift:367 |
 | `analysis.resources.naturalnessTraining.subtitle` | 视频练习 · 放松与连贯表达 | 视频练习 · 放松与连贯表达 | Video exercise · Relaxation and connected speech | GeneratedStringSymbols_Localizable.swift:279, RecordingAnalysisView.swift:363 |
-| `analysis.resources.naturalnessTraining.title` | 自然度训练 | 自然度训练 | Naturalness training | GeneratedStringSymbols_Localizable.swift:288, RecordingAnalysisView.swift:362 |
+| `analysis.resources.naturalnessTraining.title` | 自然度训练 | 自然度训练 | Naturalness Training | GeneratedStringSymbols_Localizable.swift:288, RecordingAnalysisView.swift:362 |
 | `analysis.resources.readBadge` | 阅读 | 阅读 | Read | GeneratedStringSymbols_Localizable.swift:297, RecordingAnalysisView.swift:373 |
 | `analysis.resources.subtitle` | 把建议带到下一次练习里 | 把建议带到下一次练习里 | Take these suggestions into your next practice | GeneratedStringSymbols_Localizable.swift:306, RecordingAnalysisView.swift:270 |
-| `analysis.resources.title` | 练习资源 | 练习资源 | Practice resources | GeneratedStringSymbols_Localizable.swift:315, RecordingAnalysisView.swift:268 |
+| `analysis.resources.title` | 练习资源 | 练习资源 | Practice Resources | GeneratedStringSymbols_Localizable.swift:315, RecordingAnalysisView.swift:268 |
 | `analysis.resources.voiceResearch.description` | 了解音高、自然度与录音条件之间的关系，把结果当成长期练习的参考。 | 了解音高、自然度与录音条件之间的关系，把结果当成长期练习的参考。 | Learn how pitch, naturalness, and recording conditions relate to each other, and treat the results as a long-term practice reference. | GeneratedStringSymbols_Localizable.swift:324, RecordingAnalysisView.swift:376 |
 | `analysis.resources.voiceResearch.subtitle` | 文章 · 了解音高与自然度 | 文章 · 了解音高与自然度 | Article · Understanding pitch and naturalness | GeneratedStringSymbols_Localizable.swift:333, RecordingAnalysisView.swift:372 |
-| `analysis.resources.voiceResearch.title` | 声音研究 | 声音研究 | Voice research | GeneratedStringSymbols_Localizable.swift:342, RecordingAnalysisView.swift:371 |
+| `analysis.resources.voiceResearch.title` | 声音研究 | 声音研究 | Voice Research | GeneratedStringSymbols_Localizable.swift:342, RecordingAnalysisView.swift:371 |
 | `analysis.score.explanation.a11y` | 查看评分如何得出 | 查看评分如何得出 | See how the score is calculated | GeneratedStringSymbols_Localizable.swift:351, RecordingAnalysisView.swift:428 |
 | `analysis.score.headlineHigh` | 这次表现很亮眼，继续保持稳定的表达。 | 这次表现很亮眼，继续保持稳定的表达。 | This take stands out — keep your delivery steady. | GeneratedStringSymbols_Localizable.swift:360, RecordingAnalysisView.swift:466 |
 | `analysis.score.headlineLow` | 把下面的一条建议带到下一次录音里，结果会更有参考价值。 | 把下面的一条建议带到下一次录音里，结果会更有参考价值。 | Take one suggestion below into your next recording to get more useful results. | GeneratedStringSymbols_Localizable.swift:369, RecordingAnalysisView.swift:468 |
@@ -63,50 +63,50 @@
 | `analysis.score.progress.a11y` | 综合评分进度 | 综合评分进度 | Overall score progress | GeneratedStringSymbols_Localizable.swift:387, RecordingAnalysisView.swift:448 |
 | `analysis.score.progress.a11yValue %@` | \(scoreText(result.composite.finalScore)) 分，共 100 分 | %1$@ 分，共 100 分 | %1$@ out of 100 points | GeneratedStringSymbols_Localizable.swift:396, RecordingAnalysisView.swift:449 |
 | `analysis.score.summary.a11y %@` | 综合评分 \(scoreText(result.composite.finalScore)) 分，满分 100 分 | 综合评分 %1$@ 分，满分 100 分 | Overall score %1$@ out of 100 | GeneratedStringSymbols_Localizable.swift:405, RecordingAnalysisView.swift:457 |
-| `analysis.statistics.averageVolume.label` | 平均音量 | 平均音量 | Average volume | GeneratedStringSymbols_Localizable.swift:414, RecordingAnalysisView.swift:504 |
-| `analysis.statistics.dominantPitchBand.label` | 主要音域 | 主要音域 | Dominant pitch band | GeneratedStringSymbols_Localizable.swift:423, RecordingAnalysisView.swift:497 |
-| `analysis.statistics.medianVolume.label` | 中位音量 | 中位音量 | Median volume | GeneratedStringSymbols_Localizable.swift:432, RecordingAnalysisView.swift:505 |
+| `analysis.statistics.averageVolume.label` | 平均音量 | 平均音量 | Average Volume | GeneratedStringSymbols_Localizable.swift:414, RecordingAnalysisView.swift:504 |
+| `analysis.statistics.dominantPitchBand.label` | 主要音域 | 主要音域 | Dominant Pitch Band | GeneratedStringSymbols_Localizable.swift:423, RecordingAnalysisView.swift:497 |
+| `analysis.statistics.medianVolume.label` | 中位音量 | 中位音量 | Median Volume | GeneratedStringSymbols_Localizable.swift:432, RecordingAnalysisView.swift:505 |
 | `analysis.statistics.pitch.title` | Pitch | 音高 | Pitch | GeneratedStringSymbols_Localizable.swift:441, RecordingAnalysisView.swift:474 |
 | `analysis.statistics.volume.note` | 音量使用 dBFS 表示，0 dBFS 为设备可记录的最大值；平均值和中位数下方显示高于环境底噪的音量。 | 音量使用 dBFS 表示，0 dBFS 为设备可记录的最大值；平均值和中位数下方显示高于环境底噪的音量。 | Volume is shown in dBFS, where 0 dBFS is the loudest level the device can record; the values shown under average and median are volume above the ambient noise floor. | GeneratedStringSymbols_Localizable.swift:450, RecordingAnalysisView.swift:478 |
 | `analysis.statistics.volume.title` | Volume | 音量 | Volume | GeneratedStringSymbols_Localizable.swift:459, RecordingAnalysisView.swift:476 |
-| `analysis.statistics.volumeRange.label` | 音量范围 | 音量范围 | Volume range | GeneratedStringSymbols_Localizable.swift:468, RecordingAnalysisView.swift:506 |
-| `analysis.suggestionDetail.title` | 练习建议 | 练习建议 | Practice suggestion | GeneratedStringSymbols_Localizable.swift:477, RecordingAnalysisView.swift:866 |
+| `analysis.statistics.volumeRange.label` | 音量范围 | 音量范围 | Volume Range | GeneratedStringSymbols_Localizable.swift:468, RecordingAnalysisView.swift:506 |
+| `analysis.suggestionDetail.title` | 练习建议 | 练习建议 | Practice Suggestion | GeneratedStringSymbols_Localizable.swift:477, RecordingAnalysisView.swift:866 |
 | `analysis.suggestions.adequateRecording.description` | 你已经提供了足够的语音信息。下次保持相近时长，趋势会更容易看懂。 | 你已经提供了足够的语音信息。下次保持相近时长，趋势会更容易看懂。 | You already gave enough voice data. Keep a similar length next time and the trend will be easier to read. | GeneratedStringSymbols_Localizable.swift:486, RecordingAnalysisView.swift:341 |
 | `analysis.suggestions.adequateRecording.subtitle` | 继续用相近时长录制，方便比较每次变化。 | 继续用相近时长录制，方便比较每次变化。 | Keep recording for a similar length so each change is easy to compare. | GeneratedStringSymbols_Localizable.swift:495, RecordingAnalysisView.swift:336 |
-| `analysis.suggestions.adequateRecording.title` | 保持相近的录音时长 | 保持相近的录音时长 | Keep a similar recording length | GeneratedStringSymbols_Localizable.swift:504, RecordingAnalysisView.swift:333 |
+| `analysis.suggestions.adequateRecording.title` | 保持相近的录音时长 | 保持相近的录音时长 | Keep a Similar Recording Length | GeneratedStringSymbols_Localizable.swift:504, RecordingAnalysisView.swift:333 |
 | `analysis.suggestions.naturalSpeech.description` | 自然度是一个参考值。保持轻松的语速和连贯的呼吸，比追求单次分数更有帮助。 | 自然度是一个参考值。保持轻松的语速和连贯的呼吸，比追求单次分数更有帮助。 | Naturalness is only a reference value. An easy pace and steady breathing help more than chasing a single score. | GeneratedStringSymbols_Localizable.swift:513, RecordingAnalysisView.swift:353 |
 | `analysis.suggestions.naturalSpeech.subtitle` | 这次自然度表现不错，保持放松和连贯的表达。 | 这次自然度表现不错，保持放松和连贯的表达。 | Naturalness looked good this time; stay relaxed and keep your delivery connected. | GeneratedStringSymbols_Localizable.swift:522, RecordingAnalysisView.swift:348 |
-| `analysis.suggestions.naturalSpeech.title` | 继续保持自然语气 | 继续保持自然语气 | Keep your natural tone | GeneratedStringSymbols_Localizable.swift:531, RecordingAnalysisView.swift:345 |
+| `analysis.suggestions.naturalSpeech.title` | 继续保持自然语气 | 继续保持自然语气 | Keep Your Natural Tone | GeneratedStringSymbols_Localizable.swift:531, RecordingAnalysisView.swift:345 |
 | `analysis.suggestions.shortRecording.description` | 试着连续说 10 秒以上的自然句子。录音更完整，音高和自然度的估计会更稳定。 | 试着连续说 10 秒以上的自然句子。录音更完整，音高和自然度的估计会更稳定。 | Try speaking natural sentences continuously for 10 seconds or more. A more complete recording gives more stable pitch and naturalness estimates. | GeneratedStringSymbols_Localizable.swift:540, RecordingAnalysisView.swift:340 |
 | `analysis.suggestions.shortRecording.subtitle` | 有效语音不足 5 秒，更多声音信息会让结果更稳定。 | 有效语音不足 5 秒，更多声音信息会让结果更稳定。 | Less than 5 seconds of effective speech; more voice data makes the result more stable. | GeneratedStringSymbols_Localizable.swift:549, RecordingAnalysisView.swift:335 |
-| `analysis.suggestions.shortRecording.title` | 下次多录一会儿 | 下次多录一会儿 | Record a bit longer next time | GeneratedStringSymbols_Localizable.swift:558, RecordingAnalysisView.swift:333 |
+| `analysis.suggestions.shortRecording.title` | 下次多录一会儿 | 下次多录一会儿 | Record a Bit Longer Next Time | GeneratedStringSymbols_Localizable.swift:558, RecordingAnalysisView.swift:333 |
 | `analysis.suggestions.subtitle` | 根据这次录音，下一步可以这样练习 | 根据这次录音，下一步可以这样练习 | Based on this recording, here is what to practice next | GeneratedStringSymbols_Localizable.swift:567, RecordingAnalysisView.swift:212 |
 | `analysis.suggestions.title` | 建议 | 建议 | Suggestions | GeneratedStringSymbols_Localizable.swift:576, RecordingAnalysisView.swift:210 |
 | `analysis.suggestions.unnaturalSpeech.description` | 先放松下颌和肩膀，用熟悉的句子练习。不要刻意压低或抬高音高，先让表达保持连贯。 | 先放松下颌和肩膀，用熟悉的句子练习。不要刻意压低或抬高音高，先让表达保持连贯。 | Relax your jaw and shoulders first and practise with familiar sentences. Don't force your pitch up or down — focus on keeping your delivery connected. | GeneratedStringSymbols_Localizable.swift:585, RecordingAnalysisView.swift:352 |
 | `analysis.suggestions.unnaturalSpeech.subtitle` | 放慢语速，保持连续呼吸，再试着说一段熟悉的话。 | 放慢语速，保持连续呼吸，再试着说一段熟悉的话。 | Slow down, keep breathing steadily, and try a familiar passage. | GeneratedStringSymbols_Localizable.swift:594, RecordingAnalysisView.swift:347 |
-| `analysis.suggestions.unnaturalSpeech.title` | 让语气更自然 | 让语气更自然 | Make your tone more natural | GeneratedStringSymbols_Localizable.swift:603, RecordingAnalysisView.swift:345 |
-| `analysis.voiceDetails.action` | 声音详情 | 声音详情 | Voice details | GeneratedStringSymbols_Localizable.swift:612, RecordingAnalysisView.swift:159 |
+| `analysis.suggestions.unnaturalSpeech.title` | 让语气更自然 | 让语气更自然 | Make Your Tone More Natural | GeneratedStringSymbols_Localizable.swift:603, RecordingAnalysisView.swift:345 |
+| `analysis.voiceDetails.action` | 声音详情 | 声音详情 | Voice Details | GeneratedStringSymbols_Localizable.swift:612, RecordingAnalysisView.swift:159 |
 | `analysis.voiceDetails.action.a11y` | 查看声音详情 | 查看声音详情 | View voice details | GeneratedStringSymbols_Localizable.swift:621, RecordingAnalysisView.swift:167 |
-| `analysis.voiceDetails.metrics.title` | 声音指标 | 声音指标 | Voice metrics | GeneratedStringSymbols_Localizable.swift:630, RecordingAnalysisView.swift:386 |
-| `analysis.voiceDetails.title` | 声音详情 | 声音详情 | Voice details | GeneratedStringSymbols_Localizable.swift:639, RecordingAnalysisView.swift:402 |
+| `analysis.voiceDetails.metrics.title` | 声音指标 | 声音指标 | Voice Metrics | GeneratedStringSymbols_Localizable.swift:630, RecordingAnalysisView.swift:386 |
+| `analysis.voiceDetails.title` | 声音详情 | 声音详情 | Voice Details | GeneratedStringSymbols_Localizable.swift:639, RecordingAnalysisView.swift:402 |
 | `analysis.voiceProfile.female.label` | Female | 女性 | Female | GeneratedStringSymbols_Localizable.swift:648, RecordingAnalysisView.swift:948 |
 | `analysis.voiceProfile.male.label` | Male | 男性 | Male | GeneratedStringSymbols_Localizable.swift:657, RecordingAnalysisView.swift:949 |
-| `analysis.voiceProfile.noData` | 无可靠数据 | 无可靠数据 | No reliable data | GeneratedStringSymbols_Localizable.swift:666, RecordingAnalysisView.swift:999, RecordingAnalysisView.swift:1004 |
+| `analysis.voiceProfile.noData` | 无可靠数据 | 无可靠数据 | No Reliable Data | GeneratedStringSymbols_Localizable.swift:666, RecordingAnalysisView.swift:999, RecordingAnalysisView.swift:1004 |
 | `analysis.voiceProfile.reference.a11y %@ %@ %@ %@` | 声音倾向参考，平均音高 \(meanPitchText)，样本音高范围 \(pitchRangeText)，Female \(percentageText(femaleValue))，Male \(percentageText(maleValue)) | 声音倾向参考，平均音高 %1$@，样本音高范围 %2$@，Female %3$@，Male %4$@ | Voice tendency reference: average pitch %1$@, sample pitch range %2$@, Female %3$@, Male %4$@ | GeneratedStringSymbols_Localizable.swift:675, RecordingAnalysisView.swift:966 |
-| `analysis.voiceProfile.title` | 声音倾向参考 | 声音倾向参考 | Voice tendency reference | GeneratedStringSymbols_Localizable.swift:684, RecordingAnalysisView.swift:150 |
+| `analysis.voiceProfile.title` | 声音倾向参考 | 声音倾向参考 | Voice Tendency Reference | GeneratedStringSymbols_Localizable.swift:684, RecordingAnalysisView.swift:150 |
 | `common.action.done` | 完成 | 完成 | Done | GeneratedStringSymbols_Localizable.swift:693, PitchImageExportButton.swift:61, RecordingAnalysisView.swift:406, RecordingAnalysisView.swift:870 |
 | `common.action.ok` | 好 | 好 | OK | GeneratedStringSymbols_Localizable.swift:702, PitchImageExportButton.swift:28, PitchImageExportButton.swift:91, RecordingExportView.swift:119 |
 | `common.brand.name` |  | Pitchee | Pitchee | GeneratedStringSymbols_Localizable.swift:711, LivePitchChartView.swift:122 |
 | `common.brand.wordmark` | PITCHEE | PITCHEE | PITCHEE | GeneratedStringSymbols_Localizable.swift:720, OnboardingView.swift:101 |
 | `common.error.tryAgainLater` | 请稍后再试。 | 请稍后再试。 | Please try again later. | GeneratedStringSymbols_Localizable.swift:729, PitchImageExportButton.swift:30, PitchImageExportButton.swift:93, RecordingExportView.swift:121 |
-| `common.metric.compositeScore.title` | 综合评分 | 综合评分 | Overall score | ContentView.swift:150, GeneratedStringSymbols_Localizable.swift:738, RecordingAnalysisView.swift:416, RecordingExportView.swift:449 |
-| `common.metric.corePitchRange.title` | 核心音域 | 核心音域 | Core pitch range | GeneratedStringSymbols_Localizable.swift:747, RecordingAnalysisView.swift:496, RecordingExportView.swift:443 |
-| `common.metric.environmentNoiseFloor.title` | 环境底噪 | 环境底噪 | Ambient noise floor | GeneratedStringSymbols_Localizable.swift:756, RecordingAnalysisView.swift:503, RecordingExportView.swift:445 |
-| `common.metric.meanPitch.title` | 平均音高 | 平均音高 | Average pitch | ContentView.swift:170, GeneratedStringSymbols_Localizable.swift:765, RecordingAnalysisView.swift:494, RecordingExportView.swift:440 |
-| `common.metric.medianPitch.title` | 中位音高 | 中位音高 | Median pitch | GeneratedStringSymbols_Localizable.swift:774, RecordingAnalysisView.swift:495, RecordingExportView.swift:441 |
+| `common.metric.compositeScore.title` | 综合评分 | 综合评分 | Overall Score | ContentView.swift:150, GeneratedStringSymbols_Localizable.swift:738, RecordingAnalysisView.swift:416, RecordingExportView.swift:449 |
+| `common.metric.corePitchRange.title` | 核心音域 | 核心音域 | Core Pitch Range | GeneratedStringSymbols_Localizable.swift:747, RecordingAnalysisView.swift:496, RecordingExportView.swift:443 |
+| `common.metric.environmentNoiseFloor.title` | 环境底噪 | 环境底噪 | Ambient Noise Floor | GeneratedStringSymbols_Localizable.swift:756, RecordingAnalysisView.swift:503, RecordingExportView.swift:445 |
+| `common.metric.meanPitch.title` | 平均音高 | 平均音高 | Average Pitch | ContentView.swift:170, GeneratedStringSymbols_Localizable.swift:765, RecordingAnalysisView.swift:494, RecordingExportView.swift:440 |
+| `common.metric.medianPitch.title` | 中位音高 | 中位音高 | Median Pitch | GeneratedStringSymbols_Localizable.swift:774, RecordingAnalysisView.swift:495, RecordingExportView.swift:441 |
 | `common.metric.naturalness.title` | 自然度 | 自然度 | Naturalness | ContentView.swift:160, GeneratedStringSymbols_Localizable.swift:783, RecordingAnalysisView.swift:389, RecordingExportView.swift:451 |
-| `common.metric.speechDuration.title` | 有效语音 | 有效语音 | Voiced speech | ContentView.swift:180, GeneratedStringSymbols_Localizable.swift:792, RecordingAnalysisView.swift:391, RecordingExportView.swift:437 |
-| `common.metric.standardScore.title` | 标准评分 | 标准评分 | Standard score | GeneratedStringSymbols_Localizable.swift:801, RecordingAnalysisView.swift:390, RecordingExportView.swift:450 |
+| `common.metric.speechDuration.title` | 有效语音 | 有效语音 | Voiced Speech | ContentView.swift:180, GeneratedStringSymbols_Localizable.swift:792, RecordingAnalysisView.swift:391, RecordingExportView.swift:437 |
+| `common.metric.standardScore.title` | 标准评分 | 标准评分 | Standard Score | GeneratedStringSymbols_Localizable.swift:801, RecordingAnalysisView.swift:390, RecordingExportView.swift:450 |
 | `common.placeholder.noValue` | — | — | — | ContentView.swift:134, GeneratedStringSymbols_Localizable.swift:810, RecordingAnalysisView.swift:535, RecordingAnalysisView.swift:541 |
 | `common.unit.channels` | 声道 | 声道 | channels | GeneratedStringSymbols_Localizable.swift:819, RecordingExportView.swift:500 |
 | `common.unit.count` | 个 | 个 | windows | GeneratedStringSymbols_Localizable.swift:828, RecordingExportView.swift:510 |
@@ -182,7 +182,7 @@
 | `export.report.charts` | 图表 | 图表 | Charts | GeneratedStringSymbols_Localizable.swift:1458, RecordingExportView.swift:787 |
 | `export.report.data` | 数据 | 数据 | Data | GeneratedStringSymbols_Localizable.swift:1467, RecordingExportView.swift:809 |
 | `export.report.emptyState.message` | 回到导出页选择图表或数据。 | 回到导出页选择图表或数据。 | Return to the export screen and select charts or data. | GeneratedStringSymbols_Localizable.swift:1476, RecordingExportView.swift:846 |
-| `export.report.emptyState.title` | 没有选择导出内容 | 没有选择导出内容 | Nothing selected for export | GeneratedStringSymbols_Localizable.swift:1485, RecordingExportView.swift:843 |
+| `export.report.emptyState.title` | 没有选择导出内容 | 没有选择导出内容 | Nothing Selected for Export | GeneratedStringSymbols_Localizable.swift:1485, RecordingExportView.swift:843 |
 | `export.report.footer` | Pitchee · 声音分析 | Pitchee · 声音分析 | Pitchee · Sound Analysis | GeneratedStringSymbols_Localizable.swift:1494, RecordingExportView.swift:744 |
 | `export.report.header.subtitle` | 导出内容 | 导出内容 | Exported content | GeneratedStringSymbols_Localizable.swift:1503, RecordingExportView.swift:765 |
 | `export.report.header.title` | 声音分析报告 | 声音分析报告 | Sound Analysis Report | GeneratedStringSymbols_Localizable.swift:1512, RecordingExportView.swift:762 |
@@ -199,29 +199,28 @@
 | `export.sheet.defaultFilename` | Pitchee-Report.pdf | Pitchee-Report.pdf | Pitchee-Report.pdf | GeneratedStringSymbols_Localizable.swift:1611, RecordingExportView.swift:109 |
 | `export.sheet.saveReport` | 保存 | 保存 | Save | GeneratedStringSymbols_Localizable.swift:1620, RecordingExportView.swift:99 |
 | `export.sheet.title` | 导出 | 导出 | Export | GeneratedStringSymbols_Localizable.swift:1629, RecordingExportView.swift:95 |
-| `insights.emptyState.startFirstRecording` | 开始第一次录音 | 开始第一次录音 | Start your first recording | ContentView.swift:191, GeneratedStringSymbols_Localizable.swift:1638 |
 | `insights.metric.baselineAverage.caption %@` | 平均基准 \(baseline) | 平均基准 %1$@ | Average baseline %1$@ | ContentView.swift:411, GeneratedStringSymbols_Localizable.swift:1647 |
 | `insights.metric.compositeScore.caption` | 声音表现的整体结果 | 声音表现的整体结果 | How your voice performed overall. | ContentView.swift:153, GeneratedStringSymbols_Localizable.swift:1656 |
 | `insights.metric.meanPitch.caption` | 有效语音片段的平均基频，单位 Hz | 有效语音片段的平均基频，单位 Hz | Mean fundamental frequency of voiced speech, in Hz. | ContentView.swift:173, GeneratedStringSymbols_Localizable.swift:1665 |
 | `insights.metric.naturalness.caption` | 声音听起来连贯、自然的程度 | 声音听起来连贯、自然的程度 | How consistent and natural the voice sounds. | ContentView.swift:163, GeneratedStringSymbols_Localizable.swift:1674 |
 | `insights.metric.speechDuration.caption` | 录音中检测到的人声时长，单位秒 | 录音中检测到的人声时长，单位秒 | Length of detected speech in the recording, in seconds. | ContentView.swift:183, GeneratedStringSymbols_Localizable.swift:1683 |
 | `insights.screen.title` | 洞察 | 洞察 | Insights | ContentView.swift:103, ContentView.swift:199, GeneratedStringSymbols_Localizable.swift:1692 |
-| `insights.summary.analysisCount.title` | 声音分析 | 声音分析 | Voice analyses | ContentView.swift:269, GeneratedStringSymbols_Localizable.swift:1701 |
-| `insights.summary.openedDays.title` | 打开天数 | 打开天数 | Days opened | ContentView.swift:292, GeneratedStringSymbols_Localizable.swift:1710 |
-| `onboarding.footer.finishSetup` | 完成设置 | 完成设置 | Finish setup | GeneratedStringSymbols_Localizable.swift:1719, OnboardingView.swift:239 |
-| `onboarding.footer.startSetup` | 开始设置 | 开始设置 | Get started | GeneratedStringSymbols_Localizable.swift:1728, OnboardingView.swift:238 |
+| `insights.summary.analysisCount.title` | 声音分析 | 声音分析 | Voice Analyses | ContentView.swift:269, GeneratedStringSymbols_Localizable.swift:1701 |
+| `insights.summary.openedDays.title` | 打开天数 | 打开天数 | Days Opened | ContentView.swift:292, GeneratedStringSymbols_Localizable.swift:1710 |
+| `onboarding.footer.finishSetup` | 完成设置 | 完成设置 | Finish Setup | GeneratedStringSymbols_Localizable.swift:1719, OnboardingView.swift:239 |
+| `onboarding.footer.startSetup` | 开始设置 | 开始设置 | Get Started | GeneratedStringSymbols_Localizable.swift:1728, OnboardingView.swift:238 |
 | `onboarding.footer.voiceSelectionRequired.a11y` | 请选择声音偏好 | 请选择声音偏好 | Select a voice preference to continue | GeneratedStringSymbols_Localizable.swift:1737, OnboardingView.swift:250 |
 | `onboarding.pagination.pageIndicator.a11y %lld %lld` | 第 \(page.rawValue + 1) 页，共 2 页 | 第 %1$lld 页，共 %2$lld 页 | Page %1$lld of %2$lld | GeneratedStringSymbols_Localizable.swift:1746, OnboardingView.swift:127 |
 | `onboarding.preferences.subtitle` | 选择一个想探索的方向，也可以暂不确定。之后随时都能调整。 | 选择一个想探索的方向，也可以暂不确定。之后随时都能调整。 | Pick a direction to explore — or stay undecided. You can change this anytime. | GeneratedStringSymbols_Localizable.swift:1755, OnboardingView.swift:201 |
-| `onboarding.preferences.title` | 让我们更加了解你 | 让我们更加了解你 | Help us get to know you better | GeneratedStringSymbols_Localizable.swift:1764, OnboardingView.swift:196 |
+| `onboarding.preferences.title` | 让我们更加了解你 | 让我们更加了解你 | Help Us Get to Know You Better | GeneratedStringSymbols_Localizable.swift:1764, OnboardingView.swift:196 |
 | `onboarding.preferences.voicePrompt` | 你希望什么样的声音？ | 你希望什么样的声音？ | What kind of voice are you aiming for? | GeneratedStringSymbols_Localizable.swift:1773, OnboardingView.swift:208 |
-| `onboarding.welcome.artworkBadge` | 声音分析 | 声音分析 | Voice analysis | GeneratedStringSymbols_Localizable.swift:1782, OnboardingView.swift:182 |
+| `onboarding.welcome.artworkBadge` | 声音分析 | 声音分析 | Voice Analysis | GeneratedStringSymbols_Localizable.swift:1782, OnboardingView.swift:182 |
 | `onboarding.welcome.featurePrivacy.description` | 在设备上分析，录音不会上传。 | 在设备上分析，录音不会上传。 | Analysis runs on device; recordings are never uploaded. | GeneratedStringSymbols_Localizable.swift:1791, OnboardingView.swift:159 |
-| `onboarding.welcome.featurePrivacy.title` | 你的声音由你掌控 | 你的声音由你掌控 | Your voice stays in your control | GeneratedStringSymbols_Localizable.swift:1800, OnboardingView.swift:158 |
+| `onboarding.welcome.featurePrivacy.title` | 你的声音由你掌控 | 你的声音由你掌控 | Your Voice Stays in Your Control | GeneratedStringSymbols_Localizable.swift:1800, OnboardingView.swift:158 |
 | `onboarding.welcome.featureTrend.description` | 用数据和趋势，了解你的声音状态。 | 用数据和趋势，了解你的声音状态。 | Use data and trends to understand the state of your voice. | GeneratedStringSymbols_Localizable.swift:1809, OnboardingView.swift:154 |
-| `onboarding.welcome.featureTrend.title` | 看见声音的变化 | 看见声音的变化 | See how your voice changes | GeneratedStringSymbols_Localizable.swift:1818, OnboardingView.swift:153 |
+| `onboarding.welcome.featureTrend.title` | 看见声音的变化 | 看见声音的变化 | See How Your Voice Changes | GeneratedStringSymbols_Localizable.swift:1818, OnboardingView.swift:153 |
 | `onboarding.welcome.subtitle` | Pitchee 会把声音变成清晰、可追踪的反馈，陪你记录每一次变化。 | Pitchee 会把声音变成清晰、可追踪的反馈，陪你记录每一次变化。 | Pitchee turns your voice into clear, trackable feedback and follows every change with you. | GeneratedStringSymbols_Localizable.swift:1827, OnboardingView.swift:141 |
-| `onboarding.welcome.title` | 用声音，\n更了解自己 | 用声音，\n更了解自己 | Know yourself\nthrough your voice | GeneratedStringSymbols_Localizable.swift:1836, OnboardingView.swift:135 |
+| `onboarding.welcome.title` | 用声音，\n更了解自己 | 用声音，\n更了解自己 | Know Yourself\nThrough Your Voice | GeneratedStringSymbols_Localizable.swift:1836, OnboardingView.swift:135 |
 | `piano.note.name.a11y %@` | 音符 \(note.displayName) | 音符 %1$@ | Note %1$@ | ContentView.swift:597, GeneratedStringSymbols_Localizable.swift:1845 |
 | `piano.note.playbackHint.a11y` | 轻点播放，按住可持续发声 | 轻点播放，按住可持续发声 | Tap to play. Touch and hold to sustain the sound. | ContentView.swift:598, GeneratedStringSymbols_Localizable.swift:1854 |
 | `piano.screen.title` | 钢琴键 | 钢琴键 | Piano Keys | ContentView.swift:107, ContentView.swift:483, GeneratedStringSymbols_Localizable.swift:1863 |
@@ -254,59 +253,59 @@
 | `recording.toolbar.viewLastAnalysis` | 查看上次分析 | 查看上次分析 | View Last Analysis | GeneratedStringSymbols_Localizable.swift:2106, RecordingView.swift:52 |
 | `scoring.baseFormula.note` | Standard 是模型识别的音色标准分；Naturalness 是自然度分；F0 是平均基频，单位为 Hz。带 _r 的变量会被限制在 0 到 1 之间。Base 是应用规则前的基础分，Final 是结果页显示的综合分。 | Standard 是模型识别的音色标准分；Naturalness 是自然度分；F0 是平均基频，单位为 Hz。带 _r 的变量会被限制在 0 到 1 之间。Base 是应用规则前的基础分，Final 是结果页显示的综合分。 | Standard is the timbre standard score from the model; Naturalness is the naturalness score; F0 is the mean fundamental frequency in Hz. Variables with _r are clamped between 0 and 1. Base is the score before any rule is applied, and Final is the overall score shown on the result screen. | GeneratedStringSymbols_Localizable.swift:2115, RecordingAnalysisView.swift:634 |
 | `scoring.baseFormula.subtitle` | 所有评分规则都从这些归一化步骤开始。 | 所有评分规则都从这些归一化步骤开始。 | Every scoring rule starts from these normalization steps. | GeneratedStringSymbols_Localizable.swift:2124, RecordingAnalysisView.swift:621 |
-| `scoring.baseFormula.title` | 基础公式 | 基础公式 | Base formula | GeneratedStringSymbols_Localizable.swift:2133, RecordingAnalysisView.swift:619 |
+| `scoring.baseFormula.title` | 基础公式 | 基础公式 | Base Formula | GeneratedStringSymbols_Localizable.swift:2133, RecordingAnalysisView.swift:619 |
 | `scoring.currentRule.badge` | 当前 | 当前 | Current | GeneratedStringSymbols_Localizable.swift:2142, RecordingAnalysisView.swift:648 |
-| `scoring.currentRule.title` | 本次命中规则 | 本次命中规则 | Rule matched this time | GeneratedStringSymbols_Localizable.swift:2151, RecordingAnalysisView.swift:646 |
+| `scoring.currentRule.title` | 本次命中规则 | 本次命中规则 | Rule Matched This Time | GeneratedStringSymbols_Localizable.swift:2151, RecordingAnalysisView.swift:646 |
 | `scoring.explanation.intro.description` | 综合评分把音色标准、自然度和平均音高放在一起计算，再根据本次命中的规则进行加分或封顶。它适合用来观察自己的练习趋势，不代表声音的整体好坏。 | 综合评分把音色标准、自然度和平均音高放在一起计算，再根据本次命中的规则进行加分或封顶。它适合用来观察自己的练习趋势，不代表声音的整体好坏。 | The overall score combines the timbre standard, naturalness, and average pitch, then applies a boost or a cap based on the rule that matched this recording. Use it to track your own practice trend — it does not judge whether a voice is good or bad. | GeneratedStringSymbols_Localizable.swift:2160, RecordingAnalysisView.swift:610 |
-| `scoring.explanation.intro.title` | 综合评分如何得出 | 综合评分如何得出 | How the overall score is calculated | GeneratedStringSymbols_Localizable.swift:2169, RecordingAnalysisView.swift:608 |
-| `scoring.explanation.title` | 评分说明 | 评分说明 | Score explanation | GeneratedStringSymbols_Localizable.swift:2178, RecordingAnalysisView.swift:602 |
-| `scoring.otherRules.title` | 其他评分规则 | 其他评分规则 | Other scoring rules | GeneratedStringSymbols_Localizable.swift:2187, RecordingAnalysisView.swift:703 |
-| `scoring.ruleDetail.condition` | 触发条件 | 触发条件 | Trigger condition | GeneratedStringSymbols_Localizable.swift:2196, RecordingAnalysisView.swift:658 |
+| `scoring.explanation.intro.title` | 综合评分如何得出 | 综合评分如何得出 | How the Overall Score Is Calculated | GeneratedStringSymbols_Localizable.swift:2169, RecordingAnalysisView.swift:608 |
+| `scoring.explanation.title` | 评分说明 | 评分说明 | Score Explanation | GeneratedStringSymbols_Localizable.swift:2178, RecordingAnalysisView.swift:602 |
+| `scoring.otherRules.title` | 其他评分规则 | 其他评分规则 | Other Scoring Rules | GeneratedStringSymbols_Localizable.swift:2187, RecordingAnalysisView.swift:703 |
+| `scoring.ruleDetail.condition` | 触发条件 | 触发条件 | Trigger Condition | GeneratedStringSymbols_Localizable.swift:2196, RecordingAnalysisView.swift:658 |
 | `scoring.ruleDetail.formula` | 计算公式 | 计算公式 | Formula | GeneratedStringSymbols_Localizable.swift:2205, RecordingAnalysisView.swift:659 |
 | `scoring.ruleDetail.result` | 处理结果 | 处理结果 | Result | GeneratedStringSymbols_Localizable.swift:2214, RecordingAnalysisView.swift:661 |
 | `scoring.rules.continuous.condition` | 未命中其他封顶或提升规则 | 未命中其他封顶或提升规则 | No other cap or boost rule matched | GeneratedStringSymbols_Localizable.swift:2223, RecordingAnalysisView.swift:758 |
 | `scoring.rules.continuous.description` | 这次没有触发特殊限制，综合分直接使用 Base。 | 这次没有触发特殊限制，综合分直接使用 Base。 | No special limit was triggered this time, so the overall score uses Base directly. | GeneratedStringSymbols_Localizable.swift:2232, RecordingAnalysisView.swift:757 |
 | `scoring.rules.continuous.result` | 综合分采用 Base。 | 综合分采用 Base。 | The overall score uses Base. | GeneratedStringSymbols_Localizable.swift:2241, RecordingAnalysisView.swift:760 |
-| `scoring.rules.continuous.title` | 连续评分 | 连续评分 | Continuous scoring | GeneratedStringSymbols_Localizable.swift:2250, RecordingAnalysisView.swift:756 |
+| `scoring.rules.continuous.title` | 连续评分 | 连续评分 | Continuous Scoring | GeneratedStringSymbols_Localizable.swift:2250, RecordingAnalysisView.swift:756 |
 | `scoring.rules.f0Unavailable.condition` | 没有可靠的 F0 | 没有可靠的 F0 | No reliable F0 | GeneratedStringSymbols_Localizable.swift:2259, RecordingAnalysisView.swift:813 |
 | `scoring.rules.f0Unavailable.description` | 没有识别到稳定基频，下次可以在安静环境中离麦克风近一点。 | 没有识别到稳定基频，下次可以在安静环境中离麦克风近一点。 | No stable fundamental frequency was detected — next time try a quieter place and hold the phone closer to your mouth. | GeneratedStringSymbols_Localizable.swift:2268, RecordingAnalysisView.swift:812 |
 | `scoring.rules.f0Unavailable.result` | 综合分直接采用标准音色分 Standard。 | 综合分直接采用标准音色分 Standard。 | The overall score uses the timbre standard score (Standard) directly. | GeneratedStringSymbols_Localizable.swift:2277, RecordingAnalysisView.swift:815 |
-| `scoring.rules.f0Unavailable.title` | 基频不可用 | 基频不可用 | Pitch unavailable | GeneratedStringSymbols_Localizable.swift:2286, RecordingAnalysisView.swift:811 |
+| `scoring.rules.f0Unavailable.title` | 基频不可用 | 基频不可用 | Pitch Unavailable | GeneratedStringSymbols_Localizable.swift:2286, RecordingAnalysisView.swift:811 |
 | `scoring.rules.highF0MaleCap.condition` | F0 > 165，Naturalness ≥ 50，Standard < 50 | F0 > 165，Naturalness ≥ 50，Standard < 50 | F0 > 165, Naturalness ≥ 50, Standard < 50 | GeneratedStringSymbols_Localizable.swift:2295, RecordingAnalysisView.swift:805 |
 | `scoring.rules.highF0MaleCap.description` | 音高和自然度已经达标，接下来重点练习音色，让声音更明亮、更轻松。 | 音高和自然度已经达标，接下来重点练习音色，让声音更明亮、更轻松。 | Pitch and naturalness are already on target; now focus on timbre to make your voice brighter and more relaxed. | GeneratedStringSymbols_Localizable.swift:2304, RecordingAnalysisView.swift:804 |
 | `scoring.rules.highF0MaleCap.result` | 综合分最高为 59。 | 综合分最高为 59。 | The overall score is capped at 59. | GeneratedStringSymbols_Localizable.swift:2313, RecordingAnalysisView.swift:807 |
-| `scoring.rules.highF0MaleCap.title` | 音色分不足 | 音色分不足 | Timbre score too low | GeneratedStringSymbols_Localizable.swift:2322, RecordingAnalysisView.swift:803 |
+| `scoring.rules.highF0MaleCap.title` | 音色分不足 | 音色分不足 | Timbre Score Too Low | GeneratedStringSymbols_Localizable.swift:2322, RecordingAnalysisView.swift:803 |
 | `scoring.rules.highF0StylizedCap.condition` | F0 > 165，Naturalness < 50 | F0 > 165，Naturalness < 50 | F0 > 165, Naturalness < 50 | GeneratedStringSymbols_Localizable.swift:2331, RecordingAnalysisView.swift:781 |
 | `scoring.rules.highF0StylizedCap.description` | 音高已经上去了，但自然度还没跟上。下一次先放松语气，不必刻意抬高音调。 | 音高已经上去了，但自然度还没跟上。下一次先放松语气，不必刻意抬高音调。 | Your pitch is already up, but naturalness hasn't caught up. Next time relax your tone first — there's no need to push your pitch higher. | GeneratedStringSymbols_Localizable.swift:2340, RecordingAnalysisView.swift:780 |
 | `scoring.rules.highF0StylizedCap.result` | 综合分最高为 30。 | 综合分最高为 30。 | The overall score is capped at 30. | GeneratedStringSymbols_Localizable.swift:2349, RecordingAnalysisView.swift:783 |
-| `scoring.rules.highF0StylizedCap.title` | 高基频、低自然度封顶 | 高基频、低自然度封顶 | High pitch with low naturalness cap | GeneratedStringSymbols_Localizable.swift:2358, RecordingAnalysisView.swift:779 |
+| `scoring.rules.highF0StylizedCap.title` | 高基频、低自然度封顶 | 高基频、低自然度封顶 | High Pitch with Low Naturalness Cap | GeneratedStringSymbols_Localizable.swift:2358, RecordingAnalysisView.swift:779 |
 | `scoring.rules.lowF0NaturalCap.condition` | F0 ≤ 165，Naturalness ≥ 50 | F0 ≤ 165，Naturalness ≥ 50 | F0 ≤ 165, Naturalness ≥ 50 | GeneratedStringSymbols_Localizable.swift:2367, RecordingAnalysisView.swift:789 |
 | `scoring.rules.lowF0NaturalCap.description` | 自然度已经不错，接下来可以把注意力放在音高上。 | 自然度已经不错，接下来可以把注意力放在音高上。 | Naturalness is already good — now you can focus on pitch. | GeneratedStringSymbols_Localizable.swift:2376, RecordingAnalysisView.swift:788 |
 | `scoring.rules.lowF0NaturalCap.result` | 综合分最高为 59。 | 综合分最高为 59。 | The overall score is capped at 59. | GeneratedStringSymbols_Localizable.swift:2385, RecordingAnalysisView.swift:791 |
-| `scoring.rules.lowF0NaturalCap.title` | 低基频封顶 | 低基频封顶 | Low pitch cap | GeneratedStringSymbols_Localizable.swift:2394, RecordingAnalysisView.swift:787 |
+| `scoring.rules.lowF0NaturalCap.title` | 低基频封顶 | 低基频封顶 | Low Pitch Cap | GeneratedStringSymbols_Localizable.swift:2394, RecordingAnalysisView.swift:787 |
 | `scoring.rules.lowF0StylizedCap.condition` | F0 ≤ 165，Naturalness < 50 | F0 ≤ 165，Naturalness < 50 | F0 ≤ 165, Naturalness < 50 | GeneratedStringSymbols_Localizable.swift:2403, RecordingAnalysisView.swift:797 |
 | `scoring.rules.lowF0StylizedCap.description` | 这次音高和自然度都需要照顾。先放慢一点，完整自然地说完句子。 | 这次音高和自然度都需要照顾。先放慢一点，完整自然地说完句子。 | This time both pitch and naturalness need attention. Slow down a little and finish your sentences naturally. | GeneratedStringSymbols_Localizable.swift:2412, RecordingAnalysisView.swift:796 |
 | `scoring.rules.lowF0StylizedCap.result` | 综合分最高为 20。 | 综合分最高为 20。 | The overall score is capped at 20. | GeneratedStringSymbols_Localizable.swift:2421, RecordingAnalysisView.swift:799 |
-| `scoring.rules.lowF0StylizedCap.title` | 低基频、低自然度 | 低基频、低自然度 | Low pitch and low naturalness | GeneratedStringSymbols_Localizable.swift:2430, RecordingAnalysisView.swift:795 |
+| `scoring.rules.lowF0StylizedCap.title` | 低基频、低自然度 | 低基频、低自然度 | Low Pitch and Low Naturalness | GeneratedStringSymbols_Localizable.swift:2430, RecordingAnalysisView.swift:795 |
 | `scoring.rules.passBoost.condition` | F0 > 165，Naturalness > 80，Standard > 50 | F0 > 165，Naturalness > 80，Standard > 50 | F0 > 165, Naturalness > 80, Standard > 50 | GeneratedStringSymbols_Localizable.swift:2439, RecordingAnalysisView.swift:766 |
 | `scoring.rules.passBoost.description` | 三项指标都已经过线，系统会把稳定、自然的表现向上提升。 | 三项指标都已经过线，系统会把稳定、自然的表现向上提升。 | All three metrics passed their thresholds, so the system pushes a steady, natural performance upward. | GeneratedStringSymbols_Localizable.swift:2448, RecordingAnalysisView.swift:765 |
 | `scoring.rules.passBoost.result` | 综合分最高为 100；如果 promoted 高于 Base，就采用 promoted。 | 综合分最高为 100；如果 promoted 高于 Base，就采用 promoted。 | The overall score is capped at 100; if promoted is higher than Base, promoted is used. | GeneratedStringSymbols_Localizable.swift:2457, RecordingAnalysisView.swift:775 |
-| `scoring.rules.passBoost.title` | 加分 | 加分 | Score boost | GeneratedStringSymbols_Localizable.swift:2466, RecordingAnalysisView.swift:764 |
+| `scoring.rules.passBoost.title` | 加分 | 加分 | Score Boost | GeneratedStringSymbols_Localizable.swift:2466, RecordingAnalysisView.swift:764 |
 | `settings.screen.title` | 偏好与隐私 | 偏好与隐私 | Preferences & Privacy | ContentView.swift:232, GeneratedStringSymbols_Localizable.swift:2475, SettingsView.swift:48 |
 | `settings.voicePreference.autosaveNote` | 选择会自动保存，用于记录你的练习方向。当前偏好不会改变分析评分。 | 选择会自动保存，用于记录你的练习方向。当前偏好不会改变分析评分。 | Your choice is saved automatically and records the direction you are practicing. It does not change your analysis scores. | GeneratedStringSymbols_Localizable.swift:2484, SettingsView.swift:35 |
 | `settings.voicePreference.headline.subtitle` | 可以有明确的目标，也可以先探索。你随时都能回来调整。 | 可以有明确的目标，也可以先探索。你随时都能回来调整。 | Set a clear goal or just explore — you can come back and adjust anytime. | GeneratedStringSymbols_Localizable.swift:2493, SettingsView.swift:23 |
-| `settings.voicePreference.headline.title` | 找到你的声音方向 | 找到你的声音方向 | Find your voice direction | GeneratedStringSymbols_Localizable.swift:2502, SettingsView.swift:21 |
-| `settings.voicePreference.sectionTitle` | 声音偏好 | 声音偏好 | Voice preference | GeneratedStringSymbols_Localizable.swift:2511, SettingsView.swift:29 |
+| `settings.voicePreference.headline.title` | 找到你的声音方向 | 找到你的声音方向 | Find Your Voice Direction | GeneratedStringSymbols_Localizable.swift:2502, SettingsView.swift:21 |
+| `settings.voicePreference.sectionTitle` | 声音偏好 | 声音偏好 | Voice Preference | GeneratedStringSymbols_Localizable.swift:2511, SettingsView.swift:29 |
 | `voiceProfile.option.feminine.description` | 探索更明亮、柔和的声音 | 探索更明亮、柔和的声音 | Explore a brighter, softer sound | GeneratedStringSymbols_Localizable.swift:2520, VoicePreferences.swift:30 |
-| `voiceProfile.option.feminine.title` | 女性向声音 | 女性向声音 | Feminine-leaning voice | GeneratedStringSymbols_Localizable.swift:2529, VoicePreferences.swift:22 |
+| `voiceProfile.option.feminine.title` | 女性向声音 | 女性向声音 | Feminine-Leaning Voice | GeneratedStringSymbols_Localizable.swift:2529, VoicePreferences.swift:22 |
 | `voiceProfile.option.masculine.description` | 探索更低沉、厚实的声音 | 探索更低沉、厚实的声音 | Explore a lower, fuller sound | GeneratedStringSymbols_Localizable.swift:2538, VoicePreferences.swift:29 |
-| `voiceProfile.option.masculine.title` | 男性向声音 | 男性向声音 | Masculine-leaning voice | GeneratedStringSymbols_Localizable.swift:2547, VoicePreferences.swift:21 |
+| `voiceProfile.option.masculine.title` | 男性向声音 | 男性向声音 | Masculine-Leaning Voice | GeneratedStringSymbols_Localizable.swift:2547, VoicePreferences.swift:21 |
 | `voiceProfile.option.undecided.description` | 先了解自己的声音，慢慢找到方向 | 先了解自己的声音，慢慢找到方向 | Start by getting to know your voice and find your direction over time | GeneratedStringSymbols_Localizable.swift:2556, VoicePreferences.swift:31 |
-| `voiceProfile.option.undecided.title` | 暂不确定 | 暂不确定 | Not sure yet | GeneratedStringSymbols_Localizable.swift:2565, VoicePreferences.swift:23 |
+| `voiceProfile.option.undecided.title` | 暂不确定 | 暂不确定 | Not Sure Yet | GeneratedStringSymbols_Localizable.swift:2565, VoicePreferences.swift:23 |
 | `voiceProfile.privacyPromise.onDevice.description` | 声音分析在本机完成，录音不会上传到服务器，也不会共享给第三方。 | 声音分析在本机完成，录音不会上传到服务器，也不会共享给第三方。 | Voice analysis happens on this device. Recordings are never uploaded to a server or shared with third parties. | GeneratedStringSymbols_Localizable.swift:2574, VoicePreferences.swift:95 |
-| `voiceProfile.privacyPromise.onDevice.title` | 只在设备上分析 | 只在设备上分析 | Analyzed only on your device | GeneratedStringSymbols_Localizable.swift:2583, VoicePreferences.swift:95 |
+| `voiceProfile.privacyPromise.onDevice.title` | 只在设备上分析 | 只在设备上分析 | Analyzed Only on Your Device | GeneratedStringSymbols_Localizable.swift:2583, VoicePreferences.swift:95 |
 | `voiceProfile.privacyPromise.recordingUsage.description` | 分析结束后清理临时录音，历史记录仅保存分析结果。 | 分析结束后清理临时录音，历史记录仅保存分析结果。 | Temporary recordings are deleted after analysis; history keeps only the analysis results. | GeneratedStringSymbols_Localizable.swift:2592, VoicePreferences.swift:96 |
-| `voiceProfile.privacyPromise.recordingUsage.title` | 录音仅用于本次分析 | 录音仅用于本次分析 | Recordings are used only for this analysis | GeneratedStringSymbols_Localizable.swift:2601, VoicePreferences.swift:96 |
-| `voiceProfile.privacyPromise.title` | 隐私保护承诺 | 隐私保护承诺 | Our privacy promise | GeneratedStringSymbols_Localizable.swift:2610, VoicePreferences.swift:93 |
+| `voiceProfile.privacyPromise.recordingUsage.title` | 录音仅用于本次分析 | 录音仅用于本次分析 | Recordings Are Used Only for This Analysis | GeneratedStringSymbols_Localizable.swift:2601, VoicePreferences.swift:96 |
+| `voiceProfile.privacyPromise.title` | 隐私保护承诺 | 隐私保护承诺 | Our Privacy Promise | GeneratedStringSymbols_Localizable.swift:2610, VoicePreferences.swift:93 |
 | `voiceProfile.privacyPromise.userControl.description` | 声音偏好可随时修改。麦克风权限可在系统设置中关闭。 | 声音偏好可随时修改。麦克风权限可在系统设置中关闭。 | You can change your voice preference at any time, and turn off microphone access in system settings. | GeneratedStringSymbols_Localizable.swift:2619, VoicePreferences.swift:97 |
-| `voiceProfile.privacyPromise.userControl.title` | 选择始终由你掌控 | 选择始终由你掌控 | You stay in control of your choices | GeneratedStringSymbols_Localizable.swift:2628, VoicePreferences.swift:97 |
+| `voiceProfile.privacyPromise.userControl.title` | 选择始终由你掌控 | 选择始终由你掌控 | You Stay in Control of Your Choices | GeneratedStringSymbols_Localizable.swift:2628, VoicePreferences.swift:97 |

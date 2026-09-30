@@ -46,6 +46,7 @@ private struct ExportedPitchImage: Identifiable {
 }
 
 private struct PitchImageExportSheet: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let export: ExportedPitchImage
     @Environment(\.dismiss) private var dismiss
     @State private var showsFileExporter = false
@@ -69,7 +70,7 @@ private struct PitchImageExportSheet: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                HStack(spacing: 16) {
+                AccessibleStack(spacing: 16) {
                     Button("export.pitchImage.saveToFiles", systemImage: "folder") { showsFileExporter = true }
                     Spacer()
                     ShareLink(
@@ -81,7 +82,10 @@ private struct PitchImageExportSheet: View {
                 }
                 .buttonStyle(.bordered)
                 .padding()
-                .background(.regularMaterial)
+                .background {
+                    if reduceTransparency { Color(uiColor: .systemBackground) }
+                    else { Rectangle().fill(.regularMaterial) }
+                }
             }
             .fileExporter(
                 isPresented: $showsFileExporter,

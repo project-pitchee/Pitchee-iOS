@@ -39,12 +39,12 @@ struct RecordingView: View {
             }
         }
         .alert("recording.error.startFailed.title", isPresented: Binding(
-            get: { viewModel.errorMessage != nil && !showsAnalysis && !viewModel.hasResult },
-            set: { if !$0 { viewModel.clearError() } }
+            get: { viewModel.recordingError != nil && !showsAnalysis && !viewModel.hasResult },
+            set: { if !$0 { viewModel.clearRecordingError() } }
         )) {
-            Button("common.action.ok", role: .cancel) { viewModel.clearError() }
+            Button("common.action.ok", role: .cancel) { viewModel.clearRecordingError() }
         } message: {
-            Text(viewModel.errorMessage ?? String(localized: "common.error.tryAgainLater"))
+            Text(viewModel.recordingError ?? String(localized: "common.error.tryAgainLater"))
         }
     }
 

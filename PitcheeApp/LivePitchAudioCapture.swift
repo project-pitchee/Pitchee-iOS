@@ -58,6 +58,9 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
             commonFormat: .pcmFormatFloat32,
             interleaved: false
         )
+        #if os(iOS)
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: url.path)
+        #endif
         let converter = try LivePitchPCMConverter(sampleRate: inputFormat.sampleRate)
         let (stream, continuation) = AsyncStream<[Float]>.makeStream()
         pitchInput = continuation

@@ -392,6 +392,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pitchee 需要使用麦克风录制声音，以完成分析。";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Pitchee 需要将你导出的报告图片保存到相册。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pitchee 可在本机为练习录音生成字幕，录音不会上传。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -445,6 +446,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pitchee 需要使用麦克风录制声音，以完成分析。";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Pitchee 需要将你导出的报告图片保存到相册。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pitchee 可在本机为练习录音生成字幕，录音不会上传。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

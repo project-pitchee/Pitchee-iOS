@@ -7,14 +7,7 @@
 
 import SwiftUI
 
-enum VoicePreference: String, CaseIterable, Identifiable {
-    case masculine
-    case feminine
-    case undecided
-
-    /// Stable identifier persisted in `UserDefaults` — never display text.
-    var id: String { rawValue }
-
+extension VoicePreference {
     /// Option title, looked up in the string catalog at render time.
     var title: LocalizedStringKey {
         switch self {
@@ -32,17 +25,56 @@ enum VoicePreference: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Reads a value written by an older build, where the stored value was the
-    /// option's Chinese display text. Those literals are stored data, not copy,
-    /// so they are intentionally not localizable.
-    init?(legacyStoredValue: String) {
-        switch legacyStoredValue {
-        case "男性向声音": self = .masculine
-        case "女性向声音": self = .feminine
-        case "暂不确定": self = .undecided
-        default:
-            guard let match = VoicePreference(rawValue: legacyStoredValue) else { return nil }
-            self = match
+    var scoreTitle: LocalizedStringKey {
+        switch self {
+        case .masculine: "scoring.masculine.title"
+        case .feminine: "scoring.feminine.title"
+        case .undecided: "common.metric.compositeScore.title"
+        }
+    }
+
+    var scoreTitleText: String {
+        switch self {
+        case .masculine: String(localized: "scoring.masculine.title")
+        case .feminine: String(localized: "scoring.feminine.title")
+        case .undecided: String(localized: "common.metric.compositeScore.title")
+        }
+    }
+
+    var standardMetricTitle: LocalizedStringKey {
+        switch self {
+        case .masculine: "scoring.masculine.standard.title"
+        case .feminine, .undecided: "common.metric.standardScore.title"
+        }
+    }
+
+    var standardMetricTitleText: String {
+        switch self {
+        case .masculine: String(localized: "scoring.masculine.standard.title")
+        case .feminine, .undecided: String(localized: "common.metric.standardScore.title")
+        }
+    }
+
+    var scoreExplanationTitle: LocalizedStringKey {
+        switch self {
+        case .masculine: "scoring.masculine.explanation.title"
+        case .feminine, .undecided: "scoring.explanation.title"
+        }
+    }
+
+    var scoreDirectionDescription: LocalizedStringKey {
+        switch self {
+        case .masculine: "scoring.masculine.explanation.description"
+        case .feminine: "scoring.feminine.explanation.description"
+        case .undecided: "scoring.explanation.intro.description"
+        }
+    }
+
+    var chartTargetLabel: LocalizedStringKey {
+        switch self {
+        case .masculine: "scoring.masculine.chartTarget"
+        case .feminine: "scoring.feminine.chartTarget"
+        case .undecided: "scoring.undecided.chartTarget"
         }
     }
 }
@@ -93,7 +125,7 @@ struct PrivacyPromiseView: View {
             Label("voiceProfile.privacyPromise.title", systemImage: "lock.shield")
                 .font(.headline)
             promise("voiceProfile.privacyPromise.onDevice.title", detail: "voiceProfile.privacyPromise.onDevice.description", symbol: "iphone")
-            promise("voiceProfile.privacyPromise.recordingUsage.title", detail: "voiceProfile.privacyPromise.recordingUsage.description", symbol: "waveform")
+            promise("voiceProfile.privacyPromise.recordingUsage.title", detail: "practice.audio.lifetime", symbol: "waveform")
             promise("voiceProfile.privacyPromise.userControl.title", detail: "voiceProfile.privacyPromise.userControl.description", symbol: "slider.horizontal.3")
         }
         .padding(22)

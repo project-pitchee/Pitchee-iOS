@@ -34,6 +34,30 @@ The upstream `models` directory is copied into the application bundle as a
 folder resource. `PitcheeCore.bundledModelDirectory()` resolves that directory,
 and `PitcheeCoreAnalyzer` owns and serializes access to one native analyzer.
 
+## Scores for the selected voice direction
+
+Core's VFP and composite output retain their original feminine reference.
+`VoiceDirectionScore` derives the masculine presentation from the same result:
+masculine alignment is `100 - VFP`, and the pitch contribution is
+`clamp((200 - F0) / 90, 0, 1)`. Naturalness and the composite weights stay the
+same. Core's pitch rules are reflected around 155 Hz, so the 165 Hz threshold
+becomes 145 Hz and the boost reaches full pitch strength at 120 Hz. Missing
+or invalid pitch falls back to masculine alignment alone. This is a directional
+interpretation of the existing model, not a separately trained masculine model.
+
+Results, explanations, exports, history, daily best selections, and trend
+averages use this shared calculation. Stored results remain unchanged so
+switching preferences also works for existing recordings. Feminine and
+undecided preferences preserve the original Core score.
+
+Run `./Scripts/test-voice-scoring.sh` to compare the Swift calculation against
+the real C++ scoring implementation across threshold boundaries, caps, boosts,
+and missing pitch. Run `./Scripts/test-insights.sh` to check history and trend
+selection after changing direction. Update the score explanations and string
+catalog whenever the scoring rules change.
+
+## Realtime pitch and export
+
 Realtime F0 uses the same analyzer and Core's `pitchee_realtime_f0_*` API.
 Before each recording, `resetRealtimeF0()` creates or resets the stream.
 `LivePitchAudioCapture` writes the original PCM16 WAV and uses a persistent

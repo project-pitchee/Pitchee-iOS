@@ -1,4 +1,12 @@
+//
+//  InsightsData.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/9/27.
+//
+
 import Foundation
+import SwiftUI
 
 enum InsightsRange: String, CaseIterable, Identifiable {
     case sevenDays, thirtyDays, ninetyDays, all
@@ -34,7 +42,9 @@ enum InsightsRange: String, CaseIterable, Identifiable {
 }
 
 enum InsightsMetric: String, CaseIterable, Identifiable {
-    case composite, naturalness, pitch
+    case composite, naturalness, pitch, variation
+
+    var hasBestView: Bool { self == .composite || self == .naturalness }
 
     var id: Self { self }
 
@@ -43,6 +53,7 @@ enum InsightsMetric: String, CaseIterable, Identifiable {
         case .composite: String(localized: "common.metric.compositeScore.title")
         case .naturalness: String(localized: "common.metric.naturalness.title")
         case .pitch: String(localized: "common.metric.meanPitch.title")
+        case .variation: String(localized: "practice.metric.variation")
         }
     }
 
@@ -51,6 +62,7 @@ enum InsightsMetric: String, CaseIterable, Identifiable {
         case .composite: String(localized: "insights.metric.compositeScore.description")
         case .naturalness: String(localized: "insights.metric.naturalness.description")
         case .pitch: String(localized: "insights.metric.meanPitch.description")
+        case .variation: String(localized: "practice.kind.pitchStability.instruction")
         }
     }
 
@@ -59,29 +71,40 @@ enum InsightsMetric: String, CaseIterable, Identifiable {
         case .composite: "chart.line.uptrend.xyaxis"
         case .naturalness: "waveform.path.ecg"
         case .pitch: "tuningfork"
+        case .variation: "waveform.path"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .composite: .accentColor
+        case .naturalness: .teal
+        case .pitch: .orange
+        case .variation: .purple
         }
     }
 
     var unit: String {
-        self == .pitch
+        !hasBestView
             ? String(localized: "common.unit.hertz")
             : String(localized: "common.unit.pointsOutOf100")
     }
 
-    func value(in assessment: RecordingAssessment) -> Double? {
+    func value(in assessment: RecordingAssessment, preference: VoicePreference = .undecided) -> Double? {
         let value: Double?
         switch self {
-        case .composite: value = assessment.finalScore
+        case .composite: value = assessment.finalScore(for: preference)
         case .naturalness: value = assessment.naturalnessScore
         case .pitch: value = assessment.meanPitchHz
+        case .variation: value = assessment.result?.f0.standardDeviationHz
         }
-        guard let value, value.isFinite, self != .pitch || value > 0 else { return nil }
+        guard let value, value.isFinite, value >= 0, self != .pitch || value > 0 else { return nil }
         return value
     }
 
     func formatted(_ value: Double?) -> String {
         guard let value, value.isFinite else { return String(localized: "common.placeholder.noValue") }
-        return value.formatted(.number.precision(.fractionLength(self == .pitch ? 1 : 0)))
+        return value.formatted(.number.precision(.fractionLength(hasBestView ? 0 : 1)))
     }
 }
 
@@ -90,6 +113,31 @@ enum InsightsDestination: Hashable {
 }
 
 enum InsightsData {
+    static func cohorts(_ assessments: [RecordingAssessment]) -> [PracticeCohort] {
+        var seen = Set<PracticeCohort>()
+        return assessments.sorted { $0.recordedAt > $1.recordedAt }.compactMap {
+            guard let cohort = $0.cohort, seen.insert(cohort).inserted else { return nil }
+            return cohort
+        }
+    }
+
+    static func comparable(_ assessments: [RecordingAssessment], cohort: PracticeCohort) -> [RecordingAssessment] {
+        assessments.filter { $0.isBaselineEligible && $0.cohort == cohort }
+    }
+
+    static func dailySummary(
+        _ assessments: [RecordingAssessment], cohort: PracticeCohort, metric: InsightsMetric,
+        calendar: Calendar = .current
+    ) -> [DailyPracticeSummary] {
+        Dictionary(grouping: comparable(assessments, cohort: cohort)) { calendar.startOfDay(for: $0.recordedAt) }
+            .compactMap { date, records in
+                DailyPracticeSummary(date: date, values: records.compactMap { record in
+                    if metric == .composite { return record.capturedFinalScore }
+                    return metric.value(in: record)
+                })
+            }.sorted { $0.date < $1.date }
+    }
+
     static func assessments(
         _ assessments: [RecordingAssessment],
         in range: InsightsRange,
@@ -101,13 +149,16 @@ enum InsightsData {
 
     /// Every metric uses the same daily representative as the home dashboard.
     static func dailyBest(
-        _ assessments: [RecordingAssessment], calendar: Calendar = .current
+        _ assessments: [RecordingAssessment], calendar: Calendar = .current,
+        preference: VoicePreference = .undecided
     ) -> [RecordingAssessment] {
         Dictionary(grouping: assessments) { calendar.startOfDay(for: $0.recordedAt) }
             .values.compactMap { records in
                 records.max { lhs, rhs in
-                    if lhs.finalScore == rhs.finalScore { return lhs.recordedAt < rhs.recordedAt }
-                    return lhs.finalScore < rhs.finalScore
+                    let left = lhs.finalScore(for: preference)
+                    let right = rhs.finalScore(for: preference)
+                    if left == right { return lhs.recordedAt < rhs.recordedAt }
+                    return left < right
                 }
             }
             .sorted { $0.recordedAt < $1.recordedAt }

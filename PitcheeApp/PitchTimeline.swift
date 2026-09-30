@@ -14,6 +14,40 @@ nonisolated struct LivePitchSample: Identifiable, Sendable {
     var id: TimeInterval { elapsedTime }
 }
 
+/// A bounded snapshot for chart exploration. Missing/unvoiced samples stay in
+/// the table and split the audio graph, so silence is never reported as 0 Hz.
+nonisolated struct PitchAccessibilitySnapshot: Identifiable, Sendable {
+    let id = UUID()
+    let range: ClosedRange<TimeInterval>
+    let samples: [LivePitchSample]
+
+    init(samples: [LivePitchSample], elapsedTime: TimeInterval) {
+        let end = max(PitchTimeline.visibleSeconds, elapsedTime.isFinite ? elapsedTime : 0)
+        let range = (end - PitchTimeline.visibleSeconds)...end
+        self.range = range
+        self.samples = samples.filter { $0.elapsedTime.isFinite && range.contains($0.elapsedTime) }
+            .sorted { $0.elapsedTime < $1.elapsedTime }
+    }
+
+    var voicedSegments: [[LivePitchSample]] {
+        var segments: [[LivePitchSample]] = []
+        var current: [LivePitchSample] = []
+        for sample in samples {
+            guard let pitch = sample.pitchHz, pitch.isFinite, pitch > 0 else {
+                if !current.isEmpty { segments.append(current); current = [] }
+                continue
+            }
+            if let last = current.last, sample.elapsedTime - last.elapsedTime > 0.4 {
+                segments.append(current)
+                current = []
+            }
+            current.append(sample)
+        }
+        if !current.isEmpty { segments.append(current) }
+        return segments
+    }
+}
+
 nonisolated struct PitchTimeline: Sendable {
     static let visibleSeconds: TimeInterval = 3
 

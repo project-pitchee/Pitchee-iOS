@@ -32,14 +32,49 @@ final class PianoSoundEngine: ObservableObject {
     private let engine = AVAudioEngine()
     private let renderer = PianoToneRenderer(sampleRate: 48_000)
     private var sourceNode: AVAudioSourceNode?
-    private var pendingPause: DispatchWorkItem?
+    private var sessionOwner: UUID?
+    private var preparation: Task<Bool, Never>?
+    private var pendingNote: Task<Void, Never>?
+    private var pendingMIDI: Int?
 
     @discardableResult
     func prepare() async -> Bool {
-        pendingPause?.cancel()
-        pendingPause = nil
-        guard await configureAudioSession(), !Task.isCancelled else { return false }
+        if let preparation { return await preparation.value }
+        if engine.isRunning { return true }
+        let owner = UUID()
+        sessionOwner = owner
+        let task = Task { [weak self] in
+            guard let self else { return false }
+            do {
+                try await AudioSessionController.activate(owner: owner, use: .piano) { [weak self] in
+                    self?.stopAll()
+                }
+                guard !Task.isCancelled, sessionOwner == owner else {
+                    AudioSessionController.deactivate(owner: owner)
+                    return false
+                }
+                guard startEngine() else {
+                    AudioSessionController.deactivate(owner: owner)
+                    sessionOwner = nil
+                    return false
+                }
+                return true
+            } catch {
+                AudioSessionController.deactivate(owner: owner)
+                if sessionOwner == owner { sessionOwner = nil }
+                if !(error is CancellationError) {
+                    logger.error("Unable to prepare piano: \(String(describing: error), privacy: .private)")
+                }
+                return false
+            }
+        }
+        preparation = task
+        let ready = await task.value
+        if sessionOwner == owner || sessionOwner == nil { preparation = nil }
+        return ready
+    }
 
+    private func startEngine() -> Bool {
         if sourceNode == nil {
             guard let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1) else {
                 logger.error("Unable to create piano audio format")
@@ -74,42 +109,40 @@ final class PianoSoundEngine: ObservableObject {
     }
 
     func play(note: PianoNote) {
-        renderer.noteOn(midi: note.midi, oneShot: true)
+        schedule(note: note, oneShot: true)
     }
 
     func start(note: PianoNote) {
-        renderer.noteOn(midi: note.midi)
+        schedule(note: note, oneShot: false)
+    }
+
+    private func schedule(note: PianoNote, oneShot: Bool) {
+        pendingNote?.cancel()
+        pendingMIDI = note.midi
+        pendingNote = Task { [weak self] in
+            guard let self, await prepare(), !Task.isCancelled else { return }
+            renderer.noteOn(midi: note.midi, oneShot: oneShot)
+        }
     }
 
     func stop(note: PianoNote) {
+        if pendingMIDI == note.midi {
+            pendingNote?.cancel()
+            pendingNote = nil
+            pendingMIDI = nil
+        }
         renderer.noteOff(midi: note.midi)
     }
 
     func stopAll() {
+        pendingNote?.cancel()
+        pendingNote = nil
+        pendingMIDI = nil
+        preparation?.cancel()
+        preparation = nil
         renderer.releaseAll()
-        pendingPause?.cancel()
-        // Let the audio thread render the release to zero before suspending it.
-        let pause = DispatchWorkItem { [weak self] in
-            self?.engine.pause()
-        }
-        pendingPause = pause
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: pause)
-    }
-
-    private func configureAudioSession() async -> Bool {
-        do {
-            try await AudioSessionController.activate(
-                category: .playback,
-                mode: .default,
-                options: [.mixWithOthers],
-                preferredIOBufferDuration: 0.005
-            )
-            return true
-        } catch is CancellationError {
-            return false
-        } catch {
-            logger.error("Unable to configure piano audio session: \(String(describing: error), privacy: .public)")
-            return false
-        }
+        engine.pause()
+        if let sessionOwner { AudioSessionController.deactivate(owner: sessionOwner) }
+        sessionOwner = nil
     }
 }

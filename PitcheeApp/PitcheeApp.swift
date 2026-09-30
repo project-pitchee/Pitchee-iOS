@@ -7,17 +7,51 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
 
 @main
 struct PitcheeApp: App {
+    private let container: ModelContainer?
+    @Environment(\.scenePhase) private var scenePhase
+
     init() {
-        AppStorageMigration.run()
+        do {
+            let library = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
+            try PrivateAppStorage.prepare(libraryDirectory: library)
+            try PrivateAppStorage.removeAbandonedRecordings(in: FileManager.default.temporaryDirectory)
+            AppStorageMigration.run()
+            // Keep SwiftData's existing default URL so no history migration is needed.
+            let configuration = ModelConfiguration(schema: Schema([RecordingAssessment.self]), cloudKitDatabase: .none)
+            container = try ModelContainer(for: RecordingAssessment.self, configurations: configuration)
+        } catch {
+            container = nil
+            Logger(subsystem: "com.lvyzhan.Pitchee", category: "Storage")
+                .error("Private local storage could not be prepared.")
+        }
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .modelContainer(for: RecordingAssessment.self)
+            if let container {
+                ContentView()
+                    .modelContainer(container)
+                    .onAppear {
+                        LocalDiagnosticsStore.shared.refresh()
+                        LocalScoreStudyStore.shared.refresh()
+                    }
+                    .onChange(of: scenePhase) { _, phase in
+                        if phase == .active {
+                            LocalDiagnosticsStore.shared.refresh()
+                            LocalScoreStudyStore.shared.refresh()
+                        }
+                    }
+            } else {
+                ContentUnavailableView {
+                    Label("settings.privateStorage.unavailable.title", systemImage: "lock.trianglebadge.exclamationmark")
+                } description: {
+                    Text("settings.privateStorage.unavailable.description")
+                }
+            }
         }
     }
 }

@@ -79,6 +79,8 @@
    不写代码位置、行号、Swift 语法或内部重构待办。
 8. **平台定义的键不改名。** 例如 `Info.plist` 的 `NSMicrophoneUsageDescription`、
    `NSPhotoLibraryAddUsageDescription` 由系统定义，只能通过 `Resources/InfoPlist.xcstrings` 翻译其值。
+9. **大小写按语言和用途确定。** 英文界面标题、指标名和按钮统一使用 Title Case；
+   正文和辅助说明使用 sentence case。其他语言遵循各自惯例，具体见第 13 节。
 
 ## 4. 存储键（UserDefaults / @AppStorage）
 
@@ -219,3 +221,29 @@ SF Symbols 会自动镜像需要镜像的符号（`chevron.right` 表示「下�
 
 朗读型的无障碍文本是例外：`recording.timeline.currentPitch.a11y` 要把单位**读出来**（`%1$lld hertz` / `%1$lld 赫兹`），
 所以它不走单位符号，各语言各有自己的写法（ko `헤르츠`、fi `hertsi`、pl `herc`、ru `герц`）。
+
+## 13. 界面标题大小写
+
+英文页面标题、区块标题、指标名称、按钮、选择项和独立的图例名称使用 **Title Case**，
+直接在 String Catalog 中保存最终文案。例如 `Average Pitch`、`Overall Score`、
+`Voice Details`、`Save to Files`、`Stop and Analyze`。
+
+- 首尾词和主要词大写，包括动词（如 `Is`、`Are`、`Be`）和代词；中间的冠词、并列连词及
+  四个字母以内的介词通常小写，例如 `a`、`the`、`and`、`or`、`to`、`of`、`in`、`with`。
+- 连字符连接的主要词分别大写，例如 `Feminine-Leaning Voice`、`Practice Self-Rating`。
+- 正文、说明、字幕、错误消息正文、无障碍朗读句和数值后的单位使用正常句式，
+  不因附近的标题大写而同步改写。例如说明中的 `average pitch`、数值区间中的 `5 seconds`。
+- 保留品牌、缩写、公式、格式符和单位的固有写法，例如 `Pitchee`、`PITCHEE`、`PDF`、`F0`、
+  `Hz`、`dBFS`、`s`、`%1$@`。排版换行也不应被改写。
+- 不通过 `.capitalized`、`.localizedCapitalized` 或统一的 `.textCase` 来修正文案。
+  这些转换不了解文案用途，可能错误改变介词、缩写、单位或其他语言的拼写。
+
+**英文的 Title Case 不是跨语言规则。** 法语 `Hauteur moyenne`、西班牙语 `Promedio de tono`
+和意大利语 `Tono medio` 的后续普通词小写符合标题惯例；德语按语法大写名词，
+例如 `Mittlere Tonhöhe`；中文、日文、韩文、阿拉伯文等没有英文式的字母大小写规则。
+其他语言的标题应由该语言的界面书写惯例决定，不能仅凭「第二个词小写」判定为错误。
+
+改标题时同时检查 `.title`、实际用作指标名的 `.label`、操作按钮及未使用这些后缀的标题键
+（如 `settings.voicePreference.sectionTitle`、`onboarding.footer.finishSetup`），并同步映射表中已有的英文值。
+验证时编译两个 `.xcstrings` 目录，检查占位符、复数变体、空值和语言覆盖率；
+大小写修正不代表其他语言已经通过母语者审校或新增文案已经补齐翻译。

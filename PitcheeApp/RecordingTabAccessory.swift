@@ -39,19 +39,20 @@ struct RecordingTabAccessory: ViewModifier {
 private struct RecordingAccessoryContent: View {
     @ObservedObject var viewModel: AnalysisViewModel
     let action: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .combine)
@@ -59,20 +60,23 @@ private struct RecordingAccessoryContent: View {
             Button(action: action) {
                 Group {
                     if viewModel.isRequestingPermission {
-                        ProgressView().tint(.white)
+                        ProgressView().tint(.red)
                     } else {
-                        Image(systemName: viewModel.isRecording ? "stop.fill" : (viewModel.isAnalyzing ? "arrow.up.right" : "mic.fill"))
-                            .font(.system(size: 18, weight: .semibold))
+                        Image(systemName: actionSymbol)
+                            .font(.system(size: 32, weight: .regular))
+                            .symbolRenderingMode(.monochrome)
+                            .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
                     }
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(viewModel.needsAnalysisScreen ? Color.primary : Color.red)
                 .frame(width: 44, height: 44)
-                .background(viewModel.isRecording ? Color.red : Color.accentColor, in: Circle())
                 .contentShape(Circle())
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isRequestingPermission)
             .accessibilityLabel(accessibilityLabel)
+            .accessibilityIdentifier("recording.primaryAction")
+            .accessibilityInputLabels([accessibilityLabel])
             .accessibilityHint(viewModel.isRecording
                 ? String(localized: "recording.controls.stopAndAnalyze.hint")
                 : "")
@@ -84,23 +88,31 @@ private struct RecordingAccessoryContent: View {
         .sensoryFeedback(.impact(weight: .light), trigger: viewModel.isRecording)
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var actionSymbol: String {
+        if viewModel.isRecording { return "stop.circle" }
+        if viewModel.needsAnalysisScreen { return "arrow.up.right.circle" }
+        return "record.circle"
+    }
+
     private var accessibilityLabel: String {
         if viewModel.isRecording { return String(localized: "recording.controls.stopAndAnalyze") }
-        if viewModel.isAnalyzing { return String(localized: "recording.controls.viewAnalysisProgress") }
+        if viewModel.needsAnalysisScreen { return String(localized: "recording.controls.viewAnalysisProgress") }
         return String(localized: "recording.controls.startRecording")
     }
 
     private var title: String {
         if viewModel.isRecording { return String(localized: "recording.controls.recordingInProgress") }
         if viewModel.isRequestingPermission { return String(localized: "recording.controls.preparingMicrophone") }
-        if viewModel.isAnalyzing { return String(localized: "recording.controls.analyzingAudio") }
+        if viewModel.needsAnalysisScreen { return String(localized: "recording.controls.analyzingAudio") }
         return String(localized: "recording.controls.startRecording")
     }
 
     private var subtitle: LocalizedStringKey {
         if viewModel.isRecording { return "recording.controls.stopAndAnalyze.subtitle" }
         if viewModel.isRequestingPermission { return "recording.controls.preparingMicrophone.subtitle" }
-        if viewModel.isAnalyzing { return "recording.controls.viewAnalysisProgress.subtitle" }
+        if viewModel.needsAnalysisScreen { return "recording.controls.viewAnalysisProgress.subtitle" }
         return "recording.controls.startRecording.subtitle"
     }
 }

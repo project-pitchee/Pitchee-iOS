@@ -9,6 +9,7 @@ trap 'rm -rf "$test_directory"' EXIT HUP INT TERM
 xcrun swiftc -parse-as-library \
     "$project_directory/PitcheeApp/Interop/Core/AnalysisResult.swift" \
     "$project_directory/PitcheeApp/PitchTimeline.swift" \
+    "$project_directory/PitcheeApp/AccessibilitySupport.swift" \
     "$project_directory/PitcheeApp/LivePitchChartView.swift" \
     "$project_directory/Tests/PitchTimelineTests.swift" \
     -o "$test_directory/pitch-image-tests"

@@ -9,7 +9,7 @@ import AVFoundation
 import Foundation
 import OSLog
 
-/// Serializes changes to the shared session without blocking the main actor.
+/// Owns the shared session and serializes hardware changes off the main actor.
 @MainActor
 enum AudioSessionController {
     private static let queue = DispatchQueue(
@@ -17,21 +17,38 @@ enum AudioSessionController {
         qos: .userInitiated
     )
     private static let logger = Logger(subsystem: "com.lvyzhan.Pitchee", category: "AudioSession")
+    private static let coordinator = AudioSessionCoordinator(
+        activate: configure,
+        deactivate: enqueueDeactivation
+    )
 
     static func activate(
-        category: AVAudioSession.Category,
-        mode: AVAudioSession.Mode,
-        options: AVAudioSession.CategoryOptions = [],
-        preferredIOBufferDuration: TimeInterval? = nil
+        owner: UUID,
+        use: AudioSessionCoordinator.Use,
+        stopPlayback: @escaping @MainActor () -> Void = {}
     ) async throws {
-        try Task.checkCancellation()
+        try await coordinator.activate(owner: owner, use: use, stopPlayback: stopPlayback)
+    }
+
+    static func deactivate(owner: UUID) {
+        coordinator.release(owner: owner)
+    }
+
+    private static func configure(_ use: AudioSessionCoordinator.Use) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             queue.async {
                 do {
                     let session = AVAudioSession.sharedInstance()
-                    try session.setCategory(category, mode: mode, options: options)
-                    if let preferredIOBufferDuration {
-                        try session.setPreferredIOBufferDuration(preferredIOBufferDuration)
+                    switch use {
+                    case .recording:
+                        try session.setCategory(.record, mode: .measurement)
+                        try session.setPreferredIOBufferDuration(0.02)
+                    case .piano:
+                        try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+                        try session.setPreferredIOBufferDuration(0.005)
+                    case .playback:
+                        try session.setCategory(.playback, mode: .spokenAudio)
+                        try session.setPreferredIOBufferDuration(0.02)
                     }
                     // Keep configuration and activation together on this queue,
                     // including on OS versions without async activation APIs.
@@ -44,7 +61,7 @@ enum AudioSessionController {
         }
     }
 
-    static func deactivate() {
+    private static func enqueueDeactivation() {
         let logger = logger
         // Enqueue immediately so a subsequent activation cannot overtake cleanup.
         queue.async {

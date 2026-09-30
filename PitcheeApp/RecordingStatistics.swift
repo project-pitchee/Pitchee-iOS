@@ -70,6 +70,11 @@ nonisolated struct RecordingVolumeStatistics: Sendable {
     let high95DBFS: Double?
     let low5DBFS: Double?
     let windows: [RecordingVolumeWindow]
+    var clippedSampleFraction: Double? = nil
+
+    var measuredBackgroundDBFS: Double? {
+        RecordingStatisticsMath.percentile(0.5, in: windows.compactMap(\.backgroundDBFS).sorted())
+    }
 }
 
 /// A time-aligned loudness sample used by the export report. Voice and
@@ -89,7 +94,7 @@ nonisolated enum RecordingVolumeAnalyzer {
         wavFile: URL,
         speechSegments: [PitcheeAnalysisResult.Segment]
     ) throws -> RecordingVolumeStatistics {
-        let file = try AVAudioFile(forReading: wavFile)
+        let file = try AVAudioFile(forReading: wavFile, commonFormat: .pcmFormatFloat32, interleaved: false)
         let format = file.processingFormat
         let framesPerWindow = AVAudioFrameCount(max(1, Int(format.sampleRate * windowSeconds)))
         guard let buffer = AVAudioPCMBuffer(
@@ -102,13 +107,31 @@ nonisolated enum RecordingVolumeAnalyzer {
         var speechLevels: [Double] = []
         var environmentLevels: [Double] = []
         var windows: [RecordingVolumeWindow] = []
+        var sampleCount = 0
+        var clippedCount = 0
 
         while file.framePosition < file.length {
             let startFrame = file.framePosition
             try file.read(into: buffer, frameCount: framesPerWindow)
             guard buffer.frameLength > 0 else { break }
-            guard let samples = LivePitchAudioCapture.monoSamples(from: buffer) else {
+            guard let channels = buffer.floatChannelData, format.channelCount > 0 else {
                 throw RecordingVolumeAnalyzerError.unsupportedAudioFormat
+            }
+            let samples = (0..<Int(buffer.frameLength)).map { frame in
+                (0..<Int(format.channelCount)).reduce(Float(0)) { $0 + channels[$1][frame] } / Float(format.channelCount)
+            }
+            // Check each input channel before downmixing: opposite-polarity
+            // clipped channels must not cancel each other out in the detector.
+            if let channels = buffer.floatChannelData {
+                let frameCount = Int(buffer.frameLength)
+                let channelCount = Int(format.channelCount)
+                for channel in 0..<channelCount {
+                    for frame in 0..<frameCount {
+                        let value = format.isInterleaved ? channels[0][frame * channelCount + channel] : channels[channel][frame]
+                        sampleCount += 1
+                        if abs(value) >= 0.999 { clippedCount += 1 }
+                    }
+                }
             }
 
             var rms: Float = 0
@@ -156,7 +179,8 @@ nonisolated enum RecordingVolumeAnalyzer {
             medianDBFS: RecordingStatisticsMath.percentile(0.50, in: sortedSpeechLevels),
             high95DBFS: RecordingStatisticsMath.percentile(0.95, in: sortedSpeechLevels),
             low5DBFS: RecordingStatisticsMath.percentile(0.05, in: sortedSpeechLevels),
-            windows: windows
+            windows: windows,
+            clippedSampleFraction: sampleCount > 0 ? Double(clippedCount) / Double(sampleCount) : nil
         )
     }
 }
