@@ -208,7 +208,7 @@ enum LocalScoreStudyTests {
         check(failed.storageUnavailable && failed.authorizeRecording() == nil, "Write errors never create untracked study sessions")
 
         func result(pitch: Double? = 120, naturalness: Double = 100) -> PitcheeAnalysisResult {
-            .init(schemaVersion: 2, modelVersion: "test",
+            .init(schemaVersion: 2, modelVersion: "test", scoreProfile: nil,
                   audio: .init(sourceSampleRate: 16_000, sourceChannels: 1, inputSeconds: 10, analyzedSeconds: 10),
                   vad: .init(segmentCount: 1, speechSeconds: 8, sileroSegmentCount: 1, discardedBreathLikeCount: 0, trimmedSegmentCount: 0, segments: []),
                   f0: .init(windowSeconds: 0.05, meanHz: pitch, standardDeviationHz: 1, voicedFrameCount: 10, voicedWindowCount: 10, windows: []),
@@ -219,8 +219,8 @@ enum LocalScoreStudyTests {
         check(ScoreStudyEvaluator.direction(for: .undecided) == nil, "Never treat an undecided user as feminine")
         check(ScoreStudyEvaluator.pair(for: result(), direction: .feminine)?.lossDifference(from: .mostly) == -2,
               "Feminine candidate uses Core's base score and baseline uses its final score")
-        check(ScoreStudyEvaluator.pair(for: result(), direction: .masculine)?.lossDifference(from: .fully) == 1,
-              "Masculine comparison uses the same directional rules as the normal product")
+        check(ScoreStudyEvaluator.pair(for: result(), direction: .masculine)?.lossDifference(from: .fully) == 0,
+              "Masculinization's continuous Core score has no candidate cap")
         check(ScoreStudyEvaluator.pair(for: result(pitch: nil), direction: .feminine) == nil,
               "Missing F0 must not masquerade as evidence for the candidate")
         check(ScoreStudyEvaluator.pair(for: result(naturalness: .nan), direction: .masculine) == nil,

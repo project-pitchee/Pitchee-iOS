@@ -78295,7 +78295,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This score follows your masculine voice goal. Masculine alignment is 100 minus the feminine tendency score. Lower pitch contributes more within the reference range, while naturalness and adjustment rules also affect the result."
+            "value" : "This score follows your masculine voice goal. Core combines VFP and mean F0 with a continuous formula; naturalness is shown separately and does not change this score."
           }
         },
         "es" : {
@@ -78427,13 +78427,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "该评分针对男性化目标。男性化倾向为 100 减去女性化倾向分；在参考范围内，较低的音高贡献更高，同时结合自然度和调整规则计算结果。"
+            "value" : "该评分针对男性化目标。Core 将 VFP 和平均 F0 代入连续公式计算；自然度单独展示，不改变男性化综合分。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此評分針對男性化目標。男性化傾向為 100 減去女性化傾向分；在參考範圍內，較低的音高貢獻更高，同時結合自然度與調整規則計算結果。"
+            "value" : "此評分針對男性化目標。Core 將 VFP 與平均 F0 代入連續公式計算；自然度單獨顯示，不改變男性化綜合分。"
           }
         }
       }

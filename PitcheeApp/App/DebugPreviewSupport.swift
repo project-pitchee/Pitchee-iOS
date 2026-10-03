@@ -71,6 +71,7 @@ enum DebugPreviewData {
         return PitcheeAnalysisResult(
             schemaVersion: 2,
             modelVersion: "debug-preview",
+            scoreProfile: nil,
             audio: .init(sourceSampleRate: 44_100, sourceChannels: 1, inputSeconds: 12, analyzedSeconds: 12),
             vad: .init(
                 segmentCount: segments.count,

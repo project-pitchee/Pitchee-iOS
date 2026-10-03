@@ -19,7 +19,7 @@
 
 例如：自评为第 3 级，基线映射为第 1 级，候选映射为第 3 级，差值是 `0 - 2 = -2`。负值表示候选更接近这次自评；0 表示距离相同，也可能是两版产生了相同等级。
 
-女性向使用 Core 结果中的 `composite.finalScore` 与 `baseScore`；男性向使用现有 `VoiceDirectionScore` 的镜像规则结果。候选复用同一次 Core 推理，无需再运行声学模型，也不重新读取历史录音。F0 必须为有限正数，VFP、自然度及两版分数必须有效且在范围内，否则记为不可比较；这些检查不能保证声学估计准确。
+女性向使用 Core 结果中的 `composite.finalScore` 与 `baseScore`；男性向使用 Core masculinization profile，旧结果再由 `VoiceDirectionScore` 兼容计算。候选复用同一次 Core 推理，无需再运行声学模型，也不重新读取历史录音。F0 必须为有限正数，VFP、自然度及两版分数必须有效且在范围内，否则记为不可比较；这些检查不能保证声学估计准确。
 
 ## 用户流程
 

@@ -8,6 +8,7 @@ trap 'rm -rf "$test_directory"' EXIT HUP INT TERM
 
 xcrun clang++ -std=c++17 \
     -I "$project_directory/Dependencies/PitcheeCore/src" \
+    -I "$project_directory/Dependencies/PitcheeCore/include" \
     "$project_directory/Dependencies/PitcheeCore/src/scoring.cpp" \
     "$project_directory/Tests/Voice/VoiceScoringReference.cpp" \
     -o "$test_directory/scoring-reference"

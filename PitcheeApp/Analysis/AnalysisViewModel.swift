@@ -439,6 +439,12 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     ) {
         analysisTask?.cancel()
         let practiceSnapshot = practice
+        let analysisProfile: PitcheeScoreProfile = {
+            let preference = practiceSnapshot?.target
+                ?? VoicePreference(legacyStoredValue: UserDefaults.standard.string(forKey: AppStorageKey.voicePreference) ?? "")
+                ?? .undecided
+            return preference == .masculine ? .masculinization : .feminization
+        }()
         let previousID = takes.first.flatMap { $0.historySaved ? $0.id : nil }
         let diagnostics = LocalDiagnosticsStore.shared
         let diagnosticToken = diagnostics.beginAttempt()
@@ -466,7 +472,10 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                 try Task.checkCancellation()
                 let analyzer = try await preparedAnalyzer()
 
-                let analysisResult = try await analyzer.analyze(wavFile: url)
+                let analysisResult = try await analyzer.analyze(
+                    wavFile: url,
+                    scoreProfile: analysisProfile
+                )
                 try Task.checkCancellation()
                 if let studyAttempt {
                     studyPair = ScoreStudyEvaluator.pair(for: analysisResult, direction: studyAttempt.direction)

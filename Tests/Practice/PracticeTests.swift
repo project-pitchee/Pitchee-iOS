@@ -40,7 +40,7 @@ enum PracticeTests {
         let day = calendar.date(from: DateComponents(year: 2026, month: 9, day: 30))!
         let context = PracticeContext(kind: .pitchObservation, target: .masculine)
         func result(_ score: Double = 70, pitch: Double? = 150, naturalness: Double = 75) -> PitcheeAnalysisResult {
-            PitcheeAnalysisResult(schemaVersion: 2, modelVersion: "practice-test",
+            PitcheeAnalysisResult(schemaVersion: 2, modelVersion: "practice-test", scoreProfile: nil,
                 audio: .init(sourceSampleRate: 16000, sourceChannels: 1, inputSeconds: 10, analyzedSeconds: 10),
                 vad: .init(segmentCount: 0, speechSeconds: 8, sileroSegmentCount: 0, discardedBreathLikeCount: 0, trimmedSegmentCount: 0, segments: []),
                 f0: .init(windowSeconds: 0.5, meanHz: pitch, standardDeviationHz: 12, voicedFrameCount: 10, voicedWindowCount: 5, windows: []),

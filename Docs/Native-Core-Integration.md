@@ -50,25 +50,42 @@ and `PitcheeCoreAnalyzer` owns and serializes access to one native analyzer.
 
 ## Scores for the selected voice direction
 
-Core's VFP and composite output retain their original feminine reference.
-`VoiceDirectionScore` derives the masculine presentation from the same result:
-masculine alignment is `100 - VFP`, and the pitch contribution is
-`clamp((200 - F0) / 90, 0, 1)`. Naturalness and the composite weights stay the
-same. Core's pitch rules are reflected around 155 Hz, so the 165 Hz threshold
-becomes 145 Hz and the boost reaches full pitch strength at 120 Hz. Missing
-or invalid pitch falls back to masculine alignment alone. This is a directional
-interpretation of the existing model, not a separately trained masculine model.
+Every offline analysis call now passes an explicit `pitchee_score_profile_t`:
+`PITCHEE_SCORE_PROFILE_FEMINIZATION` or
+`PITCHEE_SCORE_PROFILE_MASCULINIZATION`. The JSON schema is version 3 and
+includes `score_profile`. iOS maps the selected masculine goal to the latter
+profile; feminine and undecided goals use the former.
 
-Results, explanations, exports, history, daily best selections, and trend
-averages use this shared calculation. Stored results remain unchanged so
-switching preferences also works for existing recordings. Feminine and
-undecided preferences preserve the original Core score.
+The Core masculinization profile is a continuous two-input score. It does not
+read naturalness:
 
-Run `./Scripts/test-voice-scoring.sh` to compare the Swift calculation against
-the real C++ scoring implementation across threshold boundaries, caps, boosts,
-and missing pitch. Run `./Scripts/test-insights.sh` to check history and trend
-selection after changing direction. Update the score explanations and string
-catalog whenever the scoring rules change.
+```text
+dF0  = clamp((165 - F0) / 75, -1, 1)
+dVFP = clamp((50 - VFP) / 50, -1, 1)
+score = clamp(60 + 25 × dF0 + 15 × dVFP, 0, 100)
+```
+
+It always returns `base_score == final_score`, `rule = "continuous"`, no cap,
+and no boost. An unavailable F0 contributes `dF0 = 0`. This is a directional
+practice score, not a separately trained gender classifier.
+
+`VoiceDirectionScore` uses the composite returned by Core when the requested
+direction matches `score_profile`. Its local copies of the formulas cover older
+stored JSON and direction switches for a result captured with the opposite
+profile. Raw VFP remains the feminine reference value in storage; the masculine
+display metric is its directional complement.
+
+The result page, history, daily best selections, and trend averages use the
+profile-aware composite. Stored raw JSON remains unchanged so older recordings
+can still be re-evaluated. Exported final/base values now follow the Core
+profile; the generic standard metric and the two-sided pitch chart still use
+the raw VFP reference unless the export UI is made preference-aware.
+
+Run `./Scripts/test-voice-scoring.sh` to compare the Swift compatibility path
+against the real C++ masculinization implementation, including the F0/VFP
+boundaries and missing pitch. Run `./Scripts/test-insights.sh` to check history
+and trend selection after changing direction. Update the score explanations
+and string catalog whenever the scoring profile changes.
 
 ## Realtime pitch and export
 

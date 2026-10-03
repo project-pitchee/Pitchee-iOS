@@ -20,11 +20,11 @@
              ├─ ECAPA embedding → Naturalness
              └─ Core 原始 composite（女性向参考）
         │
-        └─ VoiceDirectionScore.masculineComposite
-             ├─ Standard = 100 - VFP
-             ├─ 反向 F0 贡献
-             ├─ 连续基础分
-             └─ 加分 / 封顶 / 缺失 F0 回退
+        └─ VoiceDirectionScore / Core masculinization profile
+             ├─ Standard = 100 - VFP（展示对齐指标）
+             ├─ 反向 F0 偏差
+             ├─ VFP 偏差
+             └─ 连续分 / 缺失 F0 回退
 ```
 
 相关实现位置：
@@ -39,7 +39,7 @@
 | 结果展示 | [`PitcheeApp/Analysis/RecordingAnalysisView.swift`](/Users/dannyfeng/Documents/Pitchee/PitcheeApp/Analysis/RecordingAnalysisView.swift) | 男性向分数、公式和规则说明 |
 | 历史与趋势 | [`PitcheeApp/Analysis/RecordingAssessment.swift`](/Users/dannyfeng/Documents/Pitchee/PitcheeApp/Analysis/RecordingAssessment.swift)、[`PitcheeApp/Insights/InsightsData.swift`](/Users/dannyfeng/Documents/Pitchee/PitcheeApp/Insights/InsightsData.swift) | 保存原始结果，按当前方向动态重算 |
 
-评分规则版本为 `directional-core-v1`；模型清单版本为 `2026-09`。
+评分规则版本为 `core-score-profile-v1`；Core JSON schema 为 `3`；模型清单版本为 `2026-09`。
 
 ## 2. 录音进入算法前的处理
 
@@ -48,7 +48,7 @@
 3. 采样率统一到 16,000 Hz。重采样使用相位滤波器和 Kaiser 窗；输入会量化到 PCM16 等价的 Float32（`round(value * 32768) / 32768`，并限制在 `[-1, 1)`）。
 4. 当前 `kMaximumSeconds` 为无穷大，因此 Core 不主动截断录音。
 
-这些处理决定了后续 VAD、F0 和 embedding 的实际输入；男性向公式本身只消费 Core 输出的 `VFP`、`Naturalness` 和平均 `F0`。
+这些处理决定了后续 VAD、F0 和 embedding 的实际输入；男性化 composite 本身只消费 Core 输出的 `VFP` 和平均 `F0`，Naturalness 仍作为独立指标输出。
 
 ## 3. Core 输出的三个评分输入
 
@@ -84,7 +84,7 @@ VAD 先确定语音段，再以语音段生成窗口：
 VFP = clamp(mean(windowProbability) * 100, 0, 100)
 ```
 
-这里的 VFP 是代码和存储中的**女性向参考分**，不是男性向分。男性向先取其补数。
+这里的 VFP 是代码和存储中的**女性向参考分**，不是男性向 composite 分。男性向展示的对齐指标取其补数，composite 则按 Core 的 VFP 偏差公式计算。
 
 ### 3.3 Naturalness（自然度）
 
@@ -96,7 +96,7 @@ VFP = clamp(mean(windowProbability) * 100, 0, 100)
 4. 拼接 `mean(192) + std(192)`，形成 384 维特征；
 5. `Naturalness.onnx` 输出分数，最后限制到 `[0, 100]`。
 
-男性向算法把这个分数作为自然度输入，不做方向取反。
+男性化 composite 不把这个分数作为输入；自然度仍会输出、保存并在结果页作为独立指标展示。
 
 ### 3.4 VAD 与语音窗口判定
 
@@ -113,94 +113,67 @@ VFP = clamp(mean(windowProbability) * 100, 0, 100)
 
 ## 4. 男性向分数的定义
 
-在 [`VoiceDirectionScore.masculineComposite`](</Users/dannyfeng/Documents/Pitchee/PitcheeApp/Analysis/VoiceScoring.swift:66>) 中，先做有限值和范围保护：
+新录音会把 `PITCHEE_SCORE_PROFILE_MASCULINIZATION` 传给 Core，并直接使用 Core 返回的 `composite`。在旧版历史 JSON 没有 `score_profile`，或用户切换到与录音 profile 相反的方向时，[`VoiceDirectionScore`](</Users/dannyfeng/Documents/Pitchee/PitcheeApp/Analysis/VoiceScoring.swift:39>) 使用对应的本地兼容公式重算；新录音仍直接使用 Core 返回值。先做有限值和范围保护：
 
 ```text
-S = Standard = clamp(100 - VFP, 0, 100)
-N = Naturalness = clamp(Naturalness, 0, 100)
+S = masculine alignment = clamp(100 - VFP, 0, 100)
 ```
 
-因此，VFP 越低，男性向 `Standard` 越高。注意这是对现有女性向参考结果的方向补数，不是重新训练或重新校准 VFP 模型。
+因此，VFP 越低，男性向对齐指标越高。Core 的男性化 composite 只读取 VFP 和 F0，不读取 Naturalness；Naturalness 仍作为独立指标展示和保存。
 
 ### 4.1 F0 归一化
 
 有有效 F0 时，男性向采用低音高贡献：
 
 ```text
-F0r = clamp((200 - F0) / 90, 0, 1)
+dF0 = clamp((165 - F0) / 75, -1, 1)
 ```
 
 含义如下：
 
-- `F0 <= 110 Hz` 时，F0 贡献封顶为 `1`；
-- `F0 = 200 Hz` 时，F0 贡献为 `0`；
-- `F0 >= 200 Hz` 时，F0 贡献保持为 `0`；
-- 在 110–200 Hz 之间线性变化。
+- `F0 = 165 Hz` 时，F0 偏差为 `0`；
+- `F0 <= 90 Hz` 时，F0 偏差封顶为 `1`；
+- `F0 >= 240 Hz` 时，F0 偏差封顶为 `-1`；
+- 在 90–240 Hz 之间线性变化。
 
-自然度归一化为：
+VFP 偏差归一化为：
 
 ```text
-Nr = clamp((N - 40) / 50, 0, 1)
+dVFP = clamp((50 - VFP) / 50, -1, 1)
 ```
 
-所以 `N <= 40` 为 0，`N = 90` 及以上为 1。
+所以 `VFP = 50` 为 0，`VFP <= 0` 为 `1`，`VFP >= 100` 为 `-1`。
 
 ### 4.2 连续基础分
 
 ```text
-Sr   = S / 100
-Base = 100 * (
-          0.50 * Sr
-        + 0.20 * Nr
-        + 0.15 * F0r
-        + 0.15 * Sr * Nr * F0r
-       )
+Base = Final = clamp(60 + 25 * dF0 + 15 * dVFP, 0, 100)
 ```
 
-四项分别表示：
+三项含义为：
 
 | 项 | 权重 | 含义 |
 |---|---:|---|
-| `Sr` | 0.50 | 男性向 Standard 主贡献 |
-| `Nr` | 0.20 | 自然度贡献 |
-| `F0r` | 0.15 | 低音高贡献 |
-| `Sr * Nr * F0r` | 0.15 | 三项同时较好时的交互贡献 |
+| 常数 `60` | 60 | F0/VFP 中心点（165 Hz、VFP 50）的基准分 |
+| `dF0` | 25 | F0 对男性化方向的最大贡献 |
+| `dVFP` | 15 | VFP 对男性化方向的最大贡献 |
 
-连续规则默认 `Final = Base`。随后按固定的 `if / else if` 顺序应用规则；一条记录最多命中一条规则。
+男性化 profile 固定为连续规则：没有 pass boost、cap 或 limited/boosted 分支，且始终 `Base = Final`、`rule = "continuous"`。
 
 ## 5. 男性向规则与边界
 
-设 `F0` 为全局平均基频，`N` 为自然度，`S` 为男性向 Standard。
+设 `F0` 为全局平均基频，`VFP` 为 Core 原始女性向参考分。
 
-| 优先级 | 内部 rule | 条件（严格按代码） | 计算 | 说明 |
-|---:|---|---|---|---|
-| 1 | `masculine_pass_boost` | `F0 < 145` 且 `N > 80` 且 `S > 50` | `Final = max(Base, promoted)` | 低音高、自然度和方向一致性同时较好时加分 |
-| 2 | `masculine_low_pitch_stylized_cap` | `F0 < 145` 且 `N < 50` | `Final = min(Base, 30)` | 低音高但自然度不足，限制分数 |
-| 3 | `masculine_high_pitch_cap` | `F0 >= 145` 且 `N >= 50` | `Final = min(Base, 59)` | 音高仍偏高时保留上限 |
-| 4 | `masculine_high_pitch_stylized_cap` | `F0 >= 145` 且 `N < 50` | `Final = min(Base, 20)` | 音高偏高且自然度不足，使用更严格上限 |
-| 5 | `masculine_low_pitch_feminine_cap` | `F0 < 145` 且 `N >= 50` 且 `S < 50` | `Final = min(Base, 59)` | 音高较低，但方向 Standard 仍不足 |
-| — | `masculine_continuous` | 以上均不满足 | `Final = Base` | 例如 `F0 < 145、N >= 50、S >= 50` |
+| 内部 rule | 条件 | 计算 | 说明 |
+|---|---|---|---|
+| `continuous` | 所有有效输入 | `Final = Base = clamp(60 + 25*dF0 + 15*dVFP, 0, 100)` | 男性化 profile 唯一规则 |
 
-### 5.1 加分公式
+### 5.1 边界值必须按实现理解
 
-仅在第一条规则成立时计算：
-
-```text
-sF = (145 - F0) / 25
-sN = (N - 80) / 20
-sS = (S - 50) / 30
-strength = min(sF, sN, sS, 1)
-promoted = 60 + 40 * strength
-Final = max(Base, promoted)
-```
-
-由于进入该分支前已保证三个条件分别大于阈值，`strength` 为正；其最大值被限制为 1。F0 对加分的贡献在 `120 Hz` 及以下达到最大，`F0 = 145 Hz` 时该分支不会触发。
-
-### 5.2 边界值必须按实现理解
-
-- `F0 = 145` 不属于低音高加分分支，会进入高音高分支；
-- `N = 80` 不触发加分；`N = 50` 属于 `>= 50`；
-- `S = 50` 不触发加分中的 `S > 50`，但也不满足 `S < 50` 的低音高封顶；
+- `F0 = 165`、`VFP = 50` 时分数严格为 `60`；
+- `F0 = 165` 是中心点，不是分支阈值；
+- `F0 <= 90` 或 `F0 >= 240` 时 F0 偏差分别饱和到 `1` 或 `-1`；
+- `VFP <= 0` 或 `VFP >= 100` 时 VFP 偏差分别饱和到 `1` 或 `-1`；
 - 规则判断使用平均 F0，不使用中位数、5–95 百分位或单个瞬时帧；
 - `Final` 最后仍会 `clamp(..., 0, 100)`。
 
@@ -208,22 +181,21 @@ Final = max(Base, promoted)
 
 以下情况视为没有可用 F0：`nil`、非有限值（NaN / infinity）或 `<= 0`。
 
-此时不计算 F0 贡献，也不套用任何 pitch 加分或封顶：
+此时只将 F0 偏差设为 `0`，不套用任何 pitch 加分或封顶：
 
 ```text
-Base  = S
-Final = S
-rule  = masculine_f0_unavailable
+Base  = Final = clamp(60 + 15 * dVFP, 0, 100)
+rule  = continuous
 cap   = nil
 ```
 
-这是“男性向 Standard 的方向分仍可显示，但缺少音高维度”的回退路径，不会伪造一个 F0，也不会把缺失值当成低音高。
+这是“男性向 VFP 对齐分仍可显示，但缺少音高维度”的回退路径，不会伪造一个 F0，也不会把缺失值当成低音高。
 
 ## 7. iOS 端的保存、重算与展示
 
 ### 7.1 偏好选择与兼容
 
-`VoicePreference` 有 `masculine / feminine / undecided` 三种值。读取偏好时兼容旧版中文字符串：`男性向声音`、`女性向声音`、`暂不确定`，同时接受新的语义 raw value。只有选择 `masculine` 时才走上述方向算法；女性向和暂不确定会保留 Core 原始结果。
+`VoicePreference` 有 `masculine / feminine / undecided` 三种值。读取偏好时兼容旧版中文字符串：`男性向声音`、`女性向声音`、`暂不确定`，同时接受新的语义 raw value。选择方向与录音 profile 一致时直接使用 Core composite；旧版结果或切换到相反方向时，iOS 使用同一组原始指标做兼容重算；暂不确定保留结果中的原始 composite。
 
 ### 7.2 结果页
 
@@ -255,7 +227,7 @@ very low:    F0 < 85
 - `recordedTargetRawValue`、`scoringRulesVersion` 保存当时的练习目标和规则版本；
 - `capturedFinalScore` 保存当时目标方向的最终分（暂不确定不保存方向分）。
 
-读取历史时，`finalScore(for: .masculine)` 会用保存的 VFP、自然度和 F0 再调用同一套男性向公式。因此切换用户偏好不会改写原始 JSON，也能重新显示旧录音的男性向分。
+读取历史时，`finalScore(for:)` 会根据当前方向和结果中的 `score_profile` 选择 Core composite 或对应的本地兼容公式；男性化公式使用 VFP 和 F0，Naturalness 保持为独立展示指标。因此切换用户偏好不会改写原始 JSON，也能重新显示目标方向分。
 
 Insights 的 composite、每日最佳和趋势平均也通过 `assessment.finalScore(for: preference)` 使用当前方向。
 
@@ -263,11 +235,11 @@ Insights 的 composite、每日最佳和趋势平均也通过 `assessment.finalS
 
 当前 `RecordingExportView` 的 `ExportMetricOption.value` 只接收 `PitcheeAnalysisResult`，其中：
 
-- `finalScore` 读取 `result.composite.finalScore`；
-- `standardScore` 读取 `result.vfp.vfpStandardScore`；
-- `baseScore` 读取 `result.composite.baseScore`。
+- `finalScore` 读取 `result.composite.finalScore`，新录音已由 Core profile 计算；
+- `standardScore` 在 `score_profile = "masculinization"` 时使用 `100 - VFP`，否则使用原始 VFP；
+- `baseScore` 读取 `result.composite.baseScore`，新录音已由 Core profile 计算。
 
-这些字段是 Core 的原始女性向参考值，导出视图目前没有传入 `VoicePreference`，所以从男性向结果页打开导出时，报告中的分数项仍可能显示原始方向分。结果页和 Insights 已经按男性向重算；若要求导出也完全方向一致，需要让导出模型接收 `VoicePreference` 或 `VoiceDirectionScore`，并改用 `directionScore.finalScore / baseScore / standardScore`。这是当前代码的实现差异，不应在产品说明中写成“导出已统一”。
+导出视图仍不接收 `VoicePreference`；旧版没有 `score_profile` 的历史结果无法从导出输入本身判断原始方向，图表也继续展示 raw VFP 两侧参考。新 Core 结果的最终分、基础分和方向 Standard 已能按 profile 输出。
 
 ## 8. 实时 F0 与离线 F0 的关系
 
@@ -296,9 +268,9 @@ Insights 的 composite、每日最佳和趋势平均也通过 `assessment.finalS
 1. 编译真实 C++ `scoring.cpp`，生成参考 TSV；
 2. 用相同输入范围运行 Swift `VoiceDirectionScore.masculineComposite`；
 3. 比较 base、final、cap、limited、boosted 和 rule；
-4. 覆盖缺失 F0、阈值边界、加分、四种封顶和连续规则。
+4. 覆盖缺失 F0、F0/VFP 边界和连续规则。
 
-当前验证结果：`10,742 checks passed across 1,530 Core reference cases`。
+当前验证结果：`10,745 checks passed across 1,530 Core reference cases`。
 
 ### 9.2 历史与趋势验证
 
@@ -313,7 +285,7 @@ Insights 的 composite、每日最佳和趋势平均也通过 `assessment.finalS
 ## 10. 关键限制与解释边界
 
 - 男性向分是面向练习目标的方向性分数，不是性别识别结果、医学判断或发声健康诊断。
-- 当前男性向算法主要由 VFP 补数、平均 F0、自然度和规则封顶构成；没有把共振峰、语速、韵律、辅音清晰度等指标加入 composite。
-- 低音高本身不会保证高分：自然度不足会触发封顶，方向 Standard 不足也可能触发封顶。
+- 当前男性化 composite 由 VFP、平均 F0 和连续线性公式构成；Naturalness、共振峰、语速、韵律、辅音清晰度等没有加入男性化 composite。
+- 低音高本身不会保证高分：VFP 偏女性向时会拉低方向分；男性化 profile 不使用自然度封顶或加分。
 - 缺失 F0 时只保留方向 Standard；不能据此推断用户音高表现。
 - 变更阈值、权重、规则顺序或模型版本时，应提升 `rulesVersion` / 模型版本，并同步更新 Swift、C++、规则说明、导出和交叉测试。

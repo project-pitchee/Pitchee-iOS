@@ -8,6 +8,18 @@
 import CPitcheeCore
 import Foundation
 
+public enum PitcheeScoreProfile: Sendable {
+    case feminization
+    case masculinization
+
+    fileprivate var cValue: pitchee_score_profile_t {
+        switch self {
+        case .feminization: PITCHEE_SCORE_PROFILE_FEMINIZATION
+        case .masculinization: PITCHEE_SCORE_PROFILE_MASCULINIZATION
+        }
+    }
+}
+
 /// Owns one native analyzer and serializes access to its C++ inference sessions.
 public actor PitcheeCoreAnalyzer {
     private var handle: OpaquePointer?
@@ -110,7 +122,8 @@ public actor PitcheeCoreAnalyzer {
     public func analyze(
         samples: [Float],
         sampleRate: Int32,
-        channels: Int32
+        channels: Int32,
+        scoreProfile: PitcheeScoreProfile = .feminization
     ) throws -> PitcheeAnalysisResult {
         guard let handle else {
             throw PitcheeCoreError(message: "The PitcheeCore analyzer is unavailable.")
@@ -125,6 +138,7 @@ public actor PitcheeCoreAnalyzer {
                 buffer.count,
                 sampleRate,
                 channels,
+                scoreProfile.cValue,
                 nil,
                 nil,
                 &output,
@@ -140,7 +154,10 @@ public actor PitcheeCoreAnalyzer {
         )
     }
 
-    public func analyze(wavFile: URL) throws -> PitcheeAnalysisResult {
+    public func analyze(
+        wavFile: URL,
+        scoreProfile: PitcheeScoreProfile = .feminization
+    ) throws -> PitcheeAnalysisResult {
         guard let handle else {
             throw PitcheeCoreError(message: "The PitcheeCore analyzer is unavailable.")
         }
@@ -150,6 +167,7 @@ public actor PitcheeCoreAnalyzer {
         let status = pitchee_analyzer_analyze_wav_file(
             handle,
             wavFile.path,
+            scoreProfile.cValue,
             nil,
             nil,
             &output,

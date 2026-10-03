@@ -628,10 +628,12 @@ private struct ScoreExplanationView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("scoring.explanation.intro.title")
                 .font(.title2.weight(.bold))
-            Text("scoring.explanation.intro.description")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if preference == .undecided {
+                Text("scoring.explanation.intro.description")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if preference != .undecided {
                 Text(preference.scoreDirectionDescription)
                     .font(.subheadline)
@@ -650,13 +652,10 @@ private struct ScoreExplanationView: View {
                 .foregroundStyle(.secondary)
             FormulaBlock(lines: preference == .masculine ? [
                 #"\mathrm{Standard} = 100 - \mathrm{VFP}"#,
-                #"\mathrm{Naturalness} \in [0,100]"#,
                 #"F_0 = \overline{f_0}"#,
-                #"S_r = \frac{\mathrm{Standard}}{100}"#,
-                #"\begin{aligned}n &= \frac{\mathrm{Naturalness} - 40}{50} \\ N_r &= \min(1,\max(0,n))\end{aligned}"#,
-                #"F_{0r} = \min\left(1, \max\left(0, \frac{200 - F_0}{90}\right)\right)"#,
-                #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,S_r + 0.20\,N_r \\ &\quad + 0.15\,F_{0r} + 0.15\,S_r\,N_r\,F_{0r}\bigr)\end{aligned}"#,
-                #"\mathrm{Base} \xrightarrow{\mathrm{rule}} \mathrm{Final}"#
+                #"d_{F_0} = \min(1, \max(-1, \frac{165 - F_0}{75}))"#,
+                #"d_{VFP} = \min(1, \max(-1, \frac{50 - VFP}{50}))"#,
+                #"\mathrm{Base} = \mathrm{Final} = \min(100, \max(0, 60 + 25d_{F_0} + 15d_{VFP}))"#
             ] : [
                 #"\mathrm{Standard} = \mathrm{VFP}"#,
                 #"\mathrm{Naturalness} \in [0,100]"#,
@@ -667,12 +666,12 @@ private struct ScoreExplanationView: View {
                 #"\begin{aligned}\mathrm{Base} &= 100 \times \bigl(0.50\,S_r + 0.20\,N_r \\ &\quad + 0.15\,F_{0r} + 0.15\,S_r\,N_r\,F_{0r}\bigr)\end{aligned}"#,
                 #"\mathrm{Base} \xrightarrow{\mathrm{rule}} \mathrm{Final}"#
             ])
-            Text(preference == .masculine
-                ? LocalizedStringKey("scoring.masculine.baseFormula.note")
-                : LocalizedStringKey("scoring.baseFormula.note"))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if preference != .masculine {
+                Text("scoring.baseFormula.note")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -860,67 +859,16 @@ private let scoreRuleDocumentation: [ScoreRuleDocumentation] = [
 
 private let masculineScoreRuleDocumentation: [ScoreRuleDocumentation] = [
     ScoreRuleDocumentation(
-        id: "masculine_continuous",
-        title: String(localized: "scoring.rules.masculineContinuous.title"),
-        guidance: String(localized: "scoring.rules.masculineContinuous.description"),
-        condition: String(localized: "scoring.rules.masculineContinuous.condition"),
-        formulas: [#"\mathrm{Final} = \mathrm{Base}"#],
-        result: String(localized: "scoring.rules.masculineContinuous.result")
-    ),
-    ScoreRuleDocumentation(
-        id: "masculine_pass_boost",
-        title: String(localized: "scoring.rules.masculinePassBoost.title"),
-        guidance: String(localized: "scoring.rules.masculinePassBoost.description"),
-        condition: String(localized: "scoring.rules.masculinePassBoost.condition"),
+        id: "continuous",
+        title: String(localized: "scoring.rules.continuous.title"),
+        guidance: String(localized: "scoring.rules.continuous.description"),
+        condition: String(localized: "scoring.rules.continuous.condition"),
         formulas: [
-            #"s_F = \frac{145 - F_0}{25}"#,
-            #"s_N = \frac{\mathrm{Naturalness} - 80}{20}"#,
-            #"s_S = \frac{\mathrm{Standard} - 50}{30}"#,
-            #"\mathrm{strength} = \min(s_F, s_N, s_S, 1)"#,
-            #"\mathrm{promoted} = 60 + 40 \times \mathrm{strength}"#,
-            #"\mathrm{Final} = \max(\mathrm{Base}, \mathrm{promoted})"#
+            #"d_{F_0} = \min(1, \max(-1, \frac{165 - F_0}{75}))"#,
+            #"d_{VFP} = \min(1, \max(-1, \frac{50 - VFP}{50}))"#,
+            #"\mathrm{Base} = \mathrm{Final} = \min(100, \max(0, 60 + 25d_{F_0} + 15d_{VFP}))"#
         ],
-        result: String(localized: "scoring.rules.masculinePassBoost.result")
-    ),
-    ScoreRuleDocumentation(
-        id: "masculine_high_pitch_stylized_cap",
-        title: String(localized: "scoring.rules.masculineHighPitchStylizedCap.title"),
-        guidance: String(localized: "scoring.rules.masculineHighPitchStylizedCap.description"),
-        condition: String(localized: "scoring.rules.masculineHighPitchStylizedCap.condition"),
-        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 20)"#],
-        result: String(localized: "scoring.rules.masculineHighPitchStylizedCap.result")
-    ),
-    ScoreRuleDocumentation(
-        id: "masculine_high_pitch_cap",
-        title: String(localized: "scoring.rules.masculineHighPitchCap.title"),
-        guidance: String(localized: "scoring.rules.masculineHighPitchCap.description"),
-        condition: String(localized: "scoring.rules.masculineHighPitchCap.condition"),
-        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
-        result: String(localized: "scoring.rules.masculineHighPitchCap.result")
-    ),
-    ScoreRuleDocumentation(
-        id: "masculine_low_pitch_stylized_cap",
-        title: String(localized: "scoring.rules.masculineLowPitchStylizedCap.title"),
-        guidance: String(localized: "scoring.rules.masculineLowPitchStylizedCap.description"),
-        condition: String(localized: "scoring.rules.masculineLowPitchStylizedCap.condition"),
-        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 30)"#],
-        result: String(localized: "scoring.rules.masculineLowPitchStylizedCap.result")
-    ),
-    ScoreRuleDocumentation(
-        id: "masculine_low_pitch_feminine_cap",
-        title: String(localized: "scoring.rules.masculineLowPitchFeminineCap.title"),
-        guidance: String(localized: "scoring.rules.masculineLowPitchFeminineCap.description"),
-        condition: String(localized: "scoring.rules.masculineLowPitchFeminineCap.condition"),
-        formulas: [#"\mathrm{Final} = \min(\mathrm{Base}, 59)"#],
-        result: String(localized: "scoring.rules.masculineLowPitchFeminineCap.result")
-    ),
-    ScoreRuleDocumentation(
-        id: "masculine_f0_unavailable",
-        title: String(localized: "scoring.rules.masculineF0Unavailable.title"),
-        guidance: String(localized: "scoring.rules.masculineF0Unavailable.description"),
-        condition: String(localized: "scoring.rules.masculineF0Unavailable.condition"),
-        formulas: [#"\mathrm{Final} = \mathrm{Standard}"#],
-        result: String(localized: "scoring.rules.masculineF0Unavailable.result")
+        result: String(localized: "scoring.rules.continuous.result")
     )
 ]
 

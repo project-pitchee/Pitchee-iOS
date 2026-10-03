@@ -10,6 +10,7 @@ import Foundation
 nonisolated public struct PitcheeAnalysisResult: Codable, Sendable {
     public let schemaVersion: Int
     public let modelVersion: String
+    public let scoreProfile: String?
     public let audio: Audio
     public let vad: VoiceActivity
     public let f0: Pitch

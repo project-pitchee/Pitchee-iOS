@@ -511,7 +511,10 @@ private enum ExportMetricOption: String, CaseIterable, Hashable, Identifiable {
         case .finalScore:
             return ExportMetricValue(number(result.composite.finalScore, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
         case .standardScore:
-            return ExportMetricValue(number(result.vfp.vfpStandardScore, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
+            let standard = result.scoreProfile == "masculinization"
+                ? 100 - min(max(result.vfp.vfpStandardScore, 0), 100)
+                : result.vfp.vfpStandardScore
+            return ExportMetricValue(number(standard, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
         case .naturalnessScore:
             return ExportMetricValue(number(result.naturalness.score, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
         case .baseScore:

@@ -93,10 +93,16 @@ final class RecordingAssessment {
 
     /// Re-evaluate existing recordings without rewriting their raw results.
     func finalScore(for preference: VoicePreference) -> Double {
-        guard preference == .masculine else { return finalScore }
-        return VoiceDirectionScore.masculineComposite(
-            feminineScore: standardScore, naturalness: naturalnessScore, pitchHz: meanPitchHz
-        ).finalScore
+        guard preference != .undecided else { return finalScore }
+        if let result {
+            return preference.score(for: result).finalScore
+        }
+        if preference == .masculine {
+            return VoiceDirectionScore.masculineComposite(
+                feminineScore: standardScore, naturalness: naturalnessScore, pitchHz: meanPitchHz
+            ).finalScore
+        }
+        return finalScore
     }
 
     private static let encoder = JSONEncoder()

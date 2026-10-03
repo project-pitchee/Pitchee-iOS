@@ -50,9 +50,10 @@ enum InsightsDataTests {
               "Streaks continue across year boundaries")
 
         func assessment(_ recordedAt: Date, score: Double, pitch: Double? = 175,
-                        standard: Double = 65, naturalness: Double = 70) throws -> RecordingAssessment {
+                        standard: Double = 65, naturalness: Double = 70,
+                        scoreProfile: String? = nil) throws -> RecordingAssessment {
             let result = PitcheeAnalysisResult(
-                schemaVersion: 2, modelVersion: "insights-tests",
+                schemaVersion: scoreProfile == nil ? 2 : 3, modelVersion: "insights-tests", scoreProfile: scoreProfile,
                 audio: .init(sourceSampleRate: 16_000, sourceChannels: 1, inputSeconds: 12, analyzedSeconds: 12),
                 vad: .init(segmentCount: 0, speechSeconds: 10, sileroSegmentCount: 0, discardedBreathLikeCount: 0, trimmedSegmentCount: 0, segments: []),
                 f0: .init(windowSeconds: 0.5, meanHz: pitch, standardDeviationHz: nil, voicedFrameCount: 0, voicedWindowCount: 0, windows: []),
@@ -93,12 +94,17 @@ enum InsightsDataTests {
         check(masculineBest.map(\.id) == [masculineTie.id, missingPitch.id], "Masculine daily best follows masculine scores and breaks ties by recency")
         check(InsightsData.dailyBest(directional, calendar: calendar, preference: .feminine).first?.id == feminine.id,
               "Switching direction reselects each day's representative")
-        check(InsightsMetric.composite.value(in: masculine, preference: .masculine) == 100, "History uses the directional score")
+        check(InsightsMetric.composite.value(in: masculine, preference: .masculine) == 84, "History uses the Core masculinization score")
         check(InsightsMetric.composite.value(in: masculine, preference: .feminine) == 20, "Switching back restores the saved engine score")
-        check(InsightsMetric.composite.value(in: missingPitch, preference: .masculine) == 35, "History applies the missing-pitch fallback")
+        check(InsightsMetric.composite.value(in: missingPitch, preference: .masculine) == 55.5, "History applies the missing-pitch fallback")
         check(InsightsMetric.naturalness.value(in: masculine, preference: .masculine) == 100, "Naturalness stays unchanged")
         check(InsightsMetric.pitch.value(in: masculine, preference: .masculine) == 120, "Pitch stays unchanged")
-        check(RecordingAssessmentAverages(assessments: masculineBest, preference: .masculine).finalScore == 67.5,
+        let profiled = try assessment(date(2026, 9, 22, 8), score: 81, pitch: 120, standard: 20, naturalness: 100,
+                                      scoreProfile: "masculinization")
+        check(profiled.finalScore(for: .masculine) == 81, "History uses a stored masculinization composite")
+        check(abs(profiled.finalScore(for: .feminine) - 32) < 0.000_001,
+              "History recomputes the opposite profile after a direction switch")
+        check(RecordingAssessmentAverages(assessments: masculineBest, preference: .masculine).finalScore == 69.75,
               "Dashboard average uses the same directional scores as the chart")
         for recording in directional {
             check(recording.finalScore(for: .masculine) == VoicePreference.masculine.score(for: recording.result!).finalScore,
