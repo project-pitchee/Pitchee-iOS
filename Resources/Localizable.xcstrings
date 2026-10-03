@@ -3,9 +3,21 @@
   "strings" : {
     "%@ %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%1$@ %2$@"
           }
         }
@@ -13,9 +25,21 @@
     },
     "%lld. %@ · %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld. %2$@ · %3$@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$lld. %2$@ · %3$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%1$lld. %2$@ · %3$@"
           }
         }
@@ -2577,7 +2601,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Result sections"
           }
         },
@@ -2715,7 +2739,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "結果區段"
           }
         }
@@ -4197,7 +4221,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Analysis complete. Results are ready."
           }
         },
@@ -4335,7 +4359,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "分析完成，結果已準備就緒。"
           }
         }
@@ -13714,6 +13738,12 @@
             "state" : "translated",
             "value" : "关闭"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
         }
       }
     },
@@ -22576,7 +22606,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Text"
           }
         },
@@ -22714,7 +22744,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "文字"
           }
         }
@@ -29452,7 +29482,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Next Page"
           }
         },
@@ -29590,7 +29620,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "下一頁"
           }
         }
@@ -29992,7 +30022,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Previous Page"
           }
         },
@@ -30130,7 +30160,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "上一頁"
           }
         }
@@ -34133,7 +34163,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Read Text Report"
           }
         },
@@ -34271,7 +34301,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "閱讀文字報告"
           }
         }
@@ -34313,7 +34343,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Opened days count dates when the home screen was visited, once per day. Recording days count dates with saved analyses."
           }
         },
@@ -34493,7 +34523,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "No Activity Recorded"
           }
         },
@@ -34673,7 +34703,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Longest Streak"
           }
         },
@@ -34853,7 +34883,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Next Month"
           }
         },
@@ -35033,7 +35063,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "No recordings were saved on this day. Select another date to view its recordings."
           }
         },
@@ -35213,7 +35243,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "View the activity calendar"
           }
         },
@@ -35393,7 +35423,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Opened"
           }
         },
@@ -35573,7 +35603,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Previous Month"
           }
         },
@@ -35753,7 +35783,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recorded"
           }
         },
@@ -35933,7 +35963,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Activity Calendar"
           }
         },
@@ -36833,7 +36863,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "There are no analyses in this period. Choose All or make a new recording."
           }
         },
@@ -37013,7 +37043,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "No Recordings Yet"
           }
         },
@@ -37193,7 +37223,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "View recording history"
           }
         },
@@ -37373,7 +37403,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "View the full analysis for this recording"
           }
         },
@@ -37553,7 +37583,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recording Days"
           }
         },
@@ -37733,7 +37763,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recording History"
           }
         },
@@ -37913,7 +37943,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "The full analysis data could not be read. Go back to view its summary metrics, or make a new recording."
           }
         },
@@ -38093,7 +38123,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "This Analysis Could Not Be Opened"
           }
         },
@@ -38273,7 +38303,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Average"
           }
         },
@@ -38813,7 +38843,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "The composite score summarizes the overall analysis on a 0–100 scale. Look for patterns across recordings; one score does not capture every quality of a voice."
           }
         },
@@ -38993,7 +39023,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Each day is represented by the recording with the highest composite score, using the later recording to break ties. Charts and statistics use valid values from those recordings."
           }
         },
@@ -39173,7 +39203,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "There are no values to display in this period. Try another date range or record a clear speech sample."
           }
         },
@@ -39353,7 +39383,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "No Metric Data Yet"
           }
         },
@@ -39533,7 +39563,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Understanding This Metric"
           }
         },
@@ -39713,7 +39743,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Latest Daily Result"
           }
         },
@@ -39893,7 +39923,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Highest"
           }
         },
@@ -40253,7 +40283,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Mean pitch is the average fundamental frequency of voiced speech, in Hz. A higher value means a higher pitch, not a better voice. Recordings without a detected pitch show “—”."
           }
         },
@@ -40433,7 +40463,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Lowest"
           }
         },
@@ -40793,7 +40823,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Naturalness is the model’s estimate of how continuous and natural a voice sounds, on a 0–100 scale. Recording content and surroundings can affect results, so compare similar conditions."
           }
         },
@@ -40973,7 +41003,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "View the metric trend and history"
           }
         },
@@ -41153,7 +41183,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Daily Results"
           }
         },
@@ -41333,7 +41363,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Selected Result"
           }
         },
@@ -45653,7 +45683,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "%1$@ hertz"
           }
         },
@@ -45791,7 +45821,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "%1$@ 赫茲"
           }
         }
@@ -46193,7 +46223,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Stop Note"
           }
         },
@@ -46331,7 +46361,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "停止音符"
           }
         }
@@ -46373,7 +46403,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Sustain Note"
           }
         },
@@ -46511,7 +46541,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "持續播放音符"
           }
         }
@@ -46711,6 +46741,12 @@
             "state" : "translated",
             "value" : "部分练习音频未能清理，请再次结束练习后再开始新录音。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "部分练习音频未能清理，请再次结束练习后再开始新录音。"
+          }
         }
       }
     },
@@ -46888,7 +46924,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本次練習期間，最多兩段音訊會保留在這台裝置上。結束練習時會刪除；若強制關閉 App，則於下次啟動時清除。歷史紀錄保留指標、練習詳情及你選擇的聆聽回饋，不保留音訊。"
           }
         }
@@ -46930,7 +46966,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Automatically generated captions may contain errors."
           }
         },
@@ -47068,7 +47104,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "自動產生的字幕可能有誤。"
           }
         }
@@ -47110,7 +47146,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Cancel Captions"
           }
         },
@@ -47248,7 +47284,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "取消產生字幕"
           }
         }
@@ -47290,7 +47326,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Could not generate captions. Check that on-device recognition is available for this language, then try again."
           }
         },
@@ -47428,7 +47464,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法產生字幕。請確認這台裝置已備妥目前語言的本機辨識功能，再試一次。"
           }
         }
@@ -47470,7 +47506,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Generate Captions"
           }
         },
@@ -47608,7 +47644,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "產生字幕"
           }
         }
@@ -47650,7 +47686,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Generating Captions"
           }
         },
@@ -47788,7 +47824,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "正在產生字幕"
           }
         }
@@ -47830,7 +47866,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Speech recognition permission is needed to generate captions. You can change it in Settings."
           }
         },
@@ -47968,7 +48004,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "需要允許語音辨識才能產生字幕。你可以在系統設定中更改權限。"
           }
         }
@@ -48010,7 +48046,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Captions are generated on this device without uploading audio and cleared when you leave the practice."
           }
         },
@@ -48148,7 +48184,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "字幕在本機產生，不會上傳音訊，並會在離開練習時清除。"
           }
         }
@@ -48190,7 +48226,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recording captions are ready."
           }
         },
@@ -48328,7 +48364,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音字幕已準備就緒。"
           }
         }
@@ -48370,7 +48406,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recording Captions"
           }
         },
@@ -48508,7 +48544,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音字幕"
           }
         }
@@ -48550,7 +48586,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "On-device captions are unavailable for this device or language."
           }
         },
@@ -48688,7 +48724,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "目前的裝置或語言不支援本機字幕辨識。"
           }
         }
@@ -48868,7 +48904,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "選擇一個練習重點"
           }
         }
@@ -49065,7 +49101,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "B − A：%1$@"
           }
         }
@@ -49245,7 +49281,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這是同一段文字兩次錄音的測量差異。數值單純變大或變小並不代表進步，也請考慮回放感受與舒適程度。"
           }
         }
@@ -49425,7 +49461,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "至少一段錄音未通過錄音檢查，或缺少所選重點的指標，因此不計算變化。仍可聆聽錄音；若要替換 A，請開始新的練習。"
           }
         }
@@ -49605,7 +49641,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "探索目標時，先觀察音高、起伏與自己的變化。有需要時，也可以選擇方向性評分。"
           }
         }
@@ -49785,7 +49821,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "只看音高與變化"
           }
         }
@@ -49965,7 +50001,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "選用方向性評分"
           }
         }
@@ -50002,11 +50038,30 @@
             "state" : "translated",
             "value" : "导出当时结果"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出当时结果"
+          }
         }
       }
     },
     "practice.feedback.%@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.feedback.%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.feedback.%@"
+          }
+        }
+      }
     },
     "practice.feedback.closer" : {
       "comment" : "Guided practice and comparison. Keep goals, model outputs, recording checks, and personal listening feedback distinct.",
@@ -50182,7 +50237,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "更接近我的目標"
           }
         }
@@ -50362,7 +50417,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法儲存聆聽回饋，請再試一次；錄音結果仍可查看。"
           }
         }
@@ -50542,7 +50597,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這是你自己的聆聽判斷，可以隨時修改。它只儲存在這次重錄的本機歷史紀錄中，不影響模型評分。"
           }
         }
@@ -50722,7 +50777,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "大致相同"
           }
         }
@@ -50902,7 +50957,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "第二次錄音聽起來如何？"
           }
         }
@@ -51082,7 +51137,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法判斷"
           }
         }
@@ -51262,7 +51317,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "結束練習並清除音訊"
           }
         }
@@ -51442,7 +51497,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音當時"
           }
         }
@@ -51622,7 +51677,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "使用目前的目標"
           }
         }
@@ -51802,7 +51857,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "重錄回饋：%1$@"
           }
         }
@@ -51982,7 +52037,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這筆舊紀錄未儲存當時的目標或評分規則，因此無法得知原始方向性評分。"
           }
         }
@@ -52162,7 +52217,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "此評分依所選方向重新計算，已儲存的原始結果不會改變。"
           }
         }
@@ -52342,7 +52397,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "評分檢視方式"
           }
         }
@@ -52522,7 +52577,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音時的目標"
           }
         }
@@ -52702,7 +52757,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音時的評分規則：%1$@"
           }
         }
@@ -52882,7 +52937,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "繼續練習"
           }
         }
@@ -53062,7 +53117,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "選擇一個重點，重讀同一段文字，探索聲音的變化。"
           }
         }
@@ -53242,7 +53297,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "查看錄音歷史（%1$lld）"
           }
         }
@@ -53422,7 +53477,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "使用新的 A 錄音，接續上次的練習類型。音訊不會保留到下次 App 啟動。"
           }
         }
@@ -53602,7 +53657,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "開始一次練習"
           }
         }
@@ -53782,17 +53837,43 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音、重讀、聆聽"
           }
         }
       }
     },
     "practice.kind.%@.instruction" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.kind.%@.instruction"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.kind.%@.instruction"
+          }
+        }
+      }
     },
     "practice.kind.%@.title" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.kind.%@.title"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.kind.%@.title"
+          }
+        }
+      }
     },
     "practice.kind.dailyReading.instruction" : {
       "comment" : "Guided practice and comparison. Keep goals, model outputs, recording checks, and personal listening feedback distinct.",
@@ -53968,7 +54049,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "像平常說話一樣朗讀。這次練習請留意偵測到的語音長度。"
           }
         }
@@ -54148,7 +54229,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "日常朗讀"
           }
         }
@@ -54328,7 +54409,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "舒適地朗讀，觀察自己的平均音高。較高或較低都不一定更好。"
           }
         }
@@ -54508,7 +54589,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "觀察音高"
           }
         }
@@ -54688,7 +54769,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "以舒適的速度朗讀，觀察音高起伏。自然的語調本來就包含變化。"
           }
         }
@@ -54868,14 +54949,27 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "音高穩定度"
           }
         }
       }
     },
     "practice.metric.%@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.metric.%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.metric.%@"
+          }
+        }
+      }
     },
     "practice.metric.pitch" : {
       "comment" : "Guided practice and comparison. Keep goals, model outputs, recording checks, and personal listening feedback distinct.",
@@ -55051,7 +55145,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "平均音高"
           }
         }
@@ -55231,7 +55325,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "偵測到的語音長度"
           }
         }
@@ -55411,7 +55505,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "音高起伏（標準差）"
           }
         }
@@ -55591,7 +55685,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "今天天氣很舒服。我想放慢步調，輕鬆地說出這幾句話。等一下，我會再讀一次，聽聽有什麼不同。"
           }
         }
@@ -55771,7 +55865,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法播放這段錄音。請再試一次，或重新錄製。"
           }
         }
@@ -55951,7 +56045,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "播放或停止第一次錄音 A"
           }
         }
@@ -56131,7 +56225,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "播放"
           }
         }
@@ -56311,7 +56405,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "播放中"
           }
         }
@@ -56491,7 +56585,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "播放或停止第二次錄音 B"
           }
         }
@@ -56671,7 +56765,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "停止"
           }
         }
@@ -56851,14 +56945,27 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已停止"
           }
         }
       }
     },
     "practice.quality.%@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.quality.%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "practice.quality.%@"
+          }
+        }
+      }
     },
     "practice.quality.background" : {
       "comment" : "Guided practice and comparison. Keep goals, model outputs, recording checks, and personal listening feedback distinct.",
@@ -57034,7 +57141,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "語音與背景位準接近，可能影響比較。請換到更安靜的地方重新錄音。"
           }
         }
@@ -57214,7 +57321,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音可能發生削波失真。請稍微遠離麥克風，避免音量過大。"
           }
         }
@@ -57394,7 +57501,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "不納入比較基準"
           }
         }
@@ -57574,7 +57681,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這筆紀錄沒有收音品質資訊。它會保留在歷史紀錄中，但不納入預設趨勢。"
           }
         }
@@ -57754,7 +57861,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音位準偏低。請稍微靠近麥克風，以舒適的音量重新錄音。"
           }
         }
@@ -57934,7 +58041,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "沒有可用的非語音片段來估計背景位準，這不代表環境已確認安靜。"
           }
         }
@@ -58114,7 +58221,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已通過錄音檢查 · 可用於比較"
           }
         }
@@ -58294,7 +58401,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這些只是初步錄音檢查，並非聲音健康評估。模型評分與你的聆聽感受描述的是不同面向。"
           }
         }
@@ -58474,7 +58581,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "偵測到的語音少於 5 秒。請保持相同距離，舒適地讀完整段文字。"
           }
         }
@@ -58654,7 +58761,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法完成位準或削波檢查。你可以保留結果，並在比較前重新錄音。"
           }
         }
@@ -58834,7 +58941,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "保持相同的麥克風距離。舒適地讀完整段文字，在說話前後各留一小段安靜停頓，然後停止錄音。"
           }
         }
@@ -59014,7 +59121,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音因中斷、音訊路徑變更或離開前景而停止。不完整的錄音已清除。請保持相同距離，再讀一次這段文字。"
           }
         }
@@ -59030,6 +59137,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "录音提示"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "录音提示"
@@ -59211,7 +59324,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "再讀一次相同段落"
           }
         }
@@ -59391,7 +59504,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "重新錄音會替換 B 的音訊並保留 A。已儲存的指標仍保留在歷史紀錄中。"
           }
         }
@@ -59406,6 +59519,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "引导练习"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "引导练习"
@@ -59587,7 +59706,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "自然度是模型對這次錄音的輸出，低分並不能證明聲音有問題。請使用舒適的聲音，保持相同麥克風距離，重讀同一段文字，再透過聆聽評估變化。"
           }
         }
@@ -59767,7 +59886,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "比較同一段文字的兩次錄音，也考慮當時是否感到舒適。"
           }
         }
@@ -59947,7 +60066,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "聆聽並選擇一個重點"
           }
         }
@@ -60127,7 +60246,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "A · 第一次錄音"
           }
         }
@@ -60307,7 +60426,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "B · 第二次錄音"
           }
         }
@@ -60487,7 +60606,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "每日最高值"
           }
         }
@@ -60667,7 +60786,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "每日最高值是這個指標當天的最高數值。即使能力沒有改變，增加嘗試次數也可能提高它，因此不能單靠這個數值判定進步。"
           }
         }
@@ -60847,7 +60966,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "每日數值與有效錄音數量"
           }
         }
@@ -61027,7 +61146,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "尚無可比較的練習結果。完成一次通過錄音檢查的短練習，即可查看每日中位數、範圍和有效錄音數量。"
           }
         }
@@ -61207,7 +61326,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "練習分組"
           }
         }
@@ -61387,7 +61506,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "每日中位數"
           }
         }
@@ -61567,7 +61686,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "中位數是有效數值排序後居中的值；若數量為偶數，則取中間兩個值的平均。範圍從最小值到最大值。各指標的計數不包含缺失值。音高沒有最高值檢視，因為較高不一定更好。"
           }
         }
@@ -61747,7 +61866,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "計算方式"
           }
         }
@@ -61927,7 +62046,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "指標"
           }
         }
@@ -62107,7 +62226,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "分析模型：%1$@"
           }
         }
@@ -62287,7 +62406,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "範圍 %1$@–%2$@ · 有效錄音：%3$lld"
           }
         }
@@ -62467,7 +62586,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "比較使用相同段落、重點、目標、模型和評分規則的有效錄音。舊紀錄及品質有問題的錄音仍會保留在歷史紀錄中。"
           }
         }
@@ -62647,7 +62766,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "統計方式"
           }
         }
@@ -62827,7 +62946,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "可比較練習的趨勢"
           }
         }
@@ -67327,7 +67446,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recent Pitch Data"
           }
         },
@@ -67465,7 +67584,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "最近音高資料"
           }
         }
@@ -67507,7 +67626,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "This is a snapshot of the last three seconds when opened. It does not update while you read. Intervals without detected pitch are marked."
           }
         },
@@ -67645,7 +67764,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這是開啟時最近三秒的資料快照，閱讀期間不會更新。未偵測到音高的區間會加以標示。"
           }
         }
@@ -67687,7 +67806,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Opens a snapshot of the last three seconds. Recording continues."
           }
         },
@@ -67825,7 +67944,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "開啟最近三秒的資料快照，錄音會繼續。"
           }
         }
@@ -68192,10 +68311,36 @@
       }
     },
     "recording.timeline.pitchAxis" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "recording.timeline.pitchAxis"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "recording.timeline.pitchAxis"
+          }
+        }
+      }
     },
     "recording.timeline.series" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "recording.timeline.series"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "recording.timeline.series"
+          }
+        }
+      }
     },
     "recording.timeline.static.description" : {
       "comment" : "Explanation beside the static pitch display used with reduced motion or Assistive Access.",
@@ -68233,7 +68378,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Pitch is shown as a number. Open recent pitch data to explore the chart values."
           }
         },
@@ -68371,7 +68516,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "音高以數字顯示。開啟最近音高資料，即可查看圖表中的數值。"
           }
         }
@@ -68413,7 +68558,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "%1$@ seconds"
           }
         },
@@ -68551,7 +68696,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "%1$@ 秒"
           }
         }
@@ -68593,7 +68738,7 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Recording Time"
           }
         },
@@ -68731,191 +68876,24 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音時間"
           }
         }
       }
     },
     "recording.timeline.timeAxis" : {
-
-    },
-    "recording.toolbar.viewLastAnalysis" : {
-      "comment" : "Toolbar action that opens the most recent completed analysis.",
-      "extractionState" : "manual",
       "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "عرض آخر تحليل"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Zobrazit poslední analýzu"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Se seneste analyse"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Letzte Analyse ansehen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Προβολή τελευταίας ανάλυσης"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "View Last Analysis"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Ver el último análisis"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Näytä viimeisin analyysi"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Voir la dernière analyse"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "הצגת הניתוח האחרון"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "पिछला विश्लेषण देखें"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Prikaži zadnju analizu"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Utolsó elemzés megtekintése"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Lihat analisis terakhir"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Vedi ultima analisi"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "前回の分析を見る"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "최근 분석 보기"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Lihat analisis terakhir"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Laatste analyse bekijken"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Zobacz ostatnią analizę"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Ver última análise"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Посмотреть последний анализ"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Visa senaste analysen"
-          }
-        },
-        "th" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ดูการวิเคราะห์ล่าสุด"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Son analizi gör"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Переглянути останній аналіз"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Xem phân tích gần nhất"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "查看上次分析"
+            "value" : "recording.timeline.timeAxis"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "檢視上次分析"
+            "value" : "recording.timeline.timeAxis"
           }
         }
       }
@@ -69094,7 +69072,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本次練習方向"
           }
         }
@@ -69274,7 +69252,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本機評分對照 · 自願填寫"
           }
         }
@@ -69454,7 +69432,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無需追求某個答案。回饋只用於本機對照，不會改變評分，也不會傳送。在前景等待時，通常會於 30 秒後自動繼續；離開此頁面也會略過回饋。"
           }
         }
@@ -69634,7 +69612,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "回想剛才的聲音，它有多符合你這次的練習方向？"
           }
         }
@@ -69814,7 +69792,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "完全不符合"
           }
         }
@@ -69994,7 +69972,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "稍微符合"
           }
         }
@@ -70174,7 +70152,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "部分符合"
           }
         }
@@ -70354,7 +70332,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "大致符合"
           }
         }
@@ -70534,7 +70512,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "非常符合"
           }
         }
@@ -70714,7 +70692,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "略過並繼續分析"
           }
         }
@@ -70894,7 +70872,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "練習自評"
           }
         }
@@ -71074,7 +71052,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法判斷，繼續分析"
           }
         }
@@ -71254,7 +71232,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "清除本實驗摘要"
           }
         }
@@ -71434,7 +71412,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "清除或關閉後仍保留本週期的次數限制；不會增加邀請次數，也不會變更基本診斷。"
           }
         }
@@ -71614,7 +71592,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "比較現有綜合評分與套用上限、加分規則之前的連續評分，看哪一種更接近你的當次自評。一般結果仍使用現有評分規則，自評不會改變分數。"
           }
         }
@@ -71794,7 +71772,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "開啟後，新錄音可能隨機收到自評邀請，並依開始錄音時選擇的練習方向分別彙整。回饋在顯示分數前填寫，也可以略過。等待期間，暫存錄音會留在本機；在前景時通常會於 30 秒後繼續分析，系統暫停執行可能延後處理與清除。實驗僅在本機儲存彙整計數，不建立個別自評紀錄或與錄音的關聯，也不傳送實驗資料。關閉會清除本實驗摘要。"
           }
         }
@@ -71974,7 +71952,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "參與本機評分對照"
           }
         }
@@ -72154,7 +72132,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "只在已選擇女性向或男性向聲音練習目標時邀請。每次符合條件的錄音有四分之一的機會；每 7 天最多檢查 100 次新錄音、最多邀請 5 次，不限制一般錄音。到期摘要會在下次啟動或返回前景時清除。"
           }
         }
@@ -72334,7 +72312,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本週期剩餘邀請次數"
           }
         }
@@ -72514,7 +72492,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本機評分對照已停止。部分資料可能尚未清除，請解鎖裝置後再試一次。"
           }
         }
@@ -72694,7 +72672,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本機評分對照"
           }
         }
@@ -72874,7 +72852,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "分析完成前中斷"
           }
         }
@@ -73054,7 +73032,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "現有評分較接近自評"
           }
         }
@@ -73234,7 +73212,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "連續評分較接近自評"
           }
         }
@@ -73414,7 +73392,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "差距相同"
           }
         }
@@ -73594,7 +73572,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "分析失敗或已取消"
           }
         }
@@ -73774,7 +73752,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "填寫回饋前中斷"
           }
         }
@@ -73954,7 +73932,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "女性向練習"
           }
         }
@@ -74134,7 +74112,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "這裡僅比較評分與自評的接近程度。少量主觀回覆無法證明模型準確度、性別認同或聲音健康狀況。"
           }
         }
@@ -74314,7 +74292,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "自評邀請"
           }
         }
@@ -74494,7 +74472,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "男性向練習"
           }
         }
@@ -74674,7 +74652,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "略過與缺失的觀察"
           }
         }
@@ -74854,7 +74832,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "配對比較"
           }
         }
@@ -75034,7 +75012,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已填寫自評"
           }
         }
@@ -75214,7 +75192,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "納入抽樣考量的錄音"
           }
         }
@@ -75394,7 +75372,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已略過或離開回饋頁面"
           }
         }
@@ -75574,7 +75552,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "回饋逾時"
           }
         }
@@ -75754,7 +75732,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法判斷"
           }
         }
@@ -75934,7 +75912,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "音高或評分無法使用"
           }
         }
@@ -90154,7 +90132,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已記錄的分析次數"
           }
         }
@@ -90334,7 +90312,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "清除摘要"
           }
         }
@@ -90514,7 +90492,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "清除或關閉診斷後，只保留參與設定和本週期的次數限制，不會增加可記錄次數。"
           }
         }
@@ -90694,7 +90672,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "60 秒以上（含）"
           }
         }
@@ -90874,7 +90852,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "5 秒以上、未滿 10 秒"
           }
         }
@@ -91054,7 +91032,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "10 秒以上、未滿 20 秒"
           }
         }
@@ -91234,7 +91212,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "20 秒以上、未滿 60 秒"
           }
         }
@@ -91414,7 +91392,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "錄音長度"
           }
         }
@@ -91594,7 +91572,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法估計"
           }
         }
@@ -91774,7 +91752,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "少於 5 秒"
           }
         }
@@ -91954,7 +91932,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "啟用本機診斷"
           }
         }
@@ -92134,7 +92112,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "30 秒以上（含）"
           }
         }
@@ -92314,7 +92292,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "1 秒以上、未滿 3 秒"
           }
         }
@@ -92494,7 +92472,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "3 秒以上、未滿 10 秒"
           }
         }
@@ -92674,7 +92652,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "10 秒以上、未滿 30 秒"
           }
         }
@@ -92854,7 +92832,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "總處理時間"
           }
         }
@@ -93034,7 +93012,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法估計"
           }
         }
@@ -93214,7 +93192,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "少於 1 秒"
           }
         }
@@ -93394,7 +93372,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "分析失敗"
           }
         }
@@ -93574,7 +93552,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已取消"
           }
         }
@@ -93754,7 +93732,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法儲存歷史紀錄"
           }
         }
@@ -93934,7 +93912,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "上次執行時中斷"
           }
         }
@@ -94114,7 +94092,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "模型無法使用"
           }
         }
@@ -94294,7 +94272,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "未偵測到語音"
           }
         }
@@ -94474,7 +94452,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "已完成"
           }
         }
@@ -94654,7 +94632,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "分析結果類別"
           }
         }
@@ -94834,7 +94812,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法讀取音訊"
           }
         }
@@ -95014,7 +94992,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "有一次分析尚未結束"
           }
         }
@@ -95194,7 +95172,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "只在這台裝置彙整分析結果類別、錄音長度、語音比例、音量位準估計和處理時間。診斷不儲存音訊、聲音特徵、分數或個別紀錄，也不會傳送這些摘要。"
           }
         }
@@ -95374,7 +95352,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "語音位準偏低"
           }
         }
@@ -95554,7 +95532,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "語音與背景位準接近"
           }
         }
@@ -95734,7 +95712,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "語音位準明顯高於背景"
           }
         }
@@ -95914,7 +95892,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "音量位準估計"
           }
         }
@@ -96094,7 +96072,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法估計"
           }
         }
@@ -96274,7 +96252,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本週期剩餘診斷次數"
           }
         }
@@ -96454,7 +96432,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "每 7 天最多記錄 5 次分析，不限制一般錄音或分析次數。摘要到期後，會在下次開啟 App 或返回前景時清除。關閉診斷會清除摘要。"
           }
         }
@@ -96634,7 +96612,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "75% 以上（含）"
           }
         }
@@ -96814,7 +96792,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "50% 以上、未滿 75%"
           }
         }
@@ -96994,7 +96972,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "25% 以上、未滿 50%"
           }
         }
@@ -97174,7 +97152,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "偵測到的語音比例"
           }
         }
@@ -97354,7 +97332,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法估計"
           }
         }
@@ -97534,7 +97512,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "少於 25%"
           }
         }
@@ -97714,7 +97692,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本機診斷已停止。部分資料可能尚未清除，請解鎖裝置後再試一次。"
           }
         }
@@ -97894,7 +97872,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本週期摘要"
           }
         }
@@ -98074,7 +98052,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "本機改進診斷"
           }
         }
@@ -98254,7 +98232,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "App 版本"
           }
         }
@@ -98434,7 +98412,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "模型清單指紋"
           }
         }
@@ -98614,7 +98592,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "包含的版本資訊"
           }
         }
@@ -98629,6 +98607,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地工具"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "本地工具"
@@ -98810,7 +98794,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "請解鎖裝置後重新開啟 App。現有紀錄並未重設。"
           }
         }
@@ -98990,7 +98974,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "無法使用本機儲存空間"
           }
         }
@@ -99172,6 +99156,906 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "偏好與隱私"
+          }
+        }
+      }
+    },
+    "settings.theme.customColor" : {
+      "comment" : "Theme color settings copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "لون مخصص"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Vlastní barva"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Brugerdefineret farve"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Benutzerdefinierte Farbe"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Προσαρμοσμένο χρώμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Color"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Color personalizado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mukautettu väri"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur personnalisée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "צבע מותאם אישית"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "कस्टम रंग"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Prilagođena boja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Egyéni szín"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Warna khusus"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Colore personalizzato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "カスタムカラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용자 지정 색상"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Warna tersuai"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Aangepaste kleur"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Kolor niestandardowy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cor personalizada"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Пользовательский цвет"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Anpassad färg"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "สีที่กำหนดเอง"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Özel renk"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Власний колір"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Màu tùy chỉnh"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义颜色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂顏色"
+          }
+        }
+      }
+    },
+    "settings.theme.description" : {
+      "comment" : "Theme color settings copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "يتبع المظهر افتراضيًا اتجاه صوتك: الأزرق للصوت الذكوري والوردي للصوت الأنثوي. يمكنك اختيار لون آخر."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Motiv ve výchozím nastavení sleduje směr vašeho hlasu: modrá pro mužský a růžová pro ženský. Můžete zvolit jinou barvu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Temaet følger som standard din stemmeretning: blå for maskulin og pink for feminin. Du kan vælge en anden farve."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Das Thema folgt standardmäßig deiner Stimmrichtung: Blau für maskulin und Pink für feminin. Du kannst eine andere Farbe wählen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Από προεπιλογή, το θέμα ακολουθεί την κατεύθυνση της φωνής σας: μπλε για ανδρική και ροζ για γυναικεία. Μπορείτε να επιλέξετε άλλο χρώμα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By default, the theme follows your voice direction: blue for masculine and pink for feminine. You can choose another color."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "De forma predeterminada, el tema sigue la dirección de tu voz: azul para masculina y rosa para femenina. Puedes elegir otro color."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Teema seuraa oletuksena äänisuuntaasi: sininen maskuliiniselle ja vaaleanpunainen feminiiniselle. Voit valita muun värin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Par défaut, le thème suit la direction de votre voix : bleu pour une voix masculine et rose pour une voix féminine. Vous pouvez choisir une autre couleur."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "כברירת מחדל, ערכת הנושא עוקבת אחר כיוון הקול שלך: כחול לקול גברי וורוד לקול נשי. אפשר לבחור צבע אחר."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "डिफ़ॉल्ट रूप से थीम आपकी आवाज़ की दिशा का पालन करती है: पुरुष आवाज़ के लिए नीला और महिला आवाज़ के लिए गुलाबी। आप कोई और रंग चुन सकते हैं।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tema prema zadanim postavkama prati smjer vašeg glasa: plava za muški i ružičasta za ženski. Možete odabrati drugu boju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "A téma alapértelmezés szerint a hang irányát követi: kék a férfi, rózsaszín a női irányhoz. Másik színt is választhatsz."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Secara default, tema mengikuti arah suara Anda: biru untuk maskulin dan merah muda untuk feminin. Anda dapat memilih warna lain."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Per impostazione predefinita, il tema segue la direzione della voce: blu per maschile e rosa per femminile. Puoi scegliere un altro colore."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "デフォルトではテーマが音声の方向に合わせて変わります。男性向けは青、女性向けはピンクです。別の色も選べます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기본적으로 테마는 음성 방향을 따릅니다. 남성 방향은 파란색, 여성 방향은 분홍색입니다. 다른 색상도 선택할 수 있습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Secara lalai, tema mengikut arah suara anda: biru untuk maskulin dan merah jambu untuk feminin. Anda boleh memilih warna lain."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Standaard volgt het thema je stemrichting: blauw voor mannelijk en roze voor vrouwelijk. Je kunt een andere kleur kiezen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Domyślnie motyw podąża za kierunkiem głosu: niebieski dla męskiego i różowy dla żeńskiego. Możesz wybrać inny kolor."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Por padrão, o tema segue a direção da sua voz: azul para masculina e rosa para feminina. Você pode escolher outra cor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "По умолчанию тема следует направлению вашего голоса: синий для мужского и розовый для женского. Можно выбрать другой цвет."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Som standard följer temat din röstinriktning: blått för maskulin och rosa för feminin. Du kan välja en annan färg."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ธีมจะใช้ทิศทางเสียงของคุณเป็นค่าเริ่มต้น: สีน้ำเงินสำหรับเสียงผู้ชายและสีชมพูสำหรับเสียงผู้หญิง คุณเลือกสีอื่นได้"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tema varsayılan olarak ses yönünü takip eder: erkek yönü için mavi, kadın yönü için pembe. Başka bir renk seçebilirsiniz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Типово тема відповідає напрямку голосу: синій для чоловічого та рожевий для жіночого. Можна вибрати інший колір."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Theo mặc định, chủ đề theo hướng giọng nói của bạn: xanh dương cho giọng nam và hồng cho giọng nữ. Bạn có thể chọn màu khác."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "默认主题色会跟随声音方向：男性向为蓝色，女性向为粉色。你也可以选择其他颜色。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主題色預設會跟隨聲音方向：男性向為藍色，女性向為粉紅色。你也可以選擇其他顏色。"
+          }
+        }
+      }
+    },
+    "settings.theme.followVoice" : {
+      "comment" : "Theme color settings copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "اتبع اتجاه الصوت"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Podle směru hlasu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Følg stemmeretning"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Stimmrichtung folgen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ακολούθηση κατεύθυνσης φωνής"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follow Voice Direction"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Seguir dirección de voz"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Seuraa äänisuuntaa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Suivre la direction de la voix"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "עקוב אחר כיוון הקול"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "आवाज़ की दिशा का पालन करें"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Prati smjer glasa"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Hangirány követése"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ikuti arah suara"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Segui direzione voce"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "音声の方向に合わせる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "음성 방향 따르기"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ikut arah suara"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Stemrichting volgen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Podążaj za kierunkiem głosu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Seguir direção da voz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Следовать направлению голоса"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Följ röstens riktning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ตามทิศทางเสียง"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ses yönünü takip et"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Слідувати напрямку голосу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Theo hướng giọng nói"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随声音方向"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟隨聲音方向"
+          }
+        }
+      }
+    },
+    "settings.theme.reset" : {
+      "comment" : "Theme color settings copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "استخدم لون الصوت الافتراضي"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Použít výchozí barvu hlasu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Brug stemmens standardfarve"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Standardfarbe der Stimme verwenden"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Χρήση προεπιλεγμένου χρώματος φωνής"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Voice Default"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Usar color predeterminado de voz"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Käytä äänen oletusväriä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Utiliser la couleur vocale par défaut"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "השתמש בצבע הקול כברירת מחדל"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "आवाज़ का डिफ़ॉल्ट रंग उपयोग करें"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Upotrijebi zadanu boju glasa"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Hang alapértelmezett színének használata"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Gunakan warna suara default"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Usa colore voce predefinito"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "音声のデフォルト色を使用"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "음성 기본 색상 사용"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Gunakan warna suara lalai"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Standaardkleur van stem gebruiken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Użyj domyślnego koloru głosu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Usar cor padrão da voz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Использовать цвет голоса по умолчанию"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Använd röstens standardfärg"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ใช้สีเสียงเริ่มต้น"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sesin varsayılan rengini kullan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Використовувати стандартний колір голосу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Dùng màu giọng nói mặc định"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复声音默认颜色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用聲音預設顏色"
+          }
+        }
+      }
+    },
+    "settings.theme.sectionTitle" : {
+      "comment" : "Theme color settings copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "لون السمة"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Barva motivu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Temafarve"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Themenfarbe"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Χρώμα θέματος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme Color"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Color del tema"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Teeman väri"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur du thème"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "צבע ערכת נושא"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "थीम रंग"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Boja teme"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Téma színe"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Warna tema"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Colore del tema"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "テーマカラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "테마 색상"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Warna tema"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Themakleur"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Kolor motywu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cor do tema"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Цвет темы"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Temafärg"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "สีธีม"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tema rengi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Колір теми"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Màu chủ đề"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主题色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主題色"
           }
         }
       }

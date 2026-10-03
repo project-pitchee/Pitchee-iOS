@@ -84,7 +84,7 @@
 
 ## 4. 存储键（UserDefaults / @AppStorage）
 
-存储键是**数据**不是文案，必须稳定、与语言无关，同样使用层级命名，集中定义在 `PitcheeApp/AppStorage.swift`：
+存储键是**数据**不是文案，必须稳定、与语言无关，同样使用层级命名，集中定义在 `PitcheeApp/App/AppStorage.swift`：
 
 | 键 | 含义 |
 | --- | --- |

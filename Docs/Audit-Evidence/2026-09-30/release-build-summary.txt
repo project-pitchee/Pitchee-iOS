@@ -1,0 +1,14 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project Pitchee.xcodeproj -scheme Pitchee -configuration Release -sdk iphoneos -destination generic/platform=iOS -derivedDataPath /tmp/pitchee-apple-audit-20260930/DerivedData ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO SWIFT_EMIT_LOC_STRINGS=NO build
+
+Build settings from command line:
+    ARCHS = arm64
+    CODE_SIGNING_ALLOWED = NO
+    ONLY_ACTIVE_ARCH = YES
+    SDKROOT = iphoneos27.1
+    SWIFT_EMIT_LOC_STRINGS = NO
+
+
+Final diagnostics and completion markers:
+2026-09-30 20:19:59.211 appintentsmetadataprocessor[5619:2136748] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+** BUILD SUCCEEDED **

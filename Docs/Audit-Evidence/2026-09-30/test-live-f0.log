@@ -1,0 +1,42 @@
+-- The C compiler identification is AppleClang 21.0.0.21000334
+-- The CXX compiler identification is AppleClang 21.0.0.21000334
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- PitcheeCore: ONNX Runtime enabled
+--   include: /private/tmp/pitchee-apple-audit-20260930/snapshot/Dependencies/Artifacts/ONNXRuntime/Headers
+--   library: /private/tmp/pitchee-apple-audit-20260930/snapshot/Dependencies/Artifacts/ONNXRuntime/onnxruntime.xcframework/macos-arm64_x86_64/onnxruntime.framework/onnxruntime
+-- Configuring done (6.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /var/folders/mc/zy0mgk7j2l5fymf3tr90k3kc0000gn/T/pitchee-live-f0.hvjd8l/native
+[ 10%] Building CXX object CMakeFiles/pitchee_core.dir/src/analyzer.cpp.o
+[ 20%] Building CXX object CMakeFiles/pitchee_core.dir/src/audio.cpp.o
+[ 30%] Building CXX object CMakeFiles/pitchee_core.dir/src/json.cpp.o
+[ 40%] Building CXX object CMakeFiles/pitchee_core.dir/src/naturalness.cpp.o
+[ 50%] Building CXX object CMakeFiles/pitchee_core.dir/src/ort_runtime.cpp.o
+[ 60%] Building CXX object CMakeFiles/pitchee_core.dir/src/scoring.cpp.o
+[ 70%] Building CXX object CMakeFiles/pitchee_core.dir/src/spectrum.cpp.o
+[ 80%] Building CXX object CMakeFiles/pitchee_core.dir/src/vad.cpp.o
+[ 90%] Building CXX object CMakeFiles/pitchee_core.dir/src/wav_reader.cpp.o
+[100%] Linking CXX static library libpitchee_core.a
+[100%] Built target pitchee_core
+/private/tmp/pitchee-apple-audit-20260930/snapshot/PitcheeApp/LivePitchAudioCapture.swift:80:19: warning: 'installTap(onBus:bufferSize:format:block:)' was deprecated in macOS 27.0 [#DeprecatedDeclaration]
+ 78 |         recordingError = nil
+ 79 |         acceptingBuffers = true
+ 80 |         inputNode.installTap(
+    |                   `- warning: 'installTap(onBus:bufferSize:format:block:)' was deprecated in macOS 27.0 [#DeprecatedDeclaration]
+ 81 |             onBus: 0,
+ 82 |             bufferSize: 1_024,
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+2026-09-30 20:06:41.620 live-f0-tests[95396:2079777] 2026-09-30 20:06:41.620291 [W:onnxruntime:, coreml_execution_provider.cc:113 GetCapability] CoreMLExecutionProvider::GetCapability, number of partitions supported by CoreML: 3 number of nodes in the graph: 406 number of nodes supported by CoreML: 3
+2026-09-30 20:06:42.655 live-f0-tests[95396:2079777] 2026-09-30 20:06:42.655660 [W:onnxruntime:, session_state.cc:1327 VerifyEachNodeIsAssignedToAnEp] Some nodes were not assigned to the preferred execution providers which may or may not have an negative impact on performance. e.g. ORT explicitly assigns shape related ops to CPU to improve perf.
+2026-09-30 20:06:42.655 live-f0-tests[95396:2079777] 2026-09-30 20:06:42.655761 [W:onnxruntime:, session_state.cc:1329 VerifyEachNodeIsAssignedToAnEp] Rerunning with verbose output on a non-minimal build will show node assignments.
+Pitch checks: 54 checks, 0 failures

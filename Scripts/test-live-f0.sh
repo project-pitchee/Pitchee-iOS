@@ -31,8 +31,8 @@ xcrun swiftc -parse-as-library -O \
     -framework CoreML -framework Accelerate -framework CoreGraphics \
     -Xlinker -lc++ \
     "$project_directory"/PitcheeApp/Interop/Core/*.swift \
-    "$project_directory/PitcheeApp/LivePitchAudioCapture.swift" \
-    "$project_directory/Tests/LivePitchTests.swift" \
+    "$project_directory/PitcheeApp/Audio/LivePitchAudioCapture.swift" \
+    "$project_directory/Tests/Recording/LivePitchTests.swift" \
     -o "$test_directory/live-f0-tests"
 
 "$test_directory/live-f0-tests" "$project_directory/Dependencies/PitcheeCore/models"

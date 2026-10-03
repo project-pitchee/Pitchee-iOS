@@ -1,0 +1,3 @@
+diagnostic interpolation key: settings.localDiagnostics.%@.%@.label localized: settings.localDiagnostics.%@.%@.label
+rating interpolation key: scoreStudy.feedback.rating.%lld.label localized: scoreStudy.feedback.rating.%lld.label
+explicit String key: settings.localDiagnostics.outcome.success.label localized: Completed

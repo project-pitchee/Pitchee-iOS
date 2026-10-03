@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-09-30T20:27:06+08:00",
+  "files": {
+    "Dependencies/PitcheeCore/src/analyzer.cpp": "c714e69e86f749094c0addd1e43b652c94cfafc0f2984c5e3cb3626f4332ac71",
+    "Dependencies/PitcheeCore/src/audio.cpp": "5b0530bf278f767b68e4af433bc0b43babb49c21db712892368a98937c57778d",
+    "Dependencies/PitcheeCore/src/internal.hpp": "46d1d32e87f8980c2da724737e9bdd74ab1254594f5ec4685c4860e7e1f9d108",
+    "Dependencies/PitcheeCore/src/json.cpp": "cd401fb3ecc8d7bb7419c8a187a1697d2a8b894cd1d59324f12bfd192cccdef1",
+    "Dependencies/PitcheeCore/src/naturalness.cpp": "c69ea415339d6f72a16481bc9ead06ee6831798c32473e50bbe71a1e7cd64a2a",
+    "Dependencies/PitcheeCore/src/ort_runtime.cpp": "bc223aacef2a3131b5fad2c3bdb7443d1c54c7c547a1639312961f4894ba9607",
+    "Dependencies/PitcheeCore/src/ort_runtime.hpp": "8b131c6c8be435124e57ef83f641545adb049c6501c1737ca657be8a65144dd0",
+    "Dependencies/PitcheeCore/src/scoring.cpp": "e524d9464442aa592b1e54da08761ad01b6ddefff73afa46319998d6726b8412",
+    "Dependencies/PitcheeCore/src/spectrum.cpp": "697ef2cf1b006d6b9a50d023914060c0817872757f6574bd6141cb0476c127d2",
+    "Dependencies/PitcheeCore/src/vad.cpp": "8d8a2dd559a92978eb37b663f81e4701d96565316052d26449bf3c563607e119",
+    "Dependencies/PitcheeCore/src/vad.hpp": "0dfffb411ea0e5dd92f780a6199c5ff0d13e4f6047a915f2279ae1941744e27c",
+    "Dependencies/PitcheeCore/src/wav_reader.cpp": "6a9a4d4430dfdb5f85b4fb93d985b0ee9f034654aca6462e519fed09384f50da",
+    "Dependencies/PitcheeCore/src/wav_reader.hpp": "0bba09e56f4bbff6c3bda5867c03b620c518264e667b81a7f12703e0a57b5e2a",
+    "Dependencies/PitcheeCore/include/pitchee/pitchee.h": "b4f6cca0bf180ac0fce54e436b10a522202f7eaf64c175798c2f5d260005ae75"
+  }
+}

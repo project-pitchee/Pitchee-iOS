@@ -8,9 +8,10 @@ trap 'rm -rf "$test_directory"' EXIT HUP INT TERM
 
 xcrun swiftc -parse-as-library \
     "$project_directory/PitcheeApp/Interop/Core/AnalysisResult.swift" \
-    "$project_directory/PitcheeApp/PitchTimeline.swift" \
-    "$project_directory/PitcheeApp/AccessibilitySupport.swift" \
-    "$project_directory/PitcheeApp/LivePitchChartView.swift" \
-    "$project_directory/Tests/PitchTimelineTests.swift" \
+    "$project_directory/PitcheeApp/Analysis/PitchTimeline.swift" \
+    "$project_directory/PitcheeApp/App/AccessibilitySupport.swift" \
+    "$project_directory/PitcheeApp/Analysis/LivePitchChartView.swift" \
+    "$project_directory/Tests/Fixtures/InsightsThemeSupport.swift" \
+    "$project_directory/Tests/Recording/PitchTimelineTests.swift" \
     -o "$test_directory/pitch-image-tests"
 "$test_directory/pitch-image-tests" "${1:-/tmp/pitchee-pitch-export-preview.png}"

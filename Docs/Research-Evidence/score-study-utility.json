@@ -1,0 +1,28 @@
+{
+  "synthetic_only": true,
+  "seed": 20260930,
+  "trials_per_scenario": 2000,
+  "manifest_sha256": "c219c8b4ce8ea85d0b46a47ba8bf8aa8a47bcc1983f2037ccfef4b0084bacb8a",
+  "protocol_sha256": "488942a1a5a47912dcc2f80acde030a89124c910147607461bef53fd8f1eb324",
+  "simulator_sha256": "ba65b93e94e2124720dd5323f499ca26a34c06b7c5b14137f2be236f4152e94e",
+  "python_version": "3.14.7",
+  "dimensions": 26,
+  "normalization_scale": 3.4641016151377544,
+  "rho_total": 0.05846763778955412,
+  "sigma_normalized_weekly": 10.543842365087835,
+  "sigma_count_units_weekly": 36.52494136665865,
+  "simultaneous_count_error_weekly": 152.55121355023024,
+  "readiness": {
+    "online_collection_allowed": false,
+    "missing_evidence": [
+      "frozen_model_core_and_rule_identity",
+      "separate_online_consent",
+      "reviewed_secure_aggregation_and_noise",
+      "unlinked_eligibility_and_replay_prevention",
+      "durable_cross_study_privacy_accounting",
+      "fixed_schedule_and_threshold_transcript_review",
+      "device_storage_and_withdrawal_validation",
+      "independent_label_and_power_review"
+    ]
+  }
+}

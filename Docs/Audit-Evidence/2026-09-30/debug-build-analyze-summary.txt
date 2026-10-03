@@ -1,0 +1,15 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project Pitchee.xcodeproj -scheme Pitchee -configuration Debug -sdk iphonesimulator -destination "generic/platform=iOS Simulator" -derivedDataPath /tmp/pitchee-apple-audit-20260930/DerivedData ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO SWIFT_EMIT_LOC_STRINGS=NO build analyze
+
+Build settings from command line:
+    ARCHS = arm64
+    CODE_SIGNING_ALLOWED = NO
+    ONLY_ACTIVE_ARCH = YES
+    SDKROOT = iphonesimulator27.1
+    SWIFT_EMIT_LOC_STRINGS = NO
+
+
+Final diagnostics and completion markers:
+2026-09-30 20:10:31.133 appintentsmetadataprocessor[97979:2098716] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+** BUILD SUCCEEDED **
+** ANALYZE SUCCEEDED **

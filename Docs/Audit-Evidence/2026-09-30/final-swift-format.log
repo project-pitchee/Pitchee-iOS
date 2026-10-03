@@ -1,0 +1,1273 @@
+PitcheeApp/DebugPreviewSupport.swift:22:19: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/DebugPreviewSupport.swift:55:18: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/DebugPreviewSupport.swift:152:49: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/DebugPreviewSupport.swift:9:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:10:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:11:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:13:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:14:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:15:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:16:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:17:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:18:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:19:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:20:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:21:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:22:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:23:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:25:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:26:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:27:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:28:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:29:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:30:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:31:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:32:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:33:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:33:33: error: [AddLines] add 1 line break
+PitcheeApp/DebugPreviewSupport.swift:34:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:35:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:36:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:37:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:38:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:39:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:40:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:41:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:42:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:43:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:44:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:45:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:46:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:47:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:48:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:49:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:50:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:51:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:52:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:53:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:54:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:55:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:56:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:57:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:58:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:59:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:60:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:61:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:62:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:63:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:64:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:65:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:66:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:67:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:68:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:69:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:71:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:72:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:73:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:74:1: error: [LineLength] line is too long
+PitcheeApp/DebugPreviewSupport.swift:74:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:75:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:76:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:77:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:78:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:79:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:80:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:81:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:82:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:83:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:84:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:85:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:86:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:87:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:88:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:89:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:90:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:91:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:92:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:93:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:94:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:95:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:96:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:97:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:98:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:99:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:100:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:101:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:102:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:103:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:104:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:105:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:106:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:107:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:108:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:109:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:110:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:111:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:112:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:114:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:115:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:116:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:117:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:118:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:119:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:120:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:121:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:122:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:123:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:124:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:125:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:126:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:127:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:128:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:129:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:130:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:131:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:132:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:134:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:135:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:136:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:137:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:138:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:139:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:140:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:142:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:143:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:144:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:145:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:146:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:147:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:148:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:149:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:150:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:151:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:152:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:153:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:155:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:156:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:157:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:158:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:159:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:160:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:161:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:162:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:163:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:164:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:165:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:166:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:167:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:167:84: error: [AddLines] add 1 line break
+PitcheeApp/DebugPreviewSupport.swift:168:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:169:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:170:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:171:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:172:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:173:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:174:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:175:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:176:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:177:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:178:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/DebugPreviewSupport.swift:179:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LocalDiagnosticsView.swift:55:72: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/LocalDiagnosticsView.swift:62:38: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/LocalDiagnosticsView.swift:69:62: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/LocalDiagnosticsView.swift:80:100: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/LocalDiagnosticsView.swift:10:24: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnosticsView.swift:10:65: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnosticsView.swift:11:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalDiagnosticsView.swift:12:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalDiagnosticsView.swift:13:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalDiagnosticsView.swift:20:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:21:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/LocalDiagnosticsView.swift:30:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:42:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:43:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:43:1: error: [Indentation] unindent by 6 spaces
+PitcheeApp/LocalDiagnosticsView.swift:44:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:44:1: error: [Indentation] unindent by 9 spaces
+PitcheeApp/LocalDiagnosticsView.swift:45:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:46:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:46:1: error: [Indentation] unindent by 6 spaces
+PitcheeApp/LocalDiagnosticsView.swift:47:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:48:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:48:1: error: [Indentation] unindent by 6 spaces
+PitcheeApp/LocalDiagnosticsView.swift:49:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:50:1: error: [Indentation] unindent by 6 spaces
+PitcheeApp/LocalDiagnosticsView.swift:50:102: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnosticsView.swift:51:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:52:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:52:1: error: [Indentation] unindent by 6 spaces
+PitcheeApp/LocalDiagnosticsView.swift:67:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:92:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsView.swift:95:1: error: [LineLength] line is too long
+PitcheeApp/PitcheeApp.swift:9:1: error: [OrderedImports] sort import statements lexicographically
+PitcheeApp/PitcheeApp.swift:21:1: error: [LineLength] line is too long
+PitcheeApp/PitcheeApp.swift:24:1: error: [LineLength] line is too long
+PitcheeApp/PitcheeApp.swift:25:1: error: [LineLength] line is too long
+PitcheeApp/PitcheeApp.swift:50:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:44:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:67:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:44:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:67:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:44:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:44:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:67:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:67:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalScoreStudyStore.swift:18:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:35:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:36:1: error: [Indentation] unindent by 1 spaces
+PitcheeApp/LocalScoreStudyStore.swift:37:1: error: [Indentation] unindent by 1 spaces
+PitcheeApp/LocalScoreStudyStore.swift:37:71: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudyStore.swift:49:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:88:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudyStore.swift:89:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudyStore.swift:90:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudyStore.swift:90:67: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudyStore.swift:94:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:121:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:122:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyStore.swift:139:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalScoreStudyStore.swift:141:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:323:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/AnalysisViewModel.swift:323:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/AnalysisViewModel.swift:323:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/AnalysisViewModel.swift:323:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/AnalysisViewModel.swift:323:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/AnalysisViewModel.swift:57:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:86:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:87:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:88:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:89:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:90:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:91:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:92:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:93:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:94:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:95:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:96:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:115:25: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:115:42: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:116:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/AnalysisViewModel.swift:117:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:168:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:169:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:170:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:171:1: error: [Indentation] indent by 2 spaces
+PitcheeApp/AnalysisViewModel.swift:172:1: error: [Indentation] indent by 2 spaces
+PitcheeApp/AnalysisViewModel.swift:172:51: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:173:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:174:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:175:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:175:15: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:176:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:177:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:177:94: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:177:101: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:178:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:178:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:179:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:179:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:180:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:181:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:206:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:229:41: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:230:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:230:1: error: [Indentation] unindent by 24 spaces
+PitcheeApp/AnalysisViewModel.swift:234:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:245:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:246:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:247:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:248:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:249:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:258:17: error: [AddLines] add 1 line break
+PitcheeApp/AnalysisViewModel.swift:259:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:259:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:268:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/AnalysisViewModel.swift:269:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:269:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/AnalysisViewModel.swift:281:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:285:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:317:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:318:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:319:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:320:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:321:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:332:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:384:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:388:1: error: [LineLength] line is too long
+PitcheeApp/AnalysisViewModel.swift:436:16: error: [Spacing] add 1 space
+PitcheeApp/AnalysisViewModel.swift:438:19: error: [Spacing] add 1 space
+PitcheeApp/AnalysisViewModel.swift:440:19: error: [Spacing] add 1 space
+PitcheeApp/AnalysisViewModel.swift:459:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/AnalysisViewModel.swift:460:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:461:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:462:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:463:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:464:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:465:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:466:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:467:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:469:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:470:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:471:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:472:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:473:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:474:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:475:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:476:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:477:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:478:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:479:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:480:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:481:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:482:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:483:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:484:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:485:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:486:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:487:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:488:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/AnalysisViewModel.swift:489:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:50:1: error: [LineLength] line is too long
+PitcheeApp/SettingsView.swift:57:1: error: [LineLength] line is too long
+PitcheeApp/SettingsView.swift:64:1: error: [LineLength] line is too long
+PitcheeApp/SettingsView.swift:168:1: error: [LineLength] line is too long
+PitcheeApp/SettingsView.swift:169:1: error: [LineLength] line is too long
+PitcheeApp/SettingsView.swift:170:1: error: [LineLength] line is too long
+PitcheeApp/SettingsView.swift:178:98: error: [AddLines] add 1 line break
+PitcheeApp/SettingsView.swift:178:111: error: [AddLines] add 1 line break
+PitcheeApp/SettingsView.swift:202:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:203:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:204:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:205:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:207:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:208:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:209:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:210:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:211:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:212:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:214:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:215:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:216:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:217:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:219:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:220:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:221:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:223:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:224:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:225:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:226:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:227:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:229:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/SettingsView.swift:230:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:231:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:232:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:233:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/SettingsView.swift:234:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/VoicePreferences.swift:109:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:114:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:127:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:128:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:129:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:133:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:136:98: error: [AddLines] add 1 line break
+PitcheeApp/VoicePreferences.swift:136:111: error: [AddLines] add 1 line break
+PitcheeApp/VoicePreferences.swift:144:1: error: [LineLength] line is too long
+PitcheeApp/VoicePreferences.swift:151:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/VoicePreferences.swift:152:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:154:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:155:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:156:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:157:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:158:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:159:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:160:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:161:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:162:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:163:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:164:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:165:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:166:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:167:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:168:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/VoicePreferences.swift:170:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/VoicePreferences.swift:171:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:172:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/VoicePreferences.swift:174:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/VoicePreferences.swift:175:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/VoicePreferences.swift:176:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/PianoToneRenderer.swift:101:20: error: [NoParensAroundConditions] remove the parentheses around this expression
+PitcheeApp/PianoToneRenderer.swift:101:20: error: [NoParensAroundConditions] remove the parentheses around this expression
+PitcheeApp/PianoToneRenderer.swift:101:1: error: [Indentation] indent by 1 spaces
+PitcheeApp/PianoToneRenderer.swift:102:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PianoToneRenderer.swift:102:84: error: [AddLines] add 1 line break
+PitcheeApp/PianoToneRenderer.swift:106:1: error: [LineLength] line is too long
+PitcheeApp/PianoToneRenderer.swift:115:41: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:572:1: error: [NoAccessLevelOnExtensionDeclaration] remove this 'private' access modifier and declare each member inside this extension as 'fileprivate'
+PitcheeApp/InsightsDetailViews.swift:573:5: note: add 'fileprivate' access modifier to this declaration
+PitcheeApp/InsightsDetailViews.swift:49:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:104:96: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:111:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:112:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:126:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:127:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:128:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:138:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:167:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:171:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:172:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:177:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:178:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:179:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:183:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:184:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:185:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:205:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:224:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:231:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:260:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:265:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:271:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:282:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:283:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:284:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:287:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:288:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:289:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:290:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:291:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:294:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:312:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:313:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:314:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:325:91: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:327:98: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:332:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:337:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:352:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/InsightsDetailViews.swift:352:55: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:369:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:372:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:373:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:374:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:375:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:375:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:377:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:378:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:379:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:380:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:381:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:381:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:384:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:385:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:386:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:419:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:430:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:431:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:432:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:444:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:452:92: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:453:91: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:483:21: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:483:39: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:488:21: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:488:38: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:500:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:522:24: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:522:43: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:524:22: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:524:27: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:525:1: error: [Indentation] indent by 3 spaces
+PitcheeApp/InsightsDetailViews.swift:525:75: error: [AddLines] add 1 line break
+PitcheeApp/InsightsDetailViews.swift:526:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:538:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:557:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:565:1: error: [LineLength] line is too long
+PitcheeApp/InsightsDetailViews.swift:583:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:584:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:585:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:587:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:588:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:589:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:590:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:591:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:592:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:593:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:594:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:595:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:596:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:597:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:599:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:600:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:601:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:602:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:603:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:605:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:606:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:607:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:608:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:610:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:611:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:612:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:613:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:614:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:616:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:617:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:618:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:619:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:620:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:622:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsDetailViews.swift:623:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:624:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsDetailViews.swift:625:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/AppStorage.swift:54:1: error: [LineLength] line is too long
+PitcheeApp/AppStorage.swift:54:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/AppStorage.swift:56:22: error: [AddLines] add 1 line break
+PitcheeApp/AppStorage.swift:57:1: error: [Indentation] unindent by 9 spaces
+PitcheeApp/AppStorage.swift:63:1: error: [LineLength] line is too long
+PitcheeApp/AppStorage.swift:63:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/AppStorage.swift:70:1: error: [LineLength] line is too long
+PitcheeApp/AppStorage.swift:70:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/AccessibilitySupport.swift:22:21: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:1005:67: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingExportView.swift:75:1: error: [TrailingWhitespace] remove trailing whitespace
+PitcheeApp/RecordingExportView.swift:86:1: error: [TrailingWhitespace] remove trailing whitespace
+PitcheeApp/RecordingExportView.swift:89:92: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:129:20: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:129:58: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:130:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:131:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:132:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:132:14: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:138:60: error: [Spacing] remove 1 space
+PitcheeApp/RecordingExportView.swift:198:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:199:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:200:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:201:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:202:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:203:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:204:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:205:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:206:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:207:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:208:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:208:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:209:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:210:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:211:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:212:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:213:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:214:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:215:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:218:100: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:218:122: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:219:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:220:95: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:220:117: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:221:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:221:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingExportView.swift:227:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:229:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:294:38: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:295:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:295:1: error: [Indentation] unindent by 21 spaces
+PitcheeApp/RecordingExportView.swift:300:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:301:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:311:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:312:1: error: [Indentation] unindent by 16 spaces
+PitcheeApp/RecordingExportView.swift:317:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:319:32: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:319:56: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:320:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:321:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:325:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:326:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:327:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:340:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingExportView.swift:340:45: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:348:38: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:349:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:350:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:351:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:352:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:353:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:448:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:457:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:534:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:575:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:594:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:596:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:598:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:600:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:602:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:604:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:606:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:608:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:610:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:612:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:614:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:616:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:618:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:625:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:627:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:629:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:631:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:636:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:641:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:749:25: error: [Spacing] add 1 space
+PitcheeApp/RecordingExportView.swift:751:30: error: [Spacing] add 1 space
+PitcheeApp/RecordingExportView.swift:758:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:759:47: error: [Spacing] add 1 space
+PitcheeApp/RecordingExportView.swift:765:26: error: [Spacing] add 1 space
+PitcheeApp/RecordingExportView.swift:773:29: error: [Spacing] add 1 space
+PitcheeApp/RecordingExportView.swift:907:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:927:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1055:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1057:59: error: [Spacing] remove 1 space
+PitcheeApp/RecordingExportView.swift:1108:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1113:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1133:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1160:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1161:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1162:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1173:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1177:99: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:1177:102: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:1178:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1186:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1219:1: error: [LineLength] line is too long
+PitcheeApp/RecordingExportView.swift:1240:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingExportView.swift:1240:50: error: [AddLines] add 1 line break
+PitcheeApp/RecordingExportView.swift:1282:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingExportView.swift:1283:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1284:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1285:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1286:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1287:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingExportView.swift:1289:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingExportView.swift:1290:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1291:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingExportView.swift:1293:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingExportView.swift:1294:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1295:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1296:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1297:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1298:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingExportView.swift:1299:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/Interop/Core/CoreError.swift:19:1: error: [LineLength] line is too long
+PitcheeApp/PrivateAppStorage.swift:11:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:12:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:13:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:14:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:14:96: error: [AddLines] add 1 line break
+PitcheeApp/PrivateAppStorage.swift:15:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:16:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:17:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:18:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:30:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:31:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:32:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PrivateAppStorage.swift:44:1: error: [LineLength] line is too long
+PitcheeApp/PrivateAppStorage.swift:44:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/PrivateAppStorage.swift:45:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/PrivateAppStorage.swift:45:94: error: [AddLines] add 1 line break
+PitcheeApp/FoldAwareArrangementView.swift:51:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:52:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:53:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:54:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:55:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:56:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:57:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:58:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:59:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:60:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:61:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:62:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:63:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:64:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:65:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:66:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:67:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:68:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:69:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:70:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:71:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:72:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/FoldAwareArrangementView.swift:73:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/PitchTimeline.swift:37:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/PitchTimeline.swift:37:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/PitchTimeline.swift:37:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/PitchTimeline.swift:37:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/PitchTimeline.swift:37:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/PitchTimeline.swift:37:63: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/PitchTimeline.swift:65:1: error: [LineLength] line is too long
+PitcheeApp/PitchTimeline.swift:88:25: error: [AddLines] add 1 line break
+PitcheeApp/PitchTimeline.swift:89:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchTimeline.swift:90:1: error: [LineLength] line is too long
+PitcheeApp/PitchTimeline.swift:90:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchTimeline.swift:91:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:9:1: error: [OrderedImports] sort import statements lexicographically
+PitcheeApp/LivePitchChartView.swift:22:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LivePitchChartView.swift:23:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:23:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LivePitchChartView.swift:82:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:83:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:85:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:120:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:127:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:173:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:185:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:199:92: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchChartView.swift:210:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:225:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchChartView.swift:226:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:229:100: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchChartView.swift:248:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LivePitchChartView.swift:249:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:250:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:251:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:252:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:253:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:254:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:255:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LivePitchChartView.swift:257:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LivePitchChartView.swift:258:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:259:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:260:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LivePitchChartView.swift:262:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LivePitchChartView.swift:263:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchChartView.swift:264:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/InsightsData.swift:89:29: error: [OneCasePerLine] move 'metric' to its own 'case' declaration
+PitcheeApp/InsightsData.swift:29:100: error: [AddLines] add 1 line break
+PitcheeApp/InsightsData.swift:71:1: error: [LineLength] line is too long
+PitcheeApp/InsightsData.swift:83:1: error: [LineLength] line is too long
+PitcheeApp/InsightsData.swift:120:13: error: [AddLines] add 1 line break
+PitcheeApp/InsightsData.swift:121:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:122:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:123:1: error: [Indentation] indent by 2 spaces
+PitcheeApp/InsightsData.swift:124:1: error: [LineLength] line is too long
+PitcheeApp/InsightsData.swift:124:1: error: [Indentation] indent by 2 spaces
+PitcheeApp/InsightsData.swift:125:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:126:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:127:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:128:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:128:87: error: [AddLines] add 1 line break
+PitcheeApp/InsightsData.swift:128:98: error: [AddLines] add 1 line break
+PitcheeApp/InsightsData.swift:129:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:130:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/InsightsData.swift:151:1: error: [LineLength] line is too long
+PitcheeApp/InsightsData.swift:151:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/InsightsData.swift:152:1: error: [LineLength] line is too long
+PitcheeApp/RecordingView.swift:41:16: error: [AddLines] add 1 line break
+PitcheeApp/RecordingView.swift:41:52: error: [AddLines] add 1 line break
+PitcheeApp/RecordingView.swift:42:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:43:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:44:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:44:10: error: [AddLines] add 1 line break
+PitcheeApp/RecordingView.swift:126:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingView.swift:128:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingView.swift:129:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:130:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:131:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:133:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:134:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:135:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:137:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:138:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:139:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:140:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:141:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:142:1: error: [LineLength] line is too long
+PitcheeApp/RecordingView.swift:142:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:143:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:144:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:144:19: error: [AddLines] add 1 line break
+PitcheeApp/RecordingView.swift:145:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:146:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:147:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:148:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:149:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:150:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:151:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingView.swift:152:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:153:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingView.swift:155:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingView.swift:156:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:157:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:158:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingView.swift:160:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingView.swift:161:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:162:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingView.swift:163:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ScoreStudyEvaluator.swift:6:1: error: [LineLength] line is too long
+PitcheeApp/ScoreStudyEvaluator.swift:8:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/ScoreStudyEvaluator.swift:9:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/ScoreStudyEvaluator.swift:9:94: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:9:1: error: [OrderedImports] sort import statements lexicographically
+PitcheeApp/RecordingAnalysisView.swift:1349:75: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1350:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1349:75: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1350:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1349:75: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1350:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1349:75: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1350:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1349:75: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1350:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1349:75: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:1350:65: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/RecordingAnalysisView.swift:404:14: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:427:14: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:585:64: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:606:48: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:664:93: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:764:85: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:774:85: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:932:72: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:975:6: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:998:72: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:1041:6: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:1343:88: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/RecordingAnalysisView.swift:29:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:31:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:38:26: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:39:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:40:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:40:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:41:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:41:67: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:51:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:135:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:161:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:259:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:331:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:350:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:361:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:373:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:416:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:417:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:418:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:419:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:480:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:505:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:507:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:518:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingAnalysisView.swift:518:50: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:525:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:526:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:527:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:528:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:534:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:535:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:536:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:537:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:549:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:572:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:572:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingAnalysisView.swift:579:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:583:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:587:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:596:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:596:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingAnalysisView.swift:607:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:607:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingAnalysisView.swift:671:26: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:671:57: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:672:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:673:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:674:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:675:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:676:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:677:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:678:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:679:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:680:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:680:14: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:681:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:682:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:683:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:684:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:685:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:686:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:687:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:688:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:689:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/RecordingAnalysisView.swift:690:18: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:691:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:692:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:692:65: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:693:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:694:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:695:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:722:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:754:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:765:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:796:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1082:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1083:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1109:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1117:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1118:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1147:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1170:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1176:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1196:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingAnalysisView.swift:1197:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/RecordingAnalysisView.swift:1197:37: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:1253:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1349:68: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:1349:83: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:1350:58: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:1350:73: error: [AddLines] add 1 line break
+PitcheeApp/RecordingAnalysisView.swift:1355:1: error: [LineLength] line is too long
+PitcheeApp/RecordingAnalysisView.swift:1370:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1371:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1373:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1374:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1375:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1377:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1378:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1379:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1380:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1381:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1382:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1384:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1385:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1386:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1388:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1389:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1390:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1392:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1393:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1394:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1396:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1397:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1398:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1399:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1400:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1401:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1402:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1403:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1404:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1406:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1407:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingAnalysisView.swift:1408:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LocalDiagnosticsStore.swift:42:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:68:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:42:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:68:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:42:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:42:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:68:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:68:69: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnosticsStore.swift:12:21: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnosticsStore.swift:13:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalDiagnosticsStore.swift:14:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalDiagnosticsStore.swift:16:95: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnosticsStore.swift:17:93: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnosticsStore.swift:23:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsStore.swift:37:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsStore.swift:47:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsStore.swift:91:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnosticsStore.swift:105:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalDiagnosticsStore.swift:107:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalScoreStudy.swift:21:10: error: [OneCasePerLine] move 'rating' to its own 'case' declaration
+PitcheeApp/LocalScoreStudy.swift:46:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudy.swift:46:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:91:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:92:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:93:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:94:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:94:98: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudy.swift:126:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudy.swift:127:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:128:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:129:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:130:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudy.swift:130:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:139:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudy.swift:159:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudy.swift:159:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:172:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudy.swift:175:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalScoreStudy.swift:175:68: error: [AddLines] add 1 line break
+PitcheeApp/VoiceScoring.swift:64:26: error: [AddLines] add 1 line break
+PitcheeApp/VoiceScoring.swift:65:1: error: [LineLength] line is too long
+PitcheeApp/VoiceScoring.swift:65:1: error: [Indentation] unindent by 9 spaces
+PitcheeApp/VoiceScoring.swift:78:32: error: [AddLines] add 1 line break
+PitcheeApp/VoiceScoring.swift:79:1: error: [Indentation] unindent by 15 spaces
+PitcheeApp/VoiceScoring.swift:99:22: error: [AddLines] add 1 line break
+PitcheeApp/VoiceScoring.swift:100:1: error: [Indentation] unindent by 9 spaces
+PitcheeApp/LocalDiagnostics.swift:14:84: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:48:85: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:68:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:14:84: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:14:84: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:14:84: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:48:85: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:48:85: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:48:85: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:68:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:68:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:68:47: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/LocalDiagnostics.swift:124:58: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/LocalDiagnostics.swift:30:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalDiagnostics.swift:31:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnostics.swift:31:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalDiagnostics.swift:69:95: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnostics.swift:83:10: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnostics.swift:84:1: error: [Indentation] unindent by 1 spaces
+PitcheeApp/LocalDiagnostics.swift:84:82: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnostics.swift:86:1: error: [LineLength] line is too long
+PitcheeApp/LocalDiagnostics.swift:114:23: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnostics.swift:115:1: error: [Indentation] unindent by 10 spaces
+PitcheeApp/LocalDiagnostics.swift:116:1: error: [Indentation] unindent by 10 spaces
+PitcheeApp/LocalDiagnostics.swift:117:1: error: [Indentation] unindent by 10 spaces
+PitcheeApp/LocalDiagnostics.swift:118:1: error: [Indentation] unindent by 10 spaces
+PitcheeApp/LocalDiagnostics.swift:118:68: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnostics.swift:120:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalDiagnostics.swift:121:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalDiagnostics.swift:122:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LocalDiagnostics.swift:122:17: error: [AddLines] add 1 line break
+PitcheeApp/LocalDiagnostics.swift:125:1: error: [LineLength] line is too long
+PitcheeApp/PianoSoundEngine.swift:26:81: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/PianoSoundEngine.swift:44:96: error: [AddLines] add 1 line break
+PitcheeApp/PianoSoundEngine.swift:69:1: error: [LineLength] line is too long
+PitcheeApp/PianoSoundEngine.swift:111:1: error: [LineLength] line is too long
+PitcheeApp/PitchImageExportButton.swift:10:1: error: [OrderedImports] sort import statements lexicographically
+PitcheeApp/PitchImageExportButton.swift:31:16: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:31:53: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:32:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:33:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:34:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:34:10: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:73:85: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:73:110: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:77:1: error: [LineLength] line is too long
+PitcheeApp/PitchImageExportButton.swift:92:1: error: [LineLength] line is too long
+PitcheeApp/PitchImageExportButton.swift:94:20: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:94:57: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:95:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:96:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:97:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:97:14: error: [AddLines] add 1 line break
+PitcheeApp/PitchImageExportButton.swift:107:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/PitchImageExportButton.swift:108:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:109:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:110:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:112:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/PitchImageExportButton.swift:114:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/PitchImageExportButton.swift:115:1: error: [LineLength] line is too long
+PitcheeApp/PitchImageExportButton.swift:115:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:116:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:117:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:118:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:119:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:120:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/PitchImageExportButton.swift:121:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/PitchImageExportButton.swift:131:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchAudioCapture.swift:53:47: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/LivePitchAudioCapture.swift:139:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchAudioCapture.swift:146:96: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchAudioCapture.swift:146:107: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchAudioCapture.swift:166:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchAudioCapture.swift:187:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LivePitchAudioCapture.swift:188:1: error: [Indentation] unindent by 2 spaces
+PitcheeApp/LivePitchAudioCapture.swift:188:92: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchAudioCapture.swift:207:14: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchAudioCapture.swift:208:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchAudioCapture.swift:209:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LivePitchAudioCapture.swift:209:50: error: [AddLines] add 1 line break
+PitcheeApp/LivePitchAudioCapture.swift:216:1: error: [LineLength] line is too long
+PitcheeApp/LivePitchAudioCapture.swift:236:1: error: [LineLength] line is too long
+PitcheeApp/RecordingStatistics.swift:9:1: error: [OrderedImports] sort import statements lexicographically
+PitcheeApp/RecordingStatistics.swift:95:14: error: [AddLines] add 1 line break
+PitcheeApp/RecordingStatistics.swift:96:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:97:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:98:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:98:10: error: [AddLines] add 1 line break
+PitcheeApp/RecordingStatistics.swift:120:32: error: [AddLines] add 1 line break
+PitcheeApp/RecordingStatistics.swift:120:34: error: [RemoveLine] remove line break
+PitcheeApp/RecordingStatistics.swift:121:68: error: [RemoveLine] remove line break
+PitcheeApp/RecordingStatistics.swift:129:32: error: [AddLines] add 1 line break
+PitcheeApp/RecordingStatistics.swift:130:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:131:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:132:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:133:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:136:32: error: [AddLines] add 1 line break
+PitcheeApp/RecordingStatistics.swift:137:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:138:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:139:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:140:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingStatistics.swift:148:1: error: [LineLength] line is too long
+PitcheeApp/AudioSessionController.swift:28:1: error: [LineLength] line is too long
+PitcheeApp/AudioSessionController.swift:57:1: error: [LineLength] line is too long
+PitcheeApp/RecordingTabAccessory.swift:59:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:60:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:61:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:62:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:63:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:64:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:65:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:66:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:67:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:68:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:69:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:70:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:71:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:97:32: error: [AddLines] add 1 line break
+PitcheeApp/RecordingTabAccessory.swift:98:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:99:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:116:1: error: [LineLength] line is too long
+PitcheeApp/RecordingTabAccessory.swift:122:1: error: [LineLength] line is too long
+PitcheeApp/RecordingTabAccessory.swift:123:1: error: [LineLength] line is too long
+PitcheeApp/RecordingTabAccessory.swift:130:1: error: [LineLength] line is too long
+PitcheeApp/RecordingTabAccessory.swift:131:1: error: [LineLength] line is too long
+PitcheeApp/RecordingTabAccessory.swift:137:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:138:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:139:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:140:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:141:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:142:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:143:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:144:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/RecordingTabAccessory.swift:145:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/OnboardingView.swift:323:1: error: [NoAccessLevelOnExtensionDeclaration] remove this 'private' access modifier and declare each member inside this extension as 'fileprivate'
+PitcheeApp/OnboardingView.swift:324:5: note: add 'fileprivate' access modifier to this declaration
+PitcheeApp/OnboardingView.swift:83:29: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:83:41: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:83:52: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:84:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/OnboardingView.swift:85:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/OnboardingView.swift:86:1: error: [Indentation] indent by 8 spaces
+PitcheeApp/OnboardingView.swift:130:1: error: [LineLength] line is too long
+PitcheeApp/OnboardingView.swift:175:1: error: [LineLength] line is too long
+PitcheeApp/OnboardingView.swift:177:1: error: [LineLength] line is too long
+PitcheeApp/OnboardingView.swift:240:26: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:241:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:242:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:252:32: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:253:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:254:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:261:36: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:261:70: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:261:72: error: [RemoveLine] remove line break
+PitcheeApp/OnboardingView.swift:262:19: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:262:56: error: [AddLines] add 1 line break
+PitcheeApp/OnboardingView.swift:307:1: error: [LineLength] line is too long
+PitcheeApp/OnboardingView.swift:323:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/OnboardingView.swift:324:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:325:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:326:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:327:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:328:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:329:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/OnboardingView.swift:331:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/OnboardingView.swift:332:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:333:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:334:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/OnboardingView.swift:336:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/OnboardingView.swift:337:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:338:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/OnboardingView.swift:339:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:11:1: error: [OrderedImports] sort import statements lexicographically
+PitcheeApp/ContentView.swift:839:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:840:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:839:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:840:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:839:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:840:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:839:38: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:840:39: error: [DoNotUseSemicolons] remove ';' and move the next statement to a new line
+PitcheeApp/ContentView.swift:944:1: error: [NoAccessLevelOnExtensionDeclaration] remove this 'private' access modifier and declare each member inside this extension as 'fileprivate'
+PitcheeApp/ContentView.swift:945:5: note: add 'fileprivate' access modifier to this declaration
+PitcheeApp/ContentView.swift:745:54: error: [TrailingComma] add trailing comma to the last element in multiline collection literal
+PitcheeApp/ContentView.swift:27:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:41:55: error: [RemoveLine] remove line break
+PitcheeApp/ContentView.swift:45:19: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:46:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:47:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:48:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:49:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:50:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:50:10: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:80:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:206:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:256:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:328:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:329:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:329:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:330:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:331:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:366:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:372:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:373:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:374:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:381:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:389:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:410:1: error: [Indentation] indent by 1 spaces
+PitcheeApp/ContentView.swift:410:92: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:411:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:432:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:477:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:515:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:629:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:640:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:666:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:667:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:674:97: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:741:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:812:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:813:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:814:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/ContentView.swift:839:30: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:839:55: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:840:31: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:840:56: error: [AddLines] add 1 line break
+PitcheeApp/ContentView.swift:845:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:926:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:927:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:935:1: error: [LineLength] line is too long
+PitcheeApp/ContentView.swift:951:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:952:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:953:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:954:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:956:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:957:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:958:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:959:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:960:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:962:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:963:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:964:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:965:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:966:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:967:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:968:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:969:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:970:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:972:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/ContentView.swift:973:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/ContentView.swift:974:1: error: [Indentation] replace leading whitespace with 4 spaces
+PitcheeApp/LocalScoreStudyView.swift:10:24: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudyView.swift:10:59: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudyView.swift:11:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalScoreStudyView.swift:12:1: error: [Indentation] indent by 4 spaces
+PitcheeApp/LocalScoreStudyView.swift:19:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:20:1: error: [Indentation] unindent by 4 spaces
+PitcheeApp/LocalScoreStudyView.swift:27:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:61:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:69:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:70:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:71:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:72:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:73:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:74:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:75:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:78:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:104:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:108:33: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudyView.swift:108:57: error: [AddLines] add 1 line break
+PitcheeApp/LocalScoreStudyView.swift:109:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:110:1: error: [LineLength] line is too long
+PitcheeApp/LocalScoreStudyView.swift:110:1: error: [Indentation] unindent by 4 spaces

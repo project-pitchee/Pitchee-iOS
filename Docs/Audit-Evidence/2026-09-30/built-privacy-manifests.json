@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-09-30T20:27:06+08:00",
+  "bundles": [
+    {
+      "configuration": "Debug-iphonesimulator",
+      "applicationRootManifestExists": false,
+      "manifests": [
+        {
+          "path": "MathJaxSwift_MathJaxSwift.bundle/PrivacyInfo.xcprivacy",
+          "contents": {
+            "NSPrivacyTracking": false,
+            "NSPrivacyTrackingDomains": [],
+            "NSPrivacyCollectedDataTypes": [],
+            "NSPrivacyAccessedAPITypes": []
+          }
+        }
+      ]
+    },
+    {
+      "configuration": "Release-iphoneos",
+      "applicationRootManifestExists": false,
+      "manifests": [
+        {
+          "path": "MathJaxSwift_MathJaxSwift.bundle/PrivacyInfo.xcprivacy",
+          "contents": {
+            "NSPrivacyTracking": false,
+            "NSPrivacyTrackingDomains": [],
+            "NSPrivacyCollectedDataTypes": [],
+            "NSPrivacyAccessedAPITypes": []
+          }
+        }
+      ]
+    }
+  ]
+}

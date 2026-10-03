@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-10-01",
+  "timeZone": "Asia/Shanghai",
+  "status": "editorial-research-only",
+  "scope": "公开页面与所列权利文件的核查；不是 App 发布清单，也不表示取得个别授权。",
+  "assumptions": [
+    "按未来可能商业使用设计",
+    "内容、音视频、量表和代码分别核查权利",
+    "权利不明时不内置第三方正文"
+  ],
+  "sources": [
+    {
+      "id": "wang-2022-twvq-sc",
+      "url": "https://pubs.asha.org/doi/10.1044/2022_JSLHR-21-00685",
+      "originalTitle": "A Study on Reliability and Validity of the Simplified Chinese Version of the Trans Woman Voice Questionnaire",
+      "attribution": "Lu Wang, Jiahe Zhang, Qingfeng Zhang, Chenxi Wang, Xiang Zhang, Rongqing Hu, Yukun Jin, Huijun Ding, Zhen Chen",
+      "publisher": "American Speech-Language-Hearing Association",
+      "language": [
+        "en"
+      ],
+      "kind": "questionnaire-validation-research",
+      "topics": [
+        "self-reported-experience",
+        "measurement"
+      ],
+      "reviewedScope": "论文公开摘要、书目信息、版权与授权入口；未取得全文或问卷使用授权。",
+      "publication": {
+        "doi": "10.1044/2022_JSLHR-21-00685",
+        "journal": "Journal of Speech, Language, and Hearing Research",
+        "volume": "65",
+        "issue": "9",
+        "pages": "3264–3275",
+        "publishedOnline": "2022-08-19",
+        "publishedInIssue": "2022-09-12"
+      },
+      "rights": {
+        "status": "copyright-notice-and-permission-route",
+        "notice": "Copyright © 2022 American Speech-Language-Hearing Association.",
+        "contentLicense": null,
+        "codeLicense": null,
+        "evidenceURLs": [
+          "https://pubs.asha.org/doi/10.1044/2022_JSLHR-21-00685"
+        ]
+      },
+      "proposedUse": "研究引用、原创短介绍和 DOI 外链。",
+      "notCleared": [
+        "论文全文或图表转载",
+        "原量表及简体中文版题目、评分说明、电子化与商业使用"
+      ],
+      "editorialNotes": [
+        "研究对象和结果是问卷的测量属性，不能用作训练疗效或 App 评分有效性的证明。"
+      ],
+      "verificationMethods": [
+        "browser-rendered-publisher-page",
+        "Crossref-metadata"
+      ]
+    },
+    {
+      "id": "rle-catherina-2024",
+      "url": "https://rle.wiki/others/voice-feminisation-exercise/",
+      "originalTitle": "基于医学研究的嗓音女性化练习",
+      "attribution": "Catherina Grace；Project Trans / RLE.wiki",
+      "language": [
+        "zh-Hans"
+      ],
+      "kind": "community-tutorial",
+      "topics": [
+        "pitch",
+        "voice-quality",
+        "everyday-communication"
+      ],
+      "reviewedScope": "RLE 指定页面、原作者仓库 README、LICENSE 和教学正文；未逐项核验图片及附属语料。",
+      "rights": {
+        "status": "open-license-with-noncommercial-condition",
+        "contentLicense": "CC-BY-NC-SA-4.0",
+        "codeLicense": null,
+        "evidenceURLs": [
+          "https://rle.wiki/others/voice-feminisation-exercise/",
+          "https://github.com/Catherina0/Voice-Feminisation-Exercise/blob/main/LICENSE",
+          "https://github.com/Catherina0/Voice-Feminisation-Exercise/blob/main/README.md"
+        ],
+        "licenseURL": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      },
+      "proposedUse": "第一版普通外链，标记旧版社区教程。",
+      "notCleared": [
+        "商业内置",
+        "第三方图文和语料的完整权利链",
+        "将旧版许可适用于新版"
+      ],
+      "editorialNotes": [
+        "原仓库说明已停止更新，新版采用新协议。",
+        "不将固定音高区间或训练时长转成通用达标规则。"
+      ],
+      "verificationMethods": [
+        "source-page",
+        "author-repository"
+      ]
+    },
+    {
+      "id": "transchinese-archive",
+      "url": "https://digital.transchinese.org/",
+      "originalTitle": "跨与多元性别档案",
+      "attribution": "跨与多元性别档案；各收录作品作者需逐篇确认",
+      "language": [
+        "zh"
+      ],
+      "kind": "archive",
+      "topics": [
+        "editorial-discovery"
+      ],
+      "reviewedScope": "首页定位、声明与授权使用说明；未核权各档案。",
+      "rights": {
+        "status": "mixed-rights-explicit-uncertainty",
+        "contentLicense": null,
+        "codeLicense": null,
+        "evidenceURLs": [
+          "https://digital.transchinese.org/"
+        ],
+        "note": "站点明确说明部分材料可能未取得授权，仅作研究保存，并要求勿作商业用途。"
+      },
+      "proposedUse": "编辑查找原始材料；不进入首版推荐训练资源。",
+      "notCleared": [
+        "批量转载档案",
+        "把整站当作开放许可教材库"
+      ],
+      "editorialNotes": [
+        "逐篇追溯原始作者、许可、时效和内容质量。"
+      ],
+      "verificationMethods": [
+        "source-page"
+      ]
+    },
+    {
+      "id": "cntt-guide-v3",
+      "url": "https://voice.cntt.uk/",
+      "originalTitle": "嗓音训练文稿与训练服务套餐",
+      "attribution": "Grace Catherina",
+      "language": [
+        "zh-Hans"
+      ],
+      "kind": "community-tutorial-and-paid-service",
+      "topics": [
+        "pitch",
+        "voice-quality",
+        "independent-practice"
+      ],
+      "reviewedScope": "首页、下载页及《嗓音学习指南》第三版下载协议；未点击同意或下载 PDF。",
+      "rights": {
+        "status": "custom-restricted-terms",
+        "contentLicense": "嗓音学习指南第三版用户下载协议",
+        "codeLicense": null,
+        "evidenceURLs": [
+          "https://voice.cntt.uk/download.html"
+        ],
+        "note": "协议对商业使用和组织公开传播等要求书面授权。"
+      },
+      "proposedUse": "原创短介绍和官网外链，说明有付费服务。",
+      "notCleared": [
+        "文稿内置和组织公开分发",
+        "商业使用",
+        "正文翻译与改编"
+      ],
+      "editorialNotes": [
+        "新版与 RLE/原仓库旧版分别记录。",
+        "首页的普遍效果与无伤害承诺不进入 Pitchee 课程文案。"
+      ],
+      "verificationMethods": [
+        "source-page",
+        "download-terms-page"
+      ]
+    },
+    {
+      "id": "vocal-congruence-project",
+      "url": "https://vocalcongruence.org/",
+      "originalTitle": "Vocal Congruence Project: Find your gender-affirming voice",
+      "attribution": "Nora Mahon, MS, CCC-SLP; Leah B. Helou, PhD, CCC-SLP",
+      "language": [
+        "en"
+      ],
+      "kind": "professional-education",
+      "topics": [
+        "voice-goals",
+        "independent-practice",
+        "progress-recording",
+        "professional-support"
+      ],
+      "reviewedScope": "首页、资源目录、自主练习与求助说明等网页文字；未核权每份 zine、图示或商店材料。",
+      "rights": {
+        "status": "no-general-reuse-license-found-in-reviewed-pages",
+        "contentLicense": null,
+        "codeLicense": null,
+        "evidenceURLs": [
+          "https://vocalcongruence.org/"
+        ]
+      },
+      "proposedUse": "目标探索、回听与专业支持主题的原创导读和外链。",
+      "notCleared": [
+        "全文翻译",
+        "zine、图表与教材转载"
+      ],
+      "editorialNotes": [
+        "免费可读不自动授予 App 转载权。"
+      ],
+      "verificationMethods": [
+        "source-page"
+      ]
+    },
+    {
+      "id": "ucsf-voice-speech-therapy",
+      "url": "https://transcare.ucsf.edu/voice-and-speech-therapy",
+      "originalTitle": "Voice and Speech Therapy",
+      "attribution": "UCSF Gender Affirming Health Program / The Regents of the University of California",
+      "language": [
+        "en"
+      ],
+      "kind": "clinical-service-information",
+      "topics": [
+        "professional-support",
+        "individual-assessment"
+      ],
+      "reviewedScope": "服务说明、就诊流程及 UCSF 网站使用条款。",
+      "rights": {
+        "status": "explicit-permission-required-for-republication",
+        "contentLicense": null,
+        "codeLicense": null,
+        "notice": "© 2026 The Regents of the University of California",
+        "evidenceURLs": [
+          "https://websites.ucsf.edu/website-terms-use"
+        ],
+        "note": "个人非商业下载例外不覆盖 App 再分发。"
+      },
+      "proposedUse": "专业支持主题的机构信息短介绍和普通外链。",
+      "notCleared": [
+        "原文翻译与转载",
+        "机构标识或照片复用"
+      ],
+      "editorialNotes": [
+        "该页不是自助训练课程；美国服务流程不直接套用于中国就医。"
+      ],
+      "verificationMethods": [
+        "browser-rendered-source-page",
+        "browser-rendered-terms-page"
+      ]
+    },
+    {
+      "id": "transnavi-voice",
+      "url": "https://transnavi.jp/en/voice/",
+      "originalTitle": "Practice for changing your voice (an introduction to voice training)",
+      "attribution": "TransNavi contributors",
+      "language": [
+        "en",
+        "ja"
+      ],
+      "kind": "community-information",
+      "topics": [
+        "voice-basics",
+        "independent-practice",
+        "professional-support"
+      ],
+      "sourceUpdatedOn": "2026-09-16",
+      "reviewedScope": "英文嗓音页、页脚和复用说明；未完成日文权威版本比对及中文临床审校。",
+      "rights": {
+        "status": "open-license-commercial-adaptation-possible-with-conditions",
+        "contentLicense": "CC-BY-SA-4.0",
+        "codeLicense": "MIT (website code only)",
+        "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "evidenceURLs": [
+          "https://transnavi.jp/en/voice/",
+          "https://transnavi.jp/en/data/"
+        ],
+        "note": "保留署名、许可、改动与上游归属；改编遵守 SA；第三方或特别标注的许可另查。"
+      },
+      "proposedUse": "首版外链；优先准备符合许可且经审校的基础知识中文改编。",
+      "notCleared": [
+        "未逐项核权的第三方素材",
+        "把 MIT 代码许可用于正文"
+      ],
+      "editorialNotes": [
+        "日文为该站权威版本。",
+        "日本医疗和制度信息需保留地域限定。"
+      ],
+      "verificationMethods": [
+        "source-page",
+        "reuse-policy-page"
+      ]
+    },
+    {
+      "id": "sheffield-trans-voice-cafe",
+      "url": "https://sites.google.com/sheffield.ac.uk/transvoiceandcommunicationcafe/voice-information-resources",
+      "originalTitle": "Trans Voice Café - Voice information & resources",
+      "attribution": "Trans Voice and Communication Café, University of Sheffield；附件作者逐项核对",
+      "language": [
+        "en"
+      ],
+      "kind": "workshop-material-index",
+      "topics": [
+        "voice-care",
+        "pitch",
+        "resonance",
+        "vocal-weight",
+        "everyday-communication"
+      ],
+      "reviewedScope": "资源索引页；未逐一下载或审查 PPTX、DOCX、视频和图片。",
+      "rights": {
+        "status": "no-general-reuse-license-found-in-reviewed-pages",
+        "contentLicense": null,
+        "codeLicense": null,
+        "evidenceURLs": [
+          "https://sites.google.com/sheffield.ac.uk/transvoiceandcommunicationcafe/voice-information-resources"
+        ]
+      },
+      "proposedUse": "按主题链接资源页；作为后续课程和工作表授权候选。",
+      "notCleared": [
+        "工作表和课件内置",
+        "视频、字幕与图片转载"
+      ],
+      "editorialNotes": [
+        "附件与被链接视频可能有不同权利人。"
+      ],
+      "verificationMethods": [
+        "source-page"
+      ]
+    },
+    {
+      "id": "cincinnati-truvox",
+      "url": "https://ceas5.uc.edu/transvoice",
+      "originalTitle": "TruVox: Gender-Affirming Voice Training",
+      "attribution": "University of Cincinnati, Vesna Novak and contributors",
+      "language": [
+        "en"
+      ],
+      "kind": "external-training-tool",
+      "topics": [
+        "pitch",
+        "volume",
+        "resonance"
+      ],
+      "reviewedScope": "渲染后的首页与 About；About 指向的 2026 源码 LICENSE 和 README。未使用录音或评估功能。",
+      "rights": {
+        "status": "code-license-confirmed-content-rights-separate",
+        "contentLicense": null,
+        "codeLicense": "GPL-2.0-or-later (2026 repository)",
+        "evidenceURLs": [
+          "https://ceas5.uc.edu/transvoice/about",
+          "https://github.com/WhereInTheWorldIsDrNovak/TruVox-2026OpenSource/blob/main/LICENSE",
+          "https://github.com/WhereInTheWorldIsDrNovak/TruVox-2026OpenSource/blob/main/README.md"
+        ],
+        "note": "README 声明吟诵练习句子来自 Stemple 等《Clinical Voice Pathology: Theory and Management》(2020)。"
+      },
+      "proposedUse": "外部工具链接和交互研究；按自身需求独立实现交互。",
+      "notCleared": [
+        "教材句子与示范视频复用",
+        "独立托管共鸣模块的代码或内容",
+        "源码复用前完整依赖与分发合规"
+      ],
+      "editorialNotes": [
+        "源码开放许可不自动解决第三方内容权利。",
+        "不传送 Pitchee 录音或用户目标给外站。"
+      ],
+      "verificationMethods": [
+        "browser-rendered-source-page",
+        "official-linked-repository"
+      ]
+    },
+    {
+      "id": "asha-practice-portal",
+      "url": "https://www.asha.org/practice-portal/professional-issues/gender-affirming-voice-and-communication",
+      "originalTitle": "Gender Affirming Voice and Communication",
+      "attribution": "American Speech-Language-Hearing Association",
+      "language": [
+        "en"
+      ],
+      "kind": "professional-practice-overview",
+      "topics": [
+        "voice-goals",
+        "assessment",
+        "pitch",
+        "resonance",
+        "communication"
+      ],
+      "reviewedScope": "专业实践页面、版权页、网站使用条款。",
+      "rights": {
+        "status": "explicit-permission-required-for-republication",
+        "contentLicense": null,
+        "codeLicense": null,
+        "notice": "All Contents Copyright 1997–2026 ASHA. All Rights Reserved.",
+        "evidenceURLs": [
+          "https://www.asha.org/sitehelp/copyright/",
+          "https://www.asha.org/sitehelp/terms_of_use/"
+        ],
+        "note": "转载与翻译有专门申请路径；条款限制框架嵌入、覆盖展示等。"
+      },
+      "proposedUse": "编辑核对、原创事实介绍和普通外链。",
+      "notCleared": [
+        "完整或实质性翻译",
+        "原文、表格、截图或标识内置",
+        "框架或覆盖展示原站"
+      ],
+      "editorialNotes": [
+        "引用不能表示 ASHA 对 Pitchee 的认可或训练效果认证。"
+      ],
+      "verificationMethods": [
+        "source-page",
+        "copyright-page",
+        "terms-page"
+      ]
+    }
+  ]
+}

@@ -14,7 +14,6 @@
 		A10000000000000000000004 /* CoreML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* CoreML.framework */; };
 		A10000000000000000000005 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Accelerate.framework */; };
 		A10000000000000000000006 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* CoreGraphics.framework */; };
-		A10000000000000000000007 /* AnalysisViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* AnalysisViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,19 +23,8 @@
 		A20000000000000000000004 /* CoreML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreML.framework; path = System/Library/Frameworks/CoreML.framework; sourceTree = SDKROOT; };
 		A20000000000000000000005 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		A20000000000000000000006 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		B10000000000000000000001 /* AnalysisViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisViewModel.swift; sourceTree = "<group>"; };
 		B76D28C92FDC49E3009E536B /* Pitchee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pitchee.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B40000000000000000000001 /* Exceptions for "PitcheeApp" folder in "Pitchee" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				AnalysisViewModel.swift,
-			);
-			target = B76D28C82FDC49E3009E536B /* Pitchee */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		55B9F06F30559D0E005ECDBE /* Resources */ = {
@@ -51,10 +39,27 @@
 		};
 		B76D28CB2FDC49E3009E536B /* PitcheeApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				B40000000000000000000001 /* Exceptions for "PitcheeApp" folder in "Pitchee" target */,
-			);
 			path = PitcheeApp;
+			sourceTree = "<group>";
+		};
+		C10000000000000000000001 /* Docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Docs;
+			sourceTree = "<group>";
+		};
+		C10000000000000000000002 /* Scripts */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		C10000000000000000000003 /* Research */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Research;
+			sourceTree = "<group>";
+		};
+		C10000000000000000000004 /* Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -97,20 +102,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		B30000000000000000000001 /* PitcheeApp */ = {
-			isa = PBXGroup;
-			children = (
-				B10000000000000000000001 /* AnalysisViewModel.swift */,
-			);
-			path = PitcheeApp;
-			sourceTree = "<group>";
-		};
 		B76D28C02FDC49E3009E536B = {
 			isa = PBXGroup;
 			children = (
 				B76D28CB2FDC49E3009E536B /* PitcheeApp */,
-				B30000000000000000000001 /* PitcheeApp */,
 				55B9F06F30559D0E005ECDBE /* Resources */,
+				C10000000000000000000001 /* Docs */,
+				C10000000000000000000002 /* Scripts */,
+				C10000000000000000000003 /* Research */,
+				C10000000000000000000004 /* Tests */,
 				A30000000000000000000001 /* Dependencies */,
 				A30000000000000000000002 /* Frameworks */,
 				B76D28CA2FDC49E3009E536B /* Products */,
@@ -234,7 +234,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000007 /* AnalysisViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
