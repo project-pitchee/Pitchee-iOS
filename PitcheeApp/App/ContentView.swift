@@ -42,6 +42,25 @@ private struct MainTabView: View {
     @StateObject private var recordingModel = AnalysisViewModel()
     @State private var selectedTab: AppTab = .trends
     @State private var showsRecordingAnalysis = false
+    @State private var monitorAccessoryState = MonitorAccessoryState()
+    @State private var practicePath: [MonitorKind] = []
+
+    init() {
+        #if DEBUG
+        // Lets the isolated review simulator open this page without altering saved preferences.
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-practice-hub-preview")
+            || arguments.contains("-monitor-review-pitch")
+            || arguments.contains("-monitor-review-spectrum") {
+            _selectedTab = State(initialValue: .practice)
+        }
+        if arguments.contains("-monitor-review-pitch") {
+            _practicePath = State(initialValue: [.pitch])
+        } else if arguments.contains("-monitor-review-spectrum") {
+            _practicePath = State(initialValue: [.spectrum])
+        }
+        #endif
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -61,6 +80,20 @@ private struct MainTabView: View {
             }
             .tag(AppTab.recording)
 
+            NavigationStack(path: $practicePath) {
+                PracticeHubView()
+                    .navigationDestination(for: MonitorKind.self) { kind in
+                        switch kind {
+                        case .pitch: PitchMonitorView()
+                        case .spectrum: SpectrumMonitorView()
+                        }
+                    }
+            }
+            .tabItem {
+                Label(AppTab.practice.title, systemImage: AppTab.practice.systemImage)
+            }
+            .tag(AppTab.practice)
+
             NavigationStack {
                 PianoKeysView()
             }
@@ -77,12 +110,28 @@ private struct MainTabView: View {
             }
             .tag(AppTab.about)
         }
-        .modifier(RecordingTabAccessory(
-            isVisible: (selectedTab == .recording && !showsRecordingAnalysis)
-                || recordingModel.isRecording || recordingModel.isRequestingPermission,
-            viewModel: recordingModel,
-            action: recordingAction
-        ))
+        .modifier(TabBarAccessory(isVisible: showsRecordingAccessory || activeMonitorModel != nil) {
+            if let model = activeMonitorModel {
+                MonitorAccessoryContent(model: model)
+            } else {
+                RecordingAccessoryContent(viewModel: recordingModel, action: recordingAction)
+            }
+        })
+        .environment(\.monitorAccessoryState, monitorAccessoryState)
+        .onChange(of: selectedTab) { _, tab in
+            if tab != .practice { monitorAccessoryState.leavePractice() }
+        }
+    }
+
+    private var showsRecordingAccessory: Bool {
+        (selectedTab == .recording && !showsRecordingAnalysis)
+            || recordingModel.isRecording || recordingModel.isRequestingPermission
+    }
+
+    private var activeMonitorModel: MonitorViewModel? {
+        guard selectedTab == .practice,
+              !recordingModel.isRecording, !recordingModel.isRequestingPermission else { return nil }
+        return monitorAccessoryState.model
     }
 
     private func recordingAction() {
@@ -102,6 +151,7 @@ private struct MainTabView: View {
 private enum AppTab: Hashable {
     case trends
     case recording
+    case practice
     case pianoKeys
     case about
 
@@ -111,6 +161,8 @@ private enum AppTab: Hashable {
             "insights.screen.title"
         case .recording:
             "recording.screen.title"
+        case .practice:
+            "practice.hub.tab"
         case .pianoKeys:
             "piano.screen.title"
         case .about:
@@ -124,6 +176,8 @@ private enum AppTab: Hashable {
             "chart.line.uptrend.xyaxis"
         case .recording:
             "waveform.badge.microphone"
+        case .practice:
+            "figure.mind.and.body"
         case .pianoKeys:
             "pianokeys"
         case .about:

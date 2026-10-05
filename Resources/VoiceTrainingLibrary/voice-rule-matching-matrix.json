@@ -1,0 +1,101 @@
+{
+  "pass_boost": [
+    "RULE-PASS-BOOST-01",
+    "RULE-PASS-BOOST-02"
+  ],
+  "high_f0_stylized_cap": [
+    "RULE-HIGH-F0-STYLIZED-01",
+    "RULE-HIGH-F0-STYLIZED-02",
+    "RULE-HIGH-F0-STYLIZED-03"
+  ],
+  "high_f0_male_cap": [
+    "RULE-HIGH-F0-MALE-01",
+    "RULE-HIGH-F0-MALE-02",
+    "RULE-HIGH-F0-MALE-03"
+  ],
+  "low_f0_natural_cap": [
+    "RULE-LOW-F0-NATURAL-01",
+    "RULE-LOW-F0-NATURAL-02"
+  ],
+  "low_f0_stylized_cap": [
+    "RULE-LOW-F0-STYLIZED-01",
+    "RULE-LOW-F0-STYLIZED-02"
+  ],
+  "f0_unavailable": [
+    "RULE-F0-UNAVAILABLE-01",
+    "RULE-F0-UNAVAILABLE-02"
+  ],
+  "continuous": [
+    "RULE-CONTINUOUS-01",
+    "SCORE-ADVANCED-01",
+    "SCORE-ADVANCED-02",
+    "SCORE-MASTER-01",
+    "SCORE-MASTER-02",
+    "SCORE-MID-01",
+    "SCORE-MID-02",
+    "SCORE-STARTER-01",
+    "SCORE-STARTER-02",
+    "MASCULINE-BASICS-01",
+    "MASCULINE-INTONATION-01",
+    "MASCULINE-LARYNX-01",
+    "MASCULINE-ON-T-01",
+    "MASCULINE-PRE-T-01",
+    "NONBINARY-EXPLORE-01",
+    "NONBINARY-FLUIDITY-01"
+  ],
+  "score_starter": [
+    "SCORE-STARTER-01",
+    "SCORE-STARTER-02"
+  ],
+  "score_mid": [
+    "SCORE-MID-01",
+    "SCORE-MID-02"
+  ],
+  "score_advanced": [
+    "SCORE-ADVANCED-01",
+    "SCORE-ADVANCED-02"
+  ],
+  "score_master": [
+    "SCORE-MASTER-01",
+    "SCORE-MASTER-02"
+  ],
+  "masculine_specialization": [
+    "MASCULINE-BASICS-01",
+    "MASCULINE-INTONATION-01",
+    "MASCULINE-LARYNX-01",
+    "MASCULINE-ON-T-01",
+    "MASCULINE-PRE-T-01"
+  ],
+  "nonbinary_exploration": [
+    "NONBINARY-EXPLORE-01",
+    "NONBINARY-FLUIDITY-01"
+  ],
+  "guided_practice": [
+    "PRACTICE-AB-DROP-01",
+    "PRACTICE-AB-SUBJECTIVE-01",
+    "PRACTICE-AB-UNSURE-01"
+  ],
+  "recording_quality": [
+    "METRIC-DURATION-SHORT-01",
+    "QUALITY-CLIPPING-01",
+    "QUALITY-ENVIRONMENT-01"
+  ],
+  "health_safety": [
+    "HEALTH-CLINICAL-01",
+    "HEALTH-HYGIENE-01",
+    "HEALTH-REDLINE-01",
+    "HEALTH-TWVQ-01"
+  ],
+  "acoustic_metrics": [
+    "METRIC-DURATION-SHORT-01",
+    "METRIC-NATURAL-LOW-01",
+    "METRIC-NATURAL-TENSION-01",
+    "METRIC-PITCH-HIGH-01",
+    "METRIC-PITCH-MONOTONE-01",
+    "METRIC-PITCH-UNSTABLE-01",
+    "METRIC-VFP-DARK-01",
+    "METRIC-VFP-NASAL-01",
+    "METRIC-VFP-THIN-01",
+    "METRIC-VOLUME-PROJECTION-01"
+  ]
+}

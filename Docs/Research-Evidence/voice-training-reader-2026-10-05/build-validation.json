@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-05",
+  "configuration": "Debug",
+  "destination": "generic/platform=iOS Simulator",
+  "command_exit_code": 0,
+  "quiet_log_bytes": 0,
+  "app_bundle": "/tmp/pitchee-library-qa.XITkRb/DerivedData/Build/Products/Debug-iphonesimulator/Pitchee.app",
+  "embedded_article_resource_matches_source": true,
+  "article_resource_sha256": "e1ecfc82b1c67f358215ebbafc7d499b1881fbc1249e9932e6f9ce340038e9b7",
+  "reader_source_sha256": "b92a3d5ee9871f040fa8a97a0b5b00b81b7f9511a34ab9b32ddabcabc6a90a63",
+  "simulator_install_exit_code": 0,
+  "simulator_launch_exit_code": 0,
+  "visual_acceptance": "partial; final formula scrolling, large text, VoiceOver and real device not verified"
+}

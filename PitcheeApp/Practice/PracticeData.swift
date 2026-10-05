@@ -10,8 +10,20 @@ import Foundation
 nonisolated enum PracticeKind: String, Codable, CaseIterable, Identifiable, Sendable {
     case pitchObservation, pitchStability, dailyReading
     var id: String { rawValue }
-    var title: String { String(localized: String.LocalizationValue("practice.kind.\(rawValue).title")) }
-    var instruction: String { String(localized: String.LocalizationValue("practice.kind.\(rawValue).instruction")) }
+    var title: String {
+        switch self {
+        case .pitchObservation: String(localized: "practice.kind.pitchObservation.title")
+        case .pitchStability: String(localized: "practice.kind.pitchStability.title")
+        case .dailyReading: String(localized: "practice.kind.dailyReading.title")
+        }
+    }
+    var instruction: String {
+        switch self {
+        case .pitchObservation: String(localized: "practice.kind.pitchObservation.instruction")
+        case .pitchStability: String(localized: "practice.kind.pitchStability.instruction")
+        case .dailyReading: String(localized: "practice.kind.dailyReading.instruction")
+        }
+    }
     var metric: PracticeMetric {
         switch self {
         case .pitchObservation: .pitch
@@ -44,7 +56,13 @@ nonisolated struct PracticeContext: Codable, Equatable, Sendable {
 nonisolated enum PracticeMetric: String, CaseIterable, Identifiable {
     case pitch, variation, speech
     var id: String { rawValue }
-    var title: String { String(localized: String.LocalizationValue("practice.metric.\(rawValue)")) }
+    var title: String {
+        switch self {
+        case .pitch: String(localized: "practice.metric.pitch")
+        case .variation: String(localized: "practice.metric.variation")
+        case .speech: String(localized: "practice.metric.speech")
+        }
+    }
     var unit: String { self == .speech ? "s" : "Hz" }
     func value(in result: PitcheeAnalysisResult) -> Double? {
         let value: Double?
@@ -65,7 +83,13 @@ nonisolated enum PracticeMetric: String, CaseIterable, Identifiable {
 nonisolated enum PracticeFeedback: String, Codable, CaseIterable, Identifiable {
     case closer, similar, unsure
     var id: String { rawValue }
-    var title: String { String(localized: String.LocalizationValue("practice.feedback.\(rawValue)")) }
+    var title: String {
+        switch self {
+        case .closer: String(localized: "practice.feedback.closer")
+        case .similar: String(localized: "practice.feedback.similar")
+        case .unsure: String(localized: "practice.feedback.unsure")
+        }
+    }
 }
 
 /// Conservative recording checks, independent of VFP/naturalness/model scores.
@@ -73,7 +97,15 @@ nonisolated enum PracticeFeedback: String, Codable, CaseIterable, Identifiable {
 nonisolated struct RecordingQuality: Codable, Equatable, Sendable {
     enum Issue: String, Codable, CaseIterable {
         case shortSpeech, lowLevel, background, clipping, unavailable
-        var advice: String { String(localized: String.LocalizationValue("practice.quality.\(rawValue)")) }
+        var advice: String {
+            switch self {
+            case .shortSpeech: String(localized: "practice.quality.shortSpeech")
+            case .lowLevel: String(localized: "practice.quality.lowLevel")
+            case .background: String(localized: "practice.quality.background")
+            case .clipping: String(localized: "practice.quality.clipping")
+            case .unavailable: String(localized: "practice.quality.unavailable")
+            }
+        }
     }
     static let rulesVersion = "capture-quality-v1"
     let version: String

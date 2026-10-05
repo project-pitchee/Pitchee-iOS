@@ -15,20 +15,32 @@ struct RecordingTabAccessory: ViewModifier {
     let action: () -> Void
 
     func body(content: Content) -> some View {
+        content.modifier(TabBarAccessory(isVisible: isVisible) {
+            RecordingAccessoryContent(viewModel: viewModel, action: action)
+        })
+    }
+}
+
+/// Recording and practice share one system-owned accessory above the tab bar.
+struct TabBarAccessory<Accessory: View>: ViewModifier {
+    let isVisible: Bool
+    @ViewBuilder var accessory: () -> Accessory
+
+    func body(content: Content) -> some View {
         if #available(iOS 26.1, *) {
             content.tabViewBottomAccessory(isEnabled: isVisible) {
-                RecordingAccessoryContent(viewModel: viewModel, action: action)
+                accessory()
             }
         } else if #available(iOS 26.0, *) {
             content.tabViewBottomAccessory {
                 if isVisible {
-                    RecordingAccessoryContent(viewModel: viewModel, action: action)
+                    accessory()
                 }
             }
         } else {
             content.safeAreaInset(edge: .bottom, spacing: 0) {
                 if isVisible {
-                    RecordingAccessoryContent(viewModel: viewModel, action: action)
+                    accessory()
                         .background(.regularMaterial)
                 }
             }
@@ -36,10 +48,9 @@ struct RecordingTabAccessory: ViewModifier {
     }
 }
 
-private struct RecordingAccessoryContent: View {
+struct RecordingAccessoryContent: View {
     @ObservedObject var viewModel: AnalysisViewModel
     let action: () -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 16) {
@@ -57,23 +68,12 @@ private struct RecordingAccessoryContent: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .combine)
 
-            Button(action: action) {
-                Group {
-                    if viewModel.isRequestingPermission {
-                        ProgressView().tint(.red)
-                    } else {
-                        Image(systemName: actionSymbol)
-                            .font(.system(size: 32, weight: .regular))
-                            .symbolRenderingMode(.monochrome)
-                            .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
-                    }
-                }
-                .foregroundStyle(viewModel.needsAnalysisScreen ? Color.primary : Color.red)
-                .frame(width: 44, height: 44)
-                .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .disabled(viewModel.isRequestingPermission)
+            RecordingAccessoryButton(
+                symbol: actionSymbol,
+                color: viewModel.needsAnalysisScreen ? .primary : .red,
+                isPreparing: viewModel.isRequestingPermission,
+                action: action
+            )
             .accessibilityLabel(accessibilityLabel)
             .accessibilityIdentifier("recording.primaryAction")
             .accessibilityInputLabels([accessibilityLabel])
@@ -114,6 +114,49 @@ private struct RecordingAccessoryContent: View {
         if viewModel.isRequestingPermission { return "recording.controls.preparingMicrophone.subtitle" }
         if viewModel.needsAnalysisScreen { return "recording.controls.viewAnalysisProgress.subtitle" }
         return "recording.controls.startRecording.subtitle"
+    }
+}
+
+/// Both audio tools use the same size, symbol treatment, and press feedback.
+struct RecordingAccessoryButton: View {
+    let symbol: String
+    var color: Color = .red
+    var iconSize: CGFloat = 32
+    let isPreparing: Bool
+    let action: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isPreparing {
+                    ProgressView()
+                        .tint(color)
+                        .frame(width: iconSize, height: iconSize)
+                } else {
+                    Image(systemName: symbol)
+                        .font(.system(size: iconSize, weight: .regular))
+                        .symbolRenderingMode(.monochrome)
+                        .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
+                }
+            }
+            .foregroundStyle(color)
+            .frame(width: 44, height: 44)
+            .contentShape(Circle())
+        }
+        .buttonStyle(RecordingAccessoryPressStyle())
+        .disabled(isPreparing)
+    }
+}
+
+struct RecordingAccessoryPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.55 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.94 : 1)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 

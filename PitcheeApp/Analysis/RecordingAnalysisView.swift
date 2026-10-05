@@ -23,7 +23,9 @@ struct RecordingAnalysisView: View {
                 RecordingResultView(
                     result: result,
                     volumeStatistics: viewModel.volumeStatistics,
-                    saveError: viewModel.analysisError
+                    saveError: viewModel.analysisError,
+                    quality: viewModel.assessment?.quality,
+                    recordedPreference: viewModel.practice?.target
                 )
             } else {
                 stateScroll {
@@ -93,29 +95,44 @@ struct RecordingResultView: View {
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
     let saveError: String?
+    let quality: RecordingQuality?
+    let recordedPreference: VoicePreference?
     private let pitchStatistics: RecordingPitchStatistics
 
     @State private var showsVoiceDetails = false
-    @State private var selectedSuggestion: ResultSuggestion?
-    @State private var selectedResource: ResultResource?
+    @State private var selectedVoiceArticle: VoiceArticle?
+    @State private var showsAllTrainingArticles = false
     @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
 
     private var voicePreference: VoicePreference {
-        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
+        recordedPreference ?? VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
     }
 
     private var directionScore: VoiceDirectionScore {
         voicePreference.score(for: result)
     }
 
+    private var trainingRecommendation: VoiceTrainingRecommendation {
+        VoiceLibraryMatcher.recommend(
+            for: result,
+            preference: voicePreference,
+            quality: quality,
+            volumeStatistics: volumeStatistics
+        )
+    }
+
     init(
         result: PitcheeAnalysisResult,
         volumeStatistics: RecordingVolumeStatistics?,
-        saveError: String?
+        saveError: String?,
+        quality: RecordingQuality? = nil,
+        recordedPreference: VoicePreference? = nil
     ) {
         self.result = result
         self.volumeStatistics = volumeStatistics
         self.saveError = saveError
+        self.quality = quality
+        self.recordedPreference = recordedPreference
         self.pitchStatistics = RecordingPitchStatistics(pitch: result.f0)
     }
 
@@ -129,11 +146,11 @@ struct RecordingResultView: View {
         .sheet(isPresented: $showsVoiceDetails) {
             voiceDetailsSheet
         }
-        .sheet(item: $selectedSuggestion) { suggestion in
-            ResultSuggestionSheet(suggestion: suggestion)
+        .sheet(item: $selectedVoiceArticle) { article in
+            VoiceArticleDetailView(article: article)
         }
-        .sheet(item: $selectedResource) { resource in
-            ResultResourceSheet(resource: resource)
+        .sheet(isPresented: $showsAllTrainingArticles) {
+            VoiceTrainingLibraryBrowserView()
         }
     }
 
@@ -189,7 +206,6 @@ struct RecordingResultView: View {
     private var resultSecondary: some View {
         VStack(alignment: .leading, spacing: 28) {
             suggestionsSection
-            resourcesSection
         }
     }
 
@@ -216,177 +232,29 @@ struct RecordingResultView: View {
     }
 
     private var suggestionsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("analysis.suggestions.title")
-                    .font(.title2.weight(.bold))
-                Text("analysis.suggestions.subtitle")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 18) {
+            PracticeSuggestionsSection(suggestions: trainingRecommendation.prioritySuggestions) { article in
+                selectedVoiceArticle = article
             }
 
-            VStack(spacing: 0) {
-                ForEach(suggestions) { suggestion in
-                    Button {
-                        selectedSuggestion = suggestion
-                    } label: {
-                        suggestionRow(suggestion)
-                    }
-                    .buttonStyle(.plain)
-
-                    if suggestion.id != suggestions.last?.id {
-                        Divider()
-                            .padding(.leading, 54)
-                    }
+            Button {
+                showsAllTrainingArticles = true
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Label("practice.suggestions.browseLibrary", systemImage: "books.vertical")
+                        .font(.subheadline.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
                 }
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, 16)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .buttonStyle(.plain)
+            .foregroundStyle(Color.pitcheeAccent)
         }
-    }
-
-    private func suggestionRow(_ suggestion: ResultSuggestion) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: suggestion.symbol)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(suggestion.tint)
-                .frame(width: 30, height: 30)
-                .background(suggestion.tint.opacity(0.12), in: Circle())
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(suggestion.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                Text(suggestion.detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer(minLength: 8)
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.tertiary)
-                .padding(.top, 8)
-        }
-        .padding(.vertical, 15)
-        .contentShape(Rectangle())
-    }
-
-    private var resourcesSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("analysis.resources.title")
-                    .font(.title2.weight(.bold))
-                Text("analysis.resources.subtitle")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            VStack(spacing: 12) {
-                ForEach(resources) { resource in
-                    Button {
-                        selectedResource = resource
-                    } label: {
-                        resourceRow(resource)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    private func resourceRow(_ resource: ResultResource) -> some View {
-        HStack(spacing: 14) {
-            ZStack(alignment: .bottomTrailing) {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(resource.tint.gradient)
-                    .frame(width: 92, height: 66)
-                Image(systemName: resource.symbol)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                Text(resource.badge)
-                    .font(.caption2.weight(.bold).monospacedDigit())
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-                    .padding(6)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(resource.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                Text(resource.detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer(minLength: 8)
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.tertiary)
-        }
-        .padding(12)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .contentShape(Rectangle())
-    }
-
-    private var suggestions: [ResultSuggestion] {
-        let needsLongerRecording = result.vad.speechSeconds < 5
-        let naturalnessNeedsWork = result.naturalness.score < 70
-
-        return [
-            ResultSuggestion(
-                id: "duration",
-                title: needsLongerRecording ? String(localized: "analysis.suggestions.shortRecording.title") : String(localized: "analysis.suggestions.adequateRecording.title"),
-                detail: needsLongerRecording
-                    ? String(localized: "analysis.suggestions.shortRecording.subtitle")
-                    : String(localized: "analysis.suggestions.adequateRecording.subtitle"),
-                symbol: "timer",
-                tint: .blue,
-                expandedDetail: needsLongerRecording
-                    ? String(localized: "analysis.suggestions.shortRecording.description")
-                    : String(localized: "analysis.suggestions.adequateRecording.description")
-            ),
-            ResultSuggestion(
-                id: "naturalness",
-                title: naturalnessNeedsWork ? String(localized: "analysis.suggestions.unnaturalSpeech.title") : String(localized: "analysis.suggestions.naturalSpeech.title"),
-                detail: naturalnessNeedsWork
-                    ? String(localized: "analysis.suggestions.unnaturalSpeech.subtitle")
-                    : String(localized: "analysis.suggestions.naturalSpeech.subtitle"),
-                symbol: "waveform",
-                tint: .orange,
-                expandedDetail: naturalnessNeedsWork
-                    ? String(localized: "analysis.suggestions.unnaturalSpeech.description")
-                    : String(localized: "analysis.suggestions.naturalSpeech.description")
-            )
-        ]
-    }
-
-    private var resources: [ResultResource] {
-        [
-            ResultResource(
-                id: "naturalness-video",
-                title: String(localized: "analysis.resources.naturalnessTraining.title"),
-                detail: String(localized: "analysis.resources.naturalnessTraining.subtitle"),
-                badge: "01:09",
-                symbol: "play.fill",
-                tint: .blue,
-                body: String(localized: "analysis.resources.naturalnessTraining.description")
-            ),
-            ResultResource(
-                id: "voice-research",
-                title: String(localized: "analysis.resources.voiceResearch.title"),
-                detail: String(localized: "analysis.resources.voiceResearch.subtitle"),
-                badge: String(localized: "analysis.resources.readBadge"),
-                symbol: "doc.text.image",
-                tint: .purple,
-                body: String(localized: "analysis.resources.voiceResearch.description")
-            )
-        ]
     }
 
     private var voiceDetailsSheet: some View {
@@ -874,112 +742,6 @@ private let masculineScoreRuleDocumentation: [ScoreRuleDocumentation] = [
 
 private func scoreRuleDocumentation(for preference: VoicePreference) -> [ScoreRuleDocumentation] {
     preference == .masculine ? masculineScoreRuleDocumentation : scoreRuleDocumentation
-}
-
-private struct ResultSuggestion: Identifiable {
-    let id: String
-    let title: String
-    let detail: String
-    let symbol: String
-    let tint: Color
-    let expandedDetail: String
-}
-
-private struct ResultResource: Identifiable {
-    let id: String
-    let title: String
-    let detail: String
-    let badge: String
-    let symbol: String
-    let tint: Color
-    let body: String
-}
-
-private struct ResultSuggestionSheet: View {
-    let suggestion: ResultSuggestion
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Image(systemName: suggestion.symbol)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(suggestion.tint)
-                    .frame(width: 64, height: 64)
-                    .background(suggestion.tint.opacity(0.12), in: Circle())
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(suggestion.title)
-                        .font(.title2.weight(.bold))
-                    Text(suggestion.expandedDetail)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-            }
-            .frame(maxWidth: 560, alignment: .leading)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(24)
-            .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("analysis.suggestionDetail.title")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("common.action.done") { dismiss() }
-                }
-            }
-        }
-        .presentationDetents([.medium])
-    }
-}
-
-private struct ResultResourceSheet: View {
-    let resource: ResultResource
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(resource.tint.gradient)
-                    Image(systemName: resource.symbol)
-                        .font(.system(size: 34, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-                .frame(height: 160)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(resource.title)
-                        .font(.title2.weight(.bold))
-                    Text(resource.body)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-            }
-            .frame(maxWidth: 560, alignment: .leading)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(24)
-            .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle(
-                resource.id == "voice-research"
-                    ? String(localized: "analysis.resourceDetail.article.title")
-                    : String(localized: "analysis.resourceDetail.video.title")
-            )
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("common.action.done") { dismiss() }
-                }
-            }
-        }
-        .presentationDetents([.medium])
-    }
 }
 
 struct VoiceProfileReferenceChart: View {

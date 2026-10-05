@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-05",
+  "article_count": 49,
+  "stable_ids_preserved": true,
+  "metadata_and_raw_content_match": true,
+  "json_mirrors_match": true,
+  "builder_copies_match": true,
+  "citation_count": 136,
+  "unique_citation_urls": 34,
+  "all_citations_https": true,
+  "core_scoring_unchanged": true,
+  "formula_examples_verified": true,
+  "content_sha256": "e1ecfc82b1c67f358215ebbafc7d499b1881fbc1249e9932e6f9ce340038e9b7"
+}

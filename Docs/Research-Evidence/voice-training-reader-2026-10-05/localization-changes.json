@@ -1,0 +1,514 @@
+{
+  "source": "/Users/dannyfeng/Documents/Pitchee/Resources/Localizable.xcstrings",
+  "before_sha256": "ba4b96ee19c48ada05585ea39346342e0b4dba66d76394592da254df549387cc",
+  "after_sha256": "a8dec679d802130e2ba01e22b3ee1f1cbf71be2efc26d59f5301657470bf6a8c",
+  "key_count": 25,
+  "value_count": 75,
+  "changes": [
+    {
+      "key": "common.metric.standardScore.title",
+      "locale": "en",
+      "old": "Standard Score",
+      "new": "Timbre Score (VFP)"
+    },
+    {
+      "key": "common.metric.standardScore.title",
+      "locale": "zh-Hans",
+      "old": "标准评分",
+      "new": "音色分（VFP）"
+    },
+    {
+      "key": "common.metric.standardScore.title",
+      "locale": "zh-Hant",
+      "old": "標準評分",
+      "new": "音色分（VFP）"
+    },
+    {
+      "key": "common.metric.naturalness.title",
+      "locale": "en",
+      "old": "Naturalness",
+      "new": "Naturalness Score"
+    },
+    {
+      "key": "common.metric.naturalness.title",
+      "locale": "zh-Hans",
+      "old": "自然度",
+      "new": "自然分"
+    },
+    {
+      "key": "common.metric.naturalness.title",
+      "locale": "zh-Hant",
+      "old": "自然度",
+      "new": "自然分"
+    },
+    {
+      "key": "insights.metric.naturalness.description",
+      "locale": "en",
+      "old": "Naturalness is the model’s estimate of how continuous and natural a voice sounds, on a 0–100 scale. Recording content and surroundings can affect results, so compare similar conditions.",
+      "new": "The naturalness score (0–100) estimates how close a voice sounds to everyday speech. A lower score means the model judged the sound as more deliberate or stylized; it does not mean a robotic voice or establish the speaker’s intention, vocal technique, or vocal health. The model can be wrong. Compare similar speech content and recording conditions."
+    },
+    {
+      "key": "insights.metric.naturalness.description",
+      "locale": "zh-Hans",
+      "old": "自然度反映分析模型对声音连贯、自然程度的评估，范围为 0–100。录音内容和环境也会影响结果，适合在相近条件下比较。",
+      "new": "自然分（0–100）估计声音听起来是否接近日常说话方式。较低分数表示模型认为听感较刻意或风格化，不代表机器音，也不能判断真实意图、发声方式或嗓音健康。模型可能误判，比较时请尽量保持语句和录音条件一致。"
+    },
+    {
+      "key": "insights.metric.naturalness.description",
+      "locale": "zh-Hant",
+      "old": "自然度反映分析模型對聲音連貫、自然程度的評估，範圍為 0–100。錄音內容和環境也會影響結果，適合在相近條件下比較。",
+      "new": "自然分（0–100）估計聲音聽起來是否接近日常說話方式。較低分數表示模型認為聽感較刻意或風格化，不代表機器音，也不能判斷真實意圖、發聲方式或嗓音健康。模型可能誤判，比較時請盡量保持語句和錄音條件一致。"
+    },
+    {
+      "key": "scoring.baseFormula.note",
+      "locale": "en",
+      "old": "Standard is the timbre standard score from the model; Naturalness is the naturalness score; F0 is the mean fundamental frequency in Hz. Variables with _r are clamped between 0 and 1. Base is the score before any rule is applied, and Final is the overall score shown on the result screen.",
+      "new": "In this formula, Standard is an alias for the timbre score (VFP), not a standard to pass. Naturalness is the naturalness score, and F0 is the mean fundamental frequency in Hz. Variables with _r are clamped between 0 and 1. Base is the score before any rule is applied, and Final is the overall score shown on the result screen."
+    },
+    {
+      "key": "scoring.baseFormula.note",
+      "locale": "zh-Hans",
+      "old": "Standard 是模型识别的音色标准分；Naturalness 是自然度分；F0 是平均基频，单位为 Hz。带 _r 的变量会被限制在 0 到 1 之间。Base 是应用规则前的基础分，Final 是结果页显示的综合分。",
+      "new": "在本公式中，Standard 代表音色分（VFP），并非标准或合格线；Naturalness 代表自然分；F0 是平均基频，单位为 Hz。带 _r 的变量会被限制在 0 到 1 之间。Base 是应用规则前的基础分，Final 是结果页显示的综合分。"
+    },
+    {
+      "key": "scoring.baseFormula.note",
+      "locale": "zh-Hant",
+      "old": "Standard 是模型識別的音色標準分；Naturalness 是自然度分；F0 是平均基頻，單位為 Hz。帶 _r 的變數會被限制在 0 到 1 之間。Base 是套用規則前的基礎分，Final 是結果頁顯示的綜合分。",
+      "new": "在本公式中，Standard 代表音色分（VFP），並非標準或及格線；Naturalness 代表自然分；F0 是平均基頻，單位為 Hz。帶 _r 的變數會被限制在 0 到 1 之間。Base 是套用規則前的基礎分，Final 是結果頁顯示的綜合分。"
+    },
+    {
+      "key": "scoring.explanation.intro.description",
+      "locale": "en",
+      "old": "The overall score combines the timbre standard, naturalness, and average pitch, then applies a boost or a cap based on the rule that matched this recording. Use it to track your own practice trend — it does not judge whether a voice is good or bad.",
+      "new": "The overall score combines the timbre score (VFP), naturalness score, and mean fundamental frequency using app formulas and rules. It does not determine gender, ability, or vocal health. If you are still exploring your goal, use what you hear and how your voice feels to guide you; a higher score does not have to be your goal."
+    },
+    {
+      "key": "scoring.explanation.intro.description",
+      "locale": "zh-Hans",
+      "old": "综合评分把音色标准、自然度和平均音高放在一起计算，再根据本次命中的规则进行加分或封顶。它适合用来观察自己的练习趋势，不代表声音的整体好坏。",
+      "new": "综合分按应用公式组合音色分（VFP）、自然分与平均基频，并按匹配规则处理。它不能判定性别、能力或嗓音健康。尚未确定目标时，可以依据自己的听感和舒适度探索，不必追求更高分。"
+    },
+    {
+      "key": "scoring.explanation.intro.description",
+      "locale": "zh-Hant",
+      "old": "綜合評分把音色標準、自然度和平均音高放在一起計算，再根據本次命中的規則進行加分或封頂。它適合用來觀察自己的練習趨勢，不代表聲音的整體好壞。",
+      "new": "綜合分按應用程式公式組合音色分（VFP）、自然分與平均基頻，並按符合的規則處理。它不能判定性別、能力或嗓音健康。尚未確定目標時，可以依據自己的聽感和舒適度探索，不必追求更高分。"
+    },
+    {
+      "key": "scoring.feminine.explanation.description",
+      "locale": "en",
+      "old": "This score follows your feminine-leaning goal and uses the same naturalness-aware reference as the analysis engine.",
+      "new": "The feminine overall score combines the timbre score (VFP), naturalness score, and mean fundamental frequency using app formulas. It reflects model estimates and app rules, which can be wrong about your voice. It cannot establish how other people perceive your gender or whether your voice is healthy."
+    },
+    {
+      "key": "scoring.feminine.explanation.description",
+      "locale": "zh-Hans",
+      "old": "该评分针对女性化目标，并沿用分析引擎结合自然度的参考方式。",
+      "new": "女性化综合分按应用公式组合音色分（VFP）、自然分和平均基频。它反映模型估计与应用规则，可能与实际听感不符，不能确认他人如何感知你的性别，也不能判断嗓音健康。"
+    },
+    {
+      "key": "scoring.feminine.explanation.description",
+      "locale": "zh-Hant",
+      "old": "此評分針對女性化目標，並沿用分析引擎結合自然度的參考方式。",
+      "new": "女性化綜合分按應用程式公式組合音色分（VFP）、自然分和平均基頻。它反映模型估計與應用程式規則，可能與實際聽感不符，不能確認他人如何感知你的性別，也不能判斷嗓音健康。"
+    },
+    {
+      "key": "scoring.masculine.explanation.description",
+      "locale": "en",
+      "old": "This score follows your masculine voice goal. Core combines VFP and mean F0 with a continuous formula; naturalness is shown separately and does not change this score.",
+      "new": "The masculine overall score combines the raw timbre score (VFP) and mean fundamental frequency using an app formula. The naturalness score is shown separately and does not affect this score. The result cannot establish how other people perceive your gender or whether your voice is healthy."
+    },
+    {
+      "key": "scoring.masculine.explanation.description",
+      "locale": "zh-Hans",
+      "old": "该评分针对男性化目标。Core 将 VFP 和平均 F0 代入连续公式计算；自然度单独展示，不改变男性化综合分。",
+      "new": "男性化综合分按应用公式组合音色分（VFP）的原始值与平均基频。自然分单独显示，不参与这一方向的综合分。结果不能确认他人如何感知你的性别，也不能判断嗓音健康。"
+    },
+    {
+      "key": "scoring.masculine.explanation.description",
+      "locale": "zh-Hant",
+      "old": "此評分針對男性化目標。Core 將 VFP 與平均 F0 代入連續公式計算；自然度單獨顯示，不改變男性化綜合分。",
+      "new": "男性化綜合分按應用程式公式組合音色分（VFP）的原始值與平均基頻。自然分單獨顯示，不參與這一方向的綜合分。結果不能確認他人如何感知你的性別，也不能判斷嗓音健康。"
+    },
+    {
+      "key": "scoring.rules.passBoost.title",
+      "locale": "en",
+      "old": "Score Boost",
+      "new": "Overall Score Boost Rule"
+    },
+    {
+      "key": "scoring.rules.passBoost.title",
+      "locale": "zh-Hans",
+      "old": "加分",
+      "new": "综合分提升规则"
+    },
+    {
+      "key": "scoring.rules.passBoost.title",
+      "locale": "zh-Hant",
+      "old": "加分",
+      "new": "綜合分提升規則"
+    },
+    {
+      "key": "scoring.rules.passBoost.description",
+      "locale": "en",
+      "old": "All three metrics passed their thresholds, so the system pushes a steady, natural performance upward.",
+      "new": "This recording meets the app’s conditions for calculating a boost candidate. The candidate is used only when it is higher than Base, so matching this rule does not always raise the score. These thresholds do not establish training success, a stable voice, or vocal health."
+    },
+    {
+      "key": "scoring.rules.passBoost.description",
+      "locale": "zh-Hans",
+      "old": "三项指标都已经过线，系统会把稳定、自然的表现向上提升。",
+      "new": "这次结果满足应用中计算提升候选分的条件。只有候选分高于 Base 时才采用，因此命中规则不一定加分。这些阈值不能证明训练成功、声音稳定或嗓音健康。"
+    },
+    {
+      "key": "scoring.rules.passBoost.description",
+      "locale": "zh-Hant",
+      "old": "三項指標都已達標，系統會把穩定、自然的表現向上提升。",
+      "new": "這次結果符合應用程式中計算提升候選分的條件。只有候選分高於 Base 時才採用，因此符合規則不一定加分。這些門檻不能證明訓練成功、聲音穩定或嗓音健康。"
+    },
+    {
+      "key": "scoring.rules.highF0MaleCap.title",
+      "locale": "en",
+      "old": "Timbre Score Too Low",
+      "new": "Timbre Score Cap Rule"
+    },
+    {
+      "key": "scoring.rules.highF0MaleCap.title",
+      "locale": "zh-Hans",
+      "old": "音色分不足",
+      "new": "音色分相关上限"
+    },
+    {
+      "key": "scoring.rules.highF0MaleCap.title",
+      "locale": "zh-Hant",
+      "old": "音色分不足",
+      "new": "音色分相關上限"
+    },
+    {
+      "key": "scoring.rules.highF0MaleCap.description",
+      "locale": "en",
+      "old": "Pitch and naturalness are already on target; now focus on timbre to make your voice brighter and more relaxed.",
+      "new": "Under the current scoring rules, this result suggests paying attention to timbre. VFP can be wrong; a low score does not establish a problem with resonance or the vocal organs. Listen back against your own goal. If the score does not match what you hear, you can skip the timbre suggestion."
+    },
+    {
+      "key": "scoring.rules.highF0MaleCap.description",
+      "locale": "zh-Hans",
+      "old": "音高和自然度已经达标，接下来重点练习音色，让声音更明亮、更轻松。",
+      "new": "当前评分规则下，这次结果提示优先观察音色。音色分（VFP）可能误判，低分不代表共鸣或发声器官有问题。先回听是否符合你的目标；若分数与听感不符，可以跳过音色练习建议。"
+    },
+    {
+      "key": "scoring.rules.highF0MaleCap.description",
+      "locale": "zh-Hant",
+      "old": "音高和自然度已經達標，接下來重點練習音色，讓聲音更明亮、更輕鬆。",
+      "new": "目前評分規則下，這次結果提示優先觀察音色。音色分（VFP）可能誤判，低分不代表共鳴或發聲器官有問題。先回聽是否符合你的目標；若分數與聽感不符，可以略過音色練習建議。"
+    },
+    {
+      "key": "scoring.rules.highF0StylizedCap.title",
+      "locale": "en",
+      "old": "High Pitch with Low Naturalness Cap",
+      "new": "Higher Pitch and Lower Naturalness Score Cap"
+    },
+    {
+      "key": "scoring.rules.highF0StylizedCap.title",
+      "locale": "zh-Hans",
+      "old": "高基频、低自然度封顶",
+      "new": "较高基频、较低自然分上限"
+    },
+    {
+      "key": "scoring.rules.highF0StylizedCap.title",
+      "locale": "zh-Hant",
+      "old": "高基頻、低自然度封頂",
+      "new": "較高基頻、較低自然分上限"
+    },
+    {
+      "key": "scoring.rules.highF0StylizedCap.description",
+      "locale": "en",
+      "old": "Your pitch is already up, but naturalness hasn't caught up. Next time relax your tone first — there's no need to push your pitch higher.",
+      "new": "Under the current scoring rules, this result suggests paying attention to everyday speech expression. The naturalness score is a model estimate of how the voice sounds; it can be wrong and cannot assess strain or vocal health. Listen back against your goal. You can skip the suggestion if it does not fit what you hear."
+    },
+    {
+      "key": "scoring.rules.highF0StylizedCap.description",
+      "locale": "zh-Hans",
+      "old": "音高已经上去了，但自然度还没跟上。下一次先放松语气，不必刻意抬高音调。",
+      "new": "当前评分规则下，这次结果提示优先观察自然表达。自然分是模型对日常说话听感的估计，可能误判，不能判断是否压嗓或嗓音健康。先回听是否符合自己的目标；若建议不符合实际听感，可以跳过。"
+    },
+    {
+      "key": "scoring.rules.highF0StylizedCap.description",
+      "locale": "zh-Hant",
+      "old": "音高已經上去了，但自然度還沒跟上。下一次先放鬆語氣，不必刻意抬高音調。",
+      "new": "目前評分規則下，這次結果提示優先觀察自然表達。自然分是模型對日常說話聽感的估計，可能誤判，不能判斷是否壓嗓或嗓音健康。先回聽是否符合自己的目標；若建議不符合實際聽感，可以略過。"
+    },
+    {
+      "key": "scoring.rules.lowF0NaturalCap.title",
+      "locale": "en",
+      "old": "Low Pitch Cap",
+      "new": "Pitch-Related Cap Rule"
+    },
+    {
+      "key": "scoring.rules.lowF0NaturalCap.title",
+      "locale": "zh-Hans",
+      "old": "低基频封顶",
+      "new": "基频相关上限"
+    },
+    {
+      "key": "scoring.rules.lowF0NaturalCap.title",
+      "locale": "zh-Hant",
+      "old": "低基頻封頂",
+      "new": "基頻相關上限"
+    },
+    {
+      "key": "scoring.rules.lowF0NaturalCap.description",
+      "locale": "en",
+      "old": "Naturalness is already good — now you can focus on pitch.",
+      "new": "Under the current scoring rules, this result suggests paying attention to mean fundamental frequency. Whether to change pitch depends on what you hear and your own goal; the naturalness score does not establish vocal health. Explore gentle pitch changes only if you want to and feel comfortable. You can skip this suggestion."
+    },
+    {
+      "key": "scoring.rules.lowF0NaturalCap.description",
+      "locale": "zh-Hans",
+      "old": "自然度已经不错，接下来可以把注意力放在音高上。",
+      "new": "当前评分规则下，这次结果提示优先观察平均基频。音高是否需要调整取决于你的听感与目标，自然分不能证明发声健康。如果你也想探索音高变化，可以在舒适范围内尝试；否则可以跳过这项建议。"
+    },
+    {
+      "key": "scoring.rules.lowF0NaturalCap.description",
+      "locale": "zh-Hant",
+      "old": "自然度已經不錯，接下來可以把注意力放在音高上。",
+      "new": "目前評分規則下，這次結果提示優先觀察平均基頻。音高是否需要調整取決於你的聽感與目標，自然分不能證明發聲健康。如果你也想探索音高變化，可以在舒適範圍內嘗試；否則可以略過這項建議。"
+    },
+    {
+      "key": "scoring.rules.lowF0StylizedCap.title",
+      "locale": "en",
+      "old": "Low Pitch and Low Naturalness",
+      "new": "Lower Pitch and Lower Naturalness Score Cap"
+    },
+    {
+      "key": "scoring.rules.lowF0StylizedCap.title",
+      "locale": "zh-Hans",
+      "old": "低基频、低自然度",
+      "new": "较低基频、较低自然分上限"
+    },
+    {
+      "key": "scoring.rules.lowF0StylizedCap.title",
+      "locale": "zh-Hant",
+      "old": "低基頻、低自然度",
+      "new": "較低基頻、較低自然分上限"
+    },
+    {
+      "key": "scoring.rules.lowF0StylizedCap.description",
+      "locale": "en",
+      "old": "This time both pitch and naturalness need attention. Slow down a little and finish your sentences naturally.",
+      "new": "Under the current scoring rules, this result suggests paying attention to both pitch and everyday speech expression. These values cannot identify a vocal problem or assess vocal health. You can compare a comfortable everyday sentence before deciding whether to explore pitch changes. The model can be wrong, and you can skip suggestions that do not fit."
+    },
+    {
+      "key": "scoring.rules.lowF0StylizedCap.description",
+      "locale": "zh-Hans",
+      "old": "这次音高和自然度都需要照顾。先放慢一点，完整自然地说完句子。",
+      "new": "当前评分规则下，这次结果提示观察音高与自然表达。这些数值不能定位发声问题或判断嗓音健康。可以先比较一句舒适的日常表达，再决定是否探索音高变化；模型可能误判，不合适的建议可以跳过。"
+    },
+    {
+      "key": "scoring.rules.lowF0StylizedCap.description",
+      "locale": "zh-Hant",
+      "old": "這次音高和自然度都需要照顧。先放慢一點，完整自然地說完句子。",
+      "new": "目前評分規則下，這次結果提示觀察音高與自然表達。這些數值不能定位發聲問題或判斷嗓音健康。可以先比較一句舒適的日常表達，再決定是否探索音高變化；模型可能誤判，不合適的建議可以略過。"
+    },
+    {
+      "key": "scoring.rules.f0Unavailable.description",
+      "locale": "en",
+      "old": "No stable fundamental frequency was detected — next time try a quieter place and hold the phone closer to your mouth.",
+      "new": "No usable fundamental frequency was detected. Check the recording conditions and try speaking comfortably again. Missing pitch data cannot identify a vocal problem."
+    },
+    {
+      "key": "scoring.rules.f0Unavailable.description",
+      "locale": "zh-Hans",
+      "old": "没有识别到稳定基频，下次可以在安静环境中离麦克风近一点。",
+      "new": "这次未检测到可用的基频。可以先检查录音条件，再用舒适的声音重录。缺少音高数据不能判断具体发声问题。"
+    },
+    {
+      "key": "scoring.rules.f0Unavailable.description",
+      "locale": "zh-Hant",
+      "old": "沒有辨識到穩定基頻，下次可以在安靜環境中離麥克風近一點。",
+      "new": "這次未偵測到可用的基頻。可以先檢查錄音條件，再用舒適的聲音重錄。缺少音高資料不能判斷具體發聲問題。"
+    },
+    {
+      "key": "scoring.rules.f0Unavailable.result",
+      "locale": "en",
+      "old": "The overall score uses the timbre standard score (Standard) directly.",
+      "new": "The overall score uses the timbre score (VFP) directly, labeled Standard in this formula."
+    },
+    {
+      "key": "scoring.rules.f0Unavailable.result",
+      "locale": "zh-Hans",
+      "old": "综合分直接采用标准音色分 Standard。",
+      "new": "综合分直接采用音色分（VFP），在本公式中记为 Standard。"
+    },
+    {
+      "key": "scoring.rules.f0Unavailable.result",
+      "locale": "zh-Hant",
+      "old": "綜合分直接採用標準音色分 Standard。",
+      "new": "綜合分直接採用音色分（VFP），在本公式中記為 Standard。"
+    },
+    {
+      "key": "practice.suggestion.comfortableVoice.title",
+      "locale": "en",
+      "old": "Start with an easy, comfortable voice",
+      "new": "Listen back before choosing a change"
+    },
+    {
+      "key": "practice.suggestion.comfortableVoice.title",
+      "locale": "zh-Hans",
+      "old": "先找回轻松的发声感觉",
+      "new": "先回听，再决定是否调整"
+    },
+    {
+      "key": "practice.suggestion.comfortableVoice.title",
+      "locale": "zh-Hant",
+      "old": "先找回輕鬆的發聲感覺",
+      "new": "先回聽，再決定是否調整"
+    },
+    {
+      "key": "practice.suggestion.comfortableVoice.detail",
+      "locale": "en",
+      "old": "Naturalness was lower in this take. Try a few easy sentences at a comfortable pitch; rest if you feel discomfort.",
+      "new": "The naturalness score was lower in this recording, but the model can be wrong and cannot identify a cause or assess vocal health. Listen back against your goal; you can skip this suggestion if it does not fit. If you want to try another take, use a comfortable pitch without aiming higher or lower, and rest if you feel discomfort."
+    },
+    {
+      "key": "practice.suggestion.comfortableVoice.detail",
+      "locale": "zh-Hans",
+      "old": "自然度指标偏低。先用舒适音高轻松说几句；如有不适，停下休息。",
+      "new": "这次自然分偏低，但模型可能误判，不能定位原因或判断嗓音健康。先回听是否符合目标；若建议不合适，可以跳过。若想再试一段，可用舒适音高说几句，暂时不追求更高或更低；如有不适就停下休息。"
+    },
+    {
+      "key": "practice.suggestion.comfortableVoice.detail",
+      "locale": "zh-Hant",
+      "old": "自然度指標偏低。先用舒適音高輕鬆說幾句；如有不適，停下休息。",
+      "new": "這次自然分偏低，但模型可能誤判，不能定位原因或判斷嗓音健康。先回聽是否符合目標；若建議不合適，可以略過。若想再試一段，可用舒適音高說幾句，暫時不追求更高或更低；如有不適就停下休息。"
+    },
+    {
+      "key": "practice.suggestion.pitchGlide.detail",
+      "locale": "en",
+      "old": "Try small, gentle pitch glides while staying comfortable, then return to a short sentence.",
+      "new": "If you want to explore pitch changes, try small, gentle glides within a comfortable range, then return to a short sentence. There is no fixed frequency to reach. If this suggestion does not fit your goal or what you hear, you can skip it."
+    },
+    {
+      "key": "practice.suggestion.pitchGlide.detail",
+      "locale": "zh-Hans",
+      "old": "保持自然发声，尝试小幅、轻柔的滑音，再带回一句短话。",
+      "new": "如果你也想探索音高变化，可以在舒适范围内做小幅、轻柔的滑音，再带回一句短话，无需达到固定频率。若这项建议不符合你的目标或听感，可以跳过。"
+    },
+    {
+      "key": "practice.suggestion.pitchGlide.detail",
+      "locale": "zh-Hant",
+      "old": "保持自然發聲，嘗試小幅、輕柔的滑音，再帶回一句短話。",
+      "new": "如果你也想探索音高變化，可以在舒適範圍內做小幅、輕柔的滑音，再帶回一句短話，無需達到固定頻率。若這項建議不符合你的目標或聽感，可以略過。"
+    },
+    {
+      "key": "practice.suggestion.resonance.detail",
+      "locale": "en",
+      "old": "Keep a comfortable pitch and volume, try a slightly brighter resonance, then listen for your goal.",
+      "new": "The timbre score (VFP) can be wrong; a low score does not mean there is a resonance problem. Listen back against your goal. If the score does not match what you hear, you can skip this suggestion. Try a small timbre change only if you also want that change."
+    },
+    {
+      "key": "practice.suggestion.resonance.detail",
+      "locale": "zh-Hans",
+      "old": "保持舒适音高和音量，试一点明亮的共鸣，再听是否接近目标。",
+      "new": "音色分（VFP）可能误判，低分不代表共鸣有问题。先回听是否符合你的目标；若分数与听感不符，可以跳过这项建议。只有你也希望改变音色时，再尝试小幅变化。"
+    },
+    {
+      "key": "practice.suggestion.resonance.detail",
+      "locale": "zh-Hant",
+      "old": "保持舒適音高和音量，試一點明亮的共鳴，再聽是否接近目標。",
+      "new": "音色分（VFP）可能誤判，低分不代表共鳴有問題。先回聽是否符合你的目標；若分數與聽感不符，可以略過這項建議。只有你也希望改變音色時，再嘗試小幅變化。"
+    },
+    {
+      "key": "practice.suggestion.captureClipping.detail",
+      "locale": "en",
+      "old": "The recording clipped. Move slightly farther from the microphone and record at your usual volume.",
+      "new": "The recording check suggests possible clipping. Try moving slightly farther from the microphone or lowering the input gain, then record at your usual volume before choosing a training focus."
+    },
+    {
+      "key": "practice.suggestion.captureClipping.detail",
+      "locale": "zh-Hans",
+      "old": "录音出现削波。稍微远离麦克风，用平常音量重录。",
+      "new": "录音检查提示可能存在削波。可以稍微拉开麦克风距离，或降低输入增益，用平常音量重录后再选择训练重点。"
+    },
+    {
+      "key": "practice.suggestion.captureClipping.detail",
+      "locale": "zh-Hant",
+      "old": "錄音出現削波。稍微遠離麥克風，用平常音量重錄。",
+      "new": "錄音檢查提示可能存在削波。可以稍微拉開麥克風距離，或降低輸入增益，用平常音量重錄後再選擇訓練重點。"
+    },
+    {
+      "key": "practice.suggestion.captureEnvironment.detail",
+      "locale": "en",
+      "old": "Noise or a quiet input affected this take. Record again somewhere quiet with a steady microphone distance.",
+      "new": "The recording check suggests that quiet input or background noise may affect this take. Try a quieter place and a steady microphone distance before recording again; there is no need to force a louder voice."
+    },
+    {
+      "key": "practice.suggestion.captureEnvironment.detail",
+      "locale": "zh-Hans",
+      "old": "背景声或输入过轻影响了录音。换到安静位置，保持麦克风距离后重录。",
+      "new": "录音检查提示输入偏轻或背景声可能影响结果。可以换到安静位置，保持稳定的麦克风距离后重录，无需刻意提高音量。"
+    },
+    {
+      "key": "practice.suggestion.captureEnvironment.detail",
+      "locale": "zh-Hant",
+      "old": "背景聲或輸入過輕影響了錄音。換到安靜位置，保持麥克風距離後重錄。",
+      "new": "錄音檢查提示輸入偏輕或背景聲可能影響結果。可以換到安靜位置，保持穩定的麥克風距離後重錄，無需刻意提高音量。"
+    }
+  ],
+  "integration_review": {
+    "date": "2026-10-05",
+    "note": "Accepted concurrent Traditional Chinese wording improvements with unchanged scoring and safety meaning; did not overwrite the localization source.",
+    "accepted_changes": [
+      {
+        "key": "scoring.baseFormula.note",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "在本公式中，Standard 代表音色分（VFP），並非標準或合格線；Naturalness 代表自然分；F0 是平均基頻，單位為 Hz。帶 _r 的變數會被限制在 0 到 1 之間。Base 是套用規則前的基礎分，Final 是結果頁顯示的綜合分。",
+        "current_reviewed_value": "在本公式中，Standard 代表音色分（VFP），並非標準或及格線；Naturalness 代表自然分；F0 是平均基頻，單位為 Hz。帶 _r 的變數會被限制在 0 到 1 之間。Base 是套用規則前的基礎分，Final 是結果頁顯示的綜合分。"
+      },
+      {
+        "key": "scoring.rules.highF0MaleCap.description",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "目前評分規則下，這次結果提示優先觀察音色。音色分（VFP）可能誤判，低分不代表共鳴或發聲器官有問題。先回聽是否符合你的目標；若分數與聽感不符，可以跳過音色練習建議。",
+        "current_reviewed_value": "目前評分規則下，這次結果提示優先觀察音色。音色分（VFP）可能誤判，低分不代表共鳴或發聲器官有問題。先回聽是否符合你的目標；若分數與聽感不符，可以略過音色練習建議。"
+      },
+      {
+        "key": "scoring.rules.highF0StylizedCap.description",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "目前評分規則下，這次結果提示優先觀察自然表達。自然分是模型對日常說話聽感的估計，可能誤判，不能判斷是否壓嗓或嗓音健康。先回聽是否符合自己的目標；若建議不符合實際聽感，可以跳過。",
+        "current_reviewed_value": "目前評分規則下，這次結果提示優先觀察自然表達。自然分是模型對日常說話聽感的估計，可能誤判，不能判斷是否壓嗓或嗓音健康。先回聽是否符合自己的目標；若建議不符合實際聽感，可以略過。"
+      },
+      {
+        "key": "scoring.rules.lowF0NaturalCap.description",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "目前評分規則下，這次結果提示優先觀察平均基頻。音高是否需要調整取決於你的聽感與目標，自然分不能證明發聲健康。如果你也想探索音高變化，可以在舒適範圍內嘗試；否則可以跳過這項建議。",
+        "current_reviewed_value": "目前評分規則下，這次結果提示優先觀察平均基頻。音高是否需要調整取決於你的聽感與目標，自然分不能證明發聲健康。如果你也想探索音高變化，可以在舒適範圍內嘗試；否則可以略過這項建議。"
+      },
+      {
+        "key": "scoring.rules.lowF0StylizedCap.description",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "目前評分規則下，這次結果提示觀察音高與自然表達。這些數值不能定位發聲問題或判斷嗓音健康。可以先比較一句舒適的日常表達，再決定是否探索音高變化；模型可能誤判，不合適的建議可以跳過。",
+        "current_reviewed_value": "目前評分規則下，這次結果提示觀察音高與自然表達。這些數值不能定位發聲問題或判斷嗓音健康。可以先比較一句舒適的日常表達，再決定是否探索音高變化；模型可能誤判，不合適的建議可以略過。"
+      },
+      {
+        "key": "practice.suggestion.comfortableVoice.detail",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "這次自然分偏低，但模型可能誤判，不能定位原因或判斷嗓音健康。先回聽是否符合目標；若建議不合適，可以跳過。若想再試一段，可用舒適音高說幾句，暫時不追求更高或更低；如有不適就停下休息。",
+        "current_reviewed_value": "這次自然分偏低，但模型可能誤判，不能定位原因或判斷嗓音健康。先回聽是否符合目標；若建議不合適，可以略過。若想再試一段，可用舒適音高說幾句，暫時不追求更高或更低；如有不適就停下休息。"
+      },
+      {
+        "key": "practice.suggestion.pitchGlide.detail",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "如果你也想探索音高變化，可以在舒適範圍內做小幅、輕柔的滑音，再帶回一句短話，無需達到固定頻率。若這項建議不符合你的目標或聽感，可以跳過。",
+        "current_reviewed_value": "如果你也想探索音高變化，可以在舒適範圍內做小幅、輕柔的滑音，再帶回一句短話，無需達到固定頻率。若這項建議不符合你的目標或聽感，可以略過。"
+      },
+      {
+        "key": "practice.suggestion.resonance.detail",
+        "locale": "zh-Hant",
+        "previous_reviewed_value": "音色分（VFP）可能誤判，低分不代表共鳴有問題。先回聽是否符合你的目標；若分數與聽感不符，可以跳過這項建議。只有你也希望改變音色時，再嘗試小幅變化。",
+        "current_reviewed_value": "音色分（VFP）可能誤判，低分不代表共鳴有問題。先回聽是否符合你的目標；若分數與聽感不符，可以略過這項建議。只有你也希望改變音色時，再嘗試小幅變化。"
+      }
+    ],
+    "source_sha256_at_review": "976a1ec01e5f04e49d540c611fe6103188b48db7c86c8b2006223a6027568f9a"
+  }
+}

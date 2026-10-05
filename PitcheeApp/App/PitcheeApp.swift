@@ -34,6 +34,9 @@ struct PitcheeApp: App {
         WindowGroup {
             if let container {
                 ContentView()
+                    #if DEBUG
+                    .modifier(MonitorReviewModifier())
+                    #endif
                     .modelContainer(container)
                     .onAppear {
                         LocalDiagnosticsStore.shared.refresh()

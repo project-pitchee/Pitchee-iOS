@@ -84,6 +84,10 @@ def validate():
             source_units = list(string_units(localizations.get(source_language, {})))
             source_values = {unit.get("value") for unit in source_units}
             expected, _ = signature(key)
+            # Explicit semantic keys can carry arguments in defaultValue instead
+            # of in the key (for example the library reading-time label).
+            if not expected and source_units:
+                expected, _ = signature(source_units[0].get("value", ""))
             for language in sorted(languages):
                 localization = localizations.get(language, {})
                 units = list(string_units(localization))
@@ -97,6 +101,8 @@ def validate():
                     if not isinstance(value, str) or not value.strip():
                         errors.append(f"{context} [{language}]: empty value")
                         continue
+                    if value == key and re.fullmatch(r"[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)+", key):
+                        errors.append(f"{context} [{language}]: localization key is displayed as text")
                     # A literal percentage (e.g. "75% or more") is not a printf argument.
                     if expected:
                         formatted_units += 1

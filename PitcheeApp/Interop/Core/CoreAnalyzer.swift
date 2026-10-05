@@ -66,6 +66,7 @@ public actor PitcheeCoreAnalyzer {
 
     /// Starts a new microphone timeline while reusing the loaded SwiftF0 model.
     public func resetRealtimeF0() throws {
+        try Task.checkCancellation()
         if let realtimeF0 {
             pitchee_realtime_f0_reset(realtimeF0)
             return

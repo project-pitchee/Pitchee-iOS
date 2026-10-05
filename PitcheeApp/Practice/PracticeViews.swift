@@ -83,6 +83,7 @@ struct PracticeResultPanel: View {
     @Environment(\.modelContext) private var modelContext
     @ObservedObject var model: AnalysisViewModel
     @ObservedObject var playback: PracticePlayback
+    @State private var activePracticeArticle: VoiceArticle?
     let repeatPractice: () -> Void
     let finish: () -> Void
 
@@ -133,6 +134,9 @@ struct PracticeResultPanel: View {
                 Button("practice.finish", action: finish).buttonStyle(.bordered)
                 Label("practice.audio.lifetime", systemImage: "lock.shield")
                     .font(.caption).foregroundStyle(.secondary)
+            }
+            .sheet(item: $activePracticeArticle) { article in
+                VoiceArticleDetailView(article: article)
             }
             .onDisappear { playback.stop(); captions.clear() }
             .onChange(of: scenePhase) { _, phase in
@@ -211,6 +215,21 @@ struct PracticeResultPanel: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("practice.comparison.change \(metric.formatted(after - before))").font(.headline)
                 Text("practice.comparison.scope").font(.footnote).foregroundStyle(.secondary)
+
+                if let practice = model.practice {
+                    let recommendation = VoiceLibraryMatcher.recommendForPractice(
+                        resultA: a.result,
+                        resultB: b.result,
+                        preference: practice.target,
+                        qualityA: a.quality,
+                        qualityB: b.quality,
+                        feedback: model.comparisonFeedback
+                    )
+                    PracticeSuggestionsSection(suggestions: recommendation.prioritySuggestions) { article in
+                        activePracticeArticle = article
+                    }
+                    .padding(.top, 12)
+                }
             }
         } else {
             Text("practice.comparison.unavailable").font(.subheadline).foregroundStyle(.secondary)

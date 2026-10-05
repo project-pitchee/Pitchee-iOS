@@ -99,6 +99,35 @@ enum LivePitchTests {
                   "reset does not retain the previous pitch at \(rate)")
         }
 
+        // A canceled page preparation can still reach the analyzer's actor
+        // after a new session has started. Reject its reset before touching
+        // the native stream, preserving the active detector's time and context.
+        try await analyzer.resetRealtimeF0()
+        let beforeCanceledReset = try await analyzer.processRealtimeF0(
+            samples: tone(220, rate: 16_000, amplitude: 0.2, duration: 0.5)
+        )
+        let canceledReset = Task {
+            withUnsafeCurrentTask { $0?.cancel() }
+            do {
+                try await analyzer.resetRealtimeF0()
+                return false
+            } catch is CancellationError {
+                return true
+            } catch {
+                return false
+            }
+        }
+        let resetWasCanceled = await canceledReset.value
+        check(resetWasCanceled, "a canceled reset must throw CancellationError at the analyzer boundary")
+        let afterCanceledReset = try await analyzer.processRealtimeF0(
+            samples: tone(220, rate: 16_000, amplitude: 0.2, duration: 0.16)
+        )
+        check(beforeCanceledReset.last.map { last in
+            !afterCanceledReset.isEmpty && afterCanceledReset.allSatisfy { $0.elapsedTime > last.elapsedTime }
+        } ?? false, "a rejected canceled reset must preserve the ongoing native timeline")
+        check(afterCanceledReset.compactMap(\.pitchHz).contains { abs($0 - 220) < 5 },
+              "a rejected canceled reset must preserve warm detector context for a sub-context PCM batch")
+
         // Chunk boundaries must not restart the sample-rate converter.
         for rate in [44_100.0, 48_000, 96_000] {
             let signal = tone(220, rate: rate, amplitude: 0.2, duration: 1)

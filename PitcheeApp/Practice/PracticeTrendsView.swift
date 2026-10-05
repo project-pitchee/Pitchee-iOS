@@ -41,7 +41,7 @@ struct PracticeTrendsView: View {
                     get: { cohort }, set: { selectedCohort = $0 }
                 )) {
                     ForEach(Array(cohorts.enumerated()), id: \.element) { index, item in
-                        Text("\(index + 1). \(item.kind.title) · \(targetTitle(item.target))").tag(item)
+                        Text("practice.trend.cohortLabel \(index + 1) \(item.kind.title) \(targetTitle(item.target))").tag(item)
                     }
                 }
                 .pickerStyle(.menu)
@@ -65,7 +65,7 @@ struct PracticeTrendsView: View {
                 if let latest = summaries.last {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(!metric.hasBestView || !showsBest ? "practice.trend.median" : "practice.trend.best").font(.headline)
-                        Text("\(metric.formatted(displayed(latest))) \(metric.unit)")
+                        Text(metric.formatted(displayed(latest)))
                             .font(.system(.largeTitle, design: .rounded).bold())
                         dayDescription(latest)
                     }
@@ -73,7 +73,7 @@ struct PracticeTrendsView: View {
                     DisclosureGroup("practice.trend.dailyValues") {
                         ForEach(summaries.reversed()) { day in
                             VStack(alignment: .leading, spacing: 5) {
-                                Text("\(metric.formatted(displayed(day))) \(metric.unit)").font(.headline)
+                                Text(metric.formatted(displayed(day))).font(.headline)
                                 dayDescription(day)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 6)
@@ -132,7 +132,7 @@ struct PracticeTrendsView: View {
                 .foregroundStyle(Color.pitcheeAccent)
                 .accessibilityLabel(Text(day.date, format: .dateTime.month().day()))
                 .accessibilityValue(
-                    Text(verbatim: "\(metric.formatted(displayed(day))) \(metric.unit), ")
+                    Text(verbatim: "\(metric.formatted(displayed(day))), ")
                     + Text("practice.trend.range \(metric.formatted(day.minimum)) \(metric.formatted(day.maximum)) \(day.count)")
                 )
         }

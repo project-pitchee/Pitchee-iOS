@@ -201,7 +201,7 @@ struct RecordingHistoryDetailView: View {
     var body: some View {
         Group {
             if let result = assessment.result {
-                RecordingResultView(result: result, volumeStatistics: nil, saveError: nil)
+                RecordingResultView(result: result, volumeStatistics: nil, saveError: nil, quality: assessment.quality, recordedPreference: assessment.recordedTarget)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             RecordingExportButton(result: result, volumeStatistics: nil)
