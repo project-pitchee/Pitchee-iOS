@@ -32,6 +32,10 @@ xcrun swiftc -parse-as-library -O \
     -Xlinker -lc++ \
     "$project_directory"/PitcheeApp/Interop/Core/*.swift \
     "$project_directory/PitcheeApp/Audio/LivePitchAudioCapture.swift" \
+    "$project_directory/PitcheeApp/Analysis/PitchTimeline.swift" \
+    "$project_directory/PitcheeApp/Monitoring/MonitorTimeline.swift" \
+    "$project_directory/PitcheeApp/Monitoring/MonitorSpectrumAnalyzer.swift" \
+    "$project_directory/PitcheeApp/Monitoring/MonitorAudioCapture.swift" \
     "$project_directory/Tests/Recording/LivePitchTests.swift" \
     -o "$test_directory/live-f0-tests"
 

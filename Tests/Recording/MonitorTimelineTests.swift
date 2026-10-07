@@ -1,5 +1,26 @@
+//
+//  MonitorTimelineTests.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import AVFoundation
 import Foundation
+
+private final class TimelineSearchReadCount {
+    var value = 0
+}
+
+private struct CountedTimelineSample {
+    let timestamp: TimeInterval
+    let reads: TimelineSearchReadCount
+
+    var elapsedTime: TimeInterval {
+        reads.value += 1
+        return timestamp
+    }
+}
 
 @main
 enum MonitorTimelineTests {
@@ -21,6 +42,171 @@ enum MonitorTimelineTests {
         func frame(_ time: Double, value: Float = -30) -> MonitorSpectrumFrame {
             .init(elapsedTime: time, magnitudesDB: [value, value - 12], binWidthHz: 7.8125)
         }
+
+        let searchSamples: [LivePitchSample] = [
+            .init(elapsedTime: 1, pitchHz: 180),
+            .init(elapsedTime: 2, pitchHz: nil),
+            .init(elapsedTime: 2, pitchHz: 200),
+            .init(elapsedTime: 4, pitchHz: 220)
+        ]
+        for lower in stride(from: -1.0, through: 5, by: 0.5) {
+            for upper in stride(from: lower, through: 5, by: 0.5) {
+                let selection = TimelineSearch.samples(in: searchSamples, range: lower...upper, time: \.elapsedTime)
+                let expected = searchSamples.filter { (lower...upper).contains($0.elapsedTime) }
+                check(selection.map(\.elapsedTime) == expected.map(\.elapsedTime)
+                      && selection.map(\.pitchHz) == expected.map(\.pitchHz),
+                      "Indexed windows preserve inclusive endpoints, duplicates, and silent gaps")
+            }
+            let latest = TimelineSearch.latest(in: searchSamples, at: lower, time: \.elapsedTime)
+            let expected = searchSamples.last { $0.elapsedTime <= lower }
+            check(latest?.elapsedTime == expected?.elapsedTime && latest?.pitchHz == expected?.pitchHz,
+                  "Indexed cursor lookup matches the latest real sample, including duplicate timestamps")
+        }
+        check(TimelineSearch.samples(in: searchSamples, range: 2...2, time: \.elapsedTime,
+                                     includingNeighbors: true).map(\.elapsedTime) == [1, 2, 2, 4],
+              "Chart clipping retains both neighbors at an exact boundary")
+        check(TimelineSearch.samples(in: searchSamples, range: 2.5...3.5, time: \.elapsedTime,
+                                     includingNeighbors: true).map(\.elapsedTime) == [2, 4],
+              "A window between samples retains the segment that crosses it")
+        check(TimelineSearch.samples(in: searchSamples, range: 0...Double.infinity, time: \.elapsedTime).isEmpty,
+              "Indexed windows reject non-finite ranges")
+        check(TimelineSearch.latest(in: searchSamples, at: .nan, time: \.elapsedTime) == nil,
+              "Invalid cursors do not select a stale sample")
+        check(TimelineSearch.samples(in: [LivePitchSample](), range: 0...3, time: \.elapsedTime,
+                                     includingNeighbors: true).isEmpty,
+              "Empty histories allow neighbor-preserving chart selection")
+
+        let reads = TimelineSearchReadCount()
+        let largeHistory = (0..<100_000).map { CountedTimelineSample(timestamp: Double($0), reads: reads) }
+        let indexedWindow = TimelineSearch.samples(in: largeHistory, range: 40_000...40_100, time: \.elapsedTime)
+        check(indexedWindow.count == 101 && reads.value <= 40,
+              "Selecting a short window from 100,000 samples performs logarithmic timestamp reads")
+        reads.value = 0
+        check(TimelineSearch.latest(in: largeHistory, at: 40_000.5, time: \.elapsedTime)?.timestamp == 40_000
+              && reads.value <= 20, "Scrubbing finds a sample without scanning the full retained history")
+        reads.value = 0
+        check(TimelineSearch.latest(in: largeHistory, at: 100_000, time: \.elapsedTime)?.timestamp == 99_999
+              && reads.value == 2, "Live-edge lookups stay constant-time")
+
+        let emptyScoring = ScoringPitchSnapshot(samples: [])
+        check(emptyScoring.samples.isEmpty && emptyScoring.timeRange == 0...10
+              && emptyScoring.cursorTime == 0 && emptyScoring.currentPitch == nil,
+              "The empty scoring chart reserves a stable ten-second axis")
+        for seconds in [0.0, 0.02, 0.2, 0.4, 1, 9.99, 10] {
+            let scoring = ScoringPitchSnapshot(samples: [
+                .init(elapsedTime: 0, pitchHz: 180), .init(elapsedTime: seconds, pitchHz: 220)
+            ])
+            check(scoring.timeRange == 0...10 && scoring.cursorTime == seconds,
+                  "Early scoring updates advance the cursor without rescaling the existing trace")
+        }
+        let lateScoring = ScoringPitchSnapshot(samples: [
+            .init(elapsedTime: 6.99, pitchHz: 170), .init(elapsedTime: 7, pitchHz: 180),
+            .init(elapsedTime: 12, pitchHz: 200), .init(elapsedTime: 17, pitchHz: 220)
+        ])
+        check(lateScoring.timeRange == 7...17 && lateScoring.cursorTime == 17
+              && lateScoring.samples.map(\.elapsedTime) == [7, 12, 17],
+              "Scoring rolls a fixed ten-second window and preserves its exact boundaries")
+
+        let longPitchHistory = (0..<100_000).map {
+            LivePitchSample(elapsedTime: Double($0) / 100, pitchHz: 200 + Double($0 % 100))
+        }
+        let longScoring = ScoringPitchSnapshot(samples: longPitchHistory)
+        let recentScoring = ScoringPitchSnapshot(samples: Array(longPitchHistory.suffix(2_000)))
+        check(longScoring.samples.map(\.elapsedTime) == recentScoring.samples.map(\.elapsedTime)
+              && longScoring.samples.map(\.pitchHz) == recentScoring.samples.map(\.pitchHz)
+              && longScoring.timeRange == recentScoring.timeRange,
+              "Old recording history does not change the latest scoring snapshot")
+        check(longScoring.samples.count <= 640
+              && longScoring.samples.allSatisfy { longScoring.timeRange.contains($0.elapsedTime) },
+              "Long scoring histories retain only visible points within the drawing budget")
+
+        var densePitch = (0...10_000).map {
+            LivePitchSample(elapsedTime: Double($0) / 1_000, pitchHz: 200 + Double($0 % 11))
+        }
+        densePitch[4_567] = .init(elapsedTime: 4.567, pitchHz: 950)
+        densePitch[4_569] = .init(elapsedTime: 4.569, pitchHz: 55)
+        let denseScoring = ScoringPitchSnapshot(samples: densePitch)
+        check(denseScoring.samples.count <= 640 && denseScoring.samples.count < densePitch.count,
+              "Dense detector output has a fixed display-sized point budget")
+        check(denseScoring.samples.first?.elapsedTime == densePitch.first?.elapsedTime
+              && denseScoring.samples.first?.pitchHz == densePitch.first?.pitchHz
+              && denseScoring.samples.last?.elapsedTime == densePitch.last?.elapsedTime
+              && denseScoring.samples.last?.pitchHz == densePitch.last?.pitchHz,
+              "Scoring reduction preserves the first and final detector samples")
+        check(denseScoring.samples.contains { $0.elapsedTime == 4.567 && $0.pitchHz == 950 }
+              && denseScoring.samples.contains { $0.elapsedTime == 4.569 && $0.pitchHz == 55 },
+              "A narrow peak and valley survive even when evenly spaced sampling would skip them")
+        check(zip(denseScoring.samples, denseScoring.samples.dropFirst()).allSatisfy {
+            $0.elapsedTime < $1.elapsedTime
+        }, "Reduced scoring samples stay ordered without duplicating selected extrema")
+
+        func isDrawablePitch(_ sample: LivePitchSample) -> Bool {
+            guard let pitch = sample.pitchHz else { return false }
+            return pitch.isFinite && (50...1_000).contains(pitch)
+        }
+        func bridgesMissingPitch(_ plotted: [LivePitchSample], source: [LivePitchSample]) -> Bool {
+            var previous: LivePitchSample?
+            for sample in plotted {
+                guard isDrawablePitch(sample) else { previous = nil; continue }
+                if let previous, (0...0.4).contains(sample.elapsedTime - previous.elapsedTime) {
+                    let interval = TimelineSearch.samples(
+                        in: source, range: previous.elapsedTime...sample.elapsedTime, time: \.elapsedTime
+                    )
+                    if interval.contains(where: { !isDrawablePitch($0) }) { return true }
+                }
+                previous = sample
+            }
+            return false
+        }
+        let missingPitches: [Double?] = [nil, .nan, .infinity, -.infinity, 0, -100, 49, 1_001]
+        for missingPitch in missingPitches {
+            var interruptedPitch = densePitch
+            interruptedPitch[4_568] = .init(elapsedTime: 4.568, pitchHz: missingPitch)
+            let interruptedScoring = ScoringPitchSnapshot(samples: interruptedPitch)
+            check(interruptedScoring.samples.contains { $0.elapsedTime == 4.568 && !isDrawablePitch($0) }
+                  && !bridgesMissingPitch(interruptedScoring.samples, source: interruptedPitch),
+                  "Silence, invalid estimates, and off-chart pitches cannot become a fabricated voiced line")
+            check(interruptedScoring.samples.contains { $0.elapsedTime == 4.567 && $0.pitchHz == 950 }
+                  && interruptedScoring.samples.contains { $0.elapsedTime == 4.569 && $0.pitchHz == 55 },
+                  "Gap preservation retains the real extrema on both sides of a brief interruption")
+        }
+        let alternatingPitch = (0...100_000).map {
+            LivePitchSample(elapsedTime: Double($0) / 10_000,
+                            pitchHz: $0 % 2 == 0 ? 200 + Double($0 % 700) : nil)
+        }
+        let alternatingScoring = ScoringPitchSnapshot(samples: alternatingPitch)
+        check(alternatingScoring.samples.count <= 640
+              && !bridgesMissingPitch(alternatingScoring.samples, source: alternatingPitch),
+              "Adversarial alternating voicing respects both the point budget and every line break")
+
+        check(ScoringPitchSnapshot.currentPitch(in: []) == nil, "An empty recording has no pitch readout")
+        check(ScoringPitchSnapshot.currentPitch(in: [
+            .init(elapsedTime: 0, pitchHz: 200), .init(elapsedTime: 0.6, pitchHz: nil)
+        ]) == 200, "The pitch readout includes a valid frame at its 0.6-second freshness boundary")
+        check(ScoringPitchSnapshot.currentPitch(in: [
+            .init(elapsedTime: 0, pitchHz: 200), .init(elapsedTime: 0.600_1, pitchHz: nil)
+        ]) == nil, "The pitch readout clears after its latest valid frame expires")
+        check(ScoringPitchSnapshot.currentPitch(in: [
+            .init(elapsedTime: 1, pitchHz: 180), .init(elapsedTime: 1.1, pitchHz: 0),
+            .init(elapsedTime: 1.2, pitchHz: -100), .init(elapsedTime: 1.3, pitchHz: .nan),
+            .init(elapsedTime: 1.4, pitchHz: .infinity), .init(elapsedTime: 1.5, pitchHz: nil)
+        ]) == 180, "Invalid detector estimates do not mask a recent valid readout")
+        check(ScoringPitchSnapshot.currentPitch(in: [
+            .init(elapsedTime: 2, pitchHz: 1_200), .init(elapsedTime: 2.1, pitchHz: nil)
+        ]) == 1_200, "The pitch readout can report a valid estimate beyond the chart's vertical range")
+
+        var readoutPitch = (0...10_000).map {
+            LivePitchSample(elapsedTime: Double($0) / 1_000, pitchHz: 200)
+        }
+        readoutPitch[9_895] = .init(elapsedTime: 9.895, pitchHz: 100)
+        readoutPitch[9_896] = .init(elapsedTime: 9.896, pitchHz: 900)
+        readoutPitch[9_999] = .init(elapsedTime: 9.999, pitchHz: 333)
+        readoutPitch[10_000] = .init(elapsedTime: 10, pitchHz: nil)
+        let readoutScoring = ScoringPitchSnapshot(samples: readoutPitch)
+        check(!readoutScoring.samples.contains { $0.pitchHz == 333 }
+              && readoutScoring.currentPitch == 333
+              && ScoringPitchSnapshot.currentPitch(in: readoutPitch) == 333,
+              "The frequency readout uses original samples even when reduction omits its latest valid frame")
 
         var short = MonitorTimeline()
         check(short.duration == 0 && short.availableRange == 0...0, "An empty history starts at zero")

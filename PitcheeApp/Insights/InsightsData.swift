@@ -96,7 +96,7 @@ enum InsightsMetric: String, CaseIterable, Identifiable {
         case .composite: value = assessment.finalScore(for: preference)
         case .naturalness: value = assessment.naturalnessScore
         case .pitch: value = assessment.meanPitchHz
-        case .variation: value = assessment.result?.f0.standardDeviationHz
+        case .variation: value = assessment.pitchVariationHz
         }
         guard let value, value.isFinite, value >= 0, self != .pitch || value > 0 else { return nil }
         return value
@@ -144,7 +144,12 @@ enum InsightsData {
         relativeTo now: Date = .now,
         calendar: Calendar = .current
     ) -> [RecordingAssessment] {
-        assessments.filter { range.contains($0.recordedAt, relativeTo: now, calendar: calendar) }
+        let today = calendar.startOfDay(for: now)
+        let start = range.startDate(relativeTo: now, calendar: calendar)
+        return assessments.filter {
+            let day = calendar.startOfDay(for: $0.recordedAt)
+            return day <= today && start.map { day >= $0 } != false
+        }
     }
 
     /// Every metric uses the same daily representative as the home dashboard.
@@ -152,15 +157,18 @@ enum InsightsData {
         _ assessments: [RecordingAssessment], calendar: Calendar = .current,
         preference: VoicePreference = .undecided
     ) -> [RecordingAssessment] {
-        Dictionary(grouping: assessments) { calendar.startOfDay(for: $0.recordedAt) }
-            .values.compactMap { records in
-                records.max { lhs, rhs in
-                    let left = lhs.finalScore(for: preference)
-                    let right = rhs.finalScore(for: preference)
-                    if left == right { return lhs.recordedAt < rhs.recordedAt }
-                    return left < right
-                }
+        var bestByDay: [Date: (assessment: RecordingAssessment, score: Double)] = [:]
+        for assessment in assessments {
+            let day = calendar.startOfDay(for: assessment.recordedAt)
+            let score = assessment.finalScore(for: preference)
+            if let current = bestByDay[day] {
+                guard current.score < score
+                    || (current.score == score && current.assessment.recordedAt < assessment.recordedAt)
+                else { continue }
             }
+            bestByDay[day] = (assessment, score)
+        }
+        return bestByDay.values.map(\.assessment)
             .sorted { $0.recordedAt < $1.recordedAt }
     }
 

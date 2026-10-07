@@ -8,24 +8,38 @@
 import SwiftData
 import SwiftUI
 import UIKit
-import Charts
 
 struct ContentView: View {
     @AppStorage(AppStorageKey.onboardingCompletedVersion) private var completedOnboardingVersion = 0
-    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
     @AppStorage(AppStorageKey.customThemeColor) private var customThemeColor = ""
+    @AppStorage(AppStorageKey.themeSelection) private var savedThemeSelection = AppThemeOption.twilt.rawValue
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    private var selectedTheme: AppThemeOption {
+        AppThemeOption(rawValue: savedThemeSelection) ?? .twilt
+    }
 
     private var themeColor: Color {
-        AppTheme.color(
-            for: VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided,
-            customHex: customThemeColor
+        if let customColor = Color(hex: customThemeColor) {
+            return customColor
+        }
+        return AppTheme.color(
+            for: selectedTheme,
+            appearance: colorScheme == .dark ? .dark : .light
         )
     }
 
     var body: some View {
         Group {
             if completedOnboardingVersion >= OnboardingFlow.currentVersion {
-                MainTabView()
+                MainTabView(
+                    themeColor: themeColor,
+                    dashboardTint: selectedTheme.dashboardPalette(
+                        for: colorScheme == .dark ? .dark : .light,
+                        contrast: colorSchemeContrast
+                    ).accent
+                )
             } else {
                 OnboardingView {
                     completedOnboardingVersion = OnboardingFlow.currentVersion
@@ -38,23 +52,31 @@ struct ContentView: View {
 }
 
 private struct MainTabView: View {
+    let themeColor: Color
+    let dashboardTint: Color
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var recordingModel = AnalysisViewModel()
+    // Keep the reference stable without making the whole TabView observe every
+    // realtime pitch frame. ScoringView and the accessory subscribe locally.
+    @State private var recordingModel = AnalysisViewModel()
     @State private var selectedTab: AppTab = .trends
-    @State private var showsRecordingAnalysis = false
     @State private var monitorAccessoryState = MonitorAccessoryState()
-    @State private var practicePath: [MonitorKind] = []
+    @State private var practicePath: [PracticeRoute] = []
 
-    init() {
+    init(themeColor: Color, dashboardTint: Color) {
+        self.themeColor = themeColor
+        self.dashboardTint = dashboardTint
         #if DEBUG
         // Lets the isolated review simulator open this page without altering saved preferences.
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("-practice-hub-preview")
             || arguments.contains("-monitor-review-pitch")
-            || arguments.contains("-monitor-review-spectrum") {
+            || arguments.contains("-monitor-review-spectrum")
+            || arguments.contains("-practice-spectrum-preview") {
             _selectedTab = State(initialValue: .practice)
         }
-        if arguments.contains("-monitor-review-pitch") {
+        if arguments.contains("-practice-spectrum-preview") {
+            _practicePath = State(initialValue: [.spectrogram])
+        } else if arguments.contains("-monitor-review-pitch") {
             _practicePath = State(initialValue: [.pitch])
         } else if arguments.contains("-monitor-review-spectrum") {
             _practicePath = State(initialValue: [.spectrum])
@@ -72,20 +94,20 @@ private struct MainTabView: View {
             }
             .tag(AppTab.trends)
 
-            NavigationStack {
-                RecordingView(viewModel: recordingModel, showsAnalysis: $showsRecordingAnalysis)
-            }
-            .tabItem {
-                Label(AppTab.recording.title, systemImage: AppTab.recording.systemImage)
-            }
-            .tag(AppTab.recording)
-
             NavigationStack(path: $practicePath) {
                 PracticeHubView()
-                    .navigationDestination(for: MonitorKind.self) { kind in
-                        switch kind {
-                        case .pitch: PitchMonitorView()
-                        case .spectrum: SpectrumMonitorView()
+                    .navigationDestination(for: PracticeRoute.self) { route in
+                        switch route {
+                        case .scoring:
+                            ScoringView(model: recordingModel, practicePath: $practicePath)
+                        case .analysis:
+                            RecordingAnalysisView(viewModel: recordingModel)
+                        case .pitch:
+                            PitchMonitorView()
+                        case .spectrum:
+                            SpectrumMonitorView()
+                        case .spectrogram:
+                            PracticeSpectrumView()
                         }
                     }
             }
@@ -110,47 +132,49 @@ private struct MainTabView: View {
             }
             .tag(AppTab.about)
         }
-        .modifier(TabBarAccessory(isVisible: showsRecordingAccessory || activeMonitorModel != nil) {
+        .modifier(TabBarAccessory(isVisible: scoringPageVisible || activeMonitorModel != nil) {
             if let model = activeMonitorModel {
                 MonitorAccessoryContent(model: model)
-            } else {
-                RecordingAccessoryContent(viewModel: recordingModel, action: recordingAction)
+            } else if practicePath.last == .scoring {
+                ScoringAccessoryHost(viewModel: recordingModel, action: scoringAction)
             }
         })
+        .tint(selectedTab == .trends ? dashboardTint : themeColor)
         .environment(\.monitorAccessoryState, monitorAccessoryState)
         .onChange(of: selectedTab) { _, tab in
-            if tab != .practice { monitorAccessoryState.leavePractice() }
+            if tab != .practice {
+                monitorAccessoryState.leavePractice()
+            }
         }
     }
 
-    private var showsRecordingAccessory: Bool {
-        (selectedTab == .recording && !showsRecordingAnalysis)
-            || recordingModel.isRecording || recordingModel.isRequestingPermission
+    private var scoringPageVisible: Bool {
+        selectedTab == .practice && practicePath.last == .scoring
     }
 
     private var activeMonitorModel: MonitorViewModel? {
-        guard selectedTab == .practice,
-              !recordingModel.isRecording, !recordingModel.isRequestingPermission else { return nil }
+        guard selectedTab == .practice else { return nil }
+        guard practicePath.last == .pitch || practicePath.last == .spectrum
+                || practicePath.last == .spectrogram else { return nil }
         return monitorAccessoryState.model
     }
 
-    private func recordingAction() {
-        if recordingModel.needsAnalysisScreen {
-            selectedTab = .recording
-            showsRecordingAnalysis = true
-            return
-        }
+    private func scoringAction() {
         recordingModel.primaryButtonTapped(modelContext: modelContext)
-        if recordingModel.needsAnalysisScreen {
-            selectedTab = .recording
-            showsRecordingAnalysis = true
-        }
+    }
+}
+
+private struct ScoringAccessoryHost: View {
+    let viewModel: AnalysisViewModel
+    let action: () -> Void
+
+    var body: some View {
+        RecordingAccessoryContent(viewModel: viewModel, action: action)
     }
 }
 
 private enum AppTab: Hashable {
     case trends
-    case recording
     case practice
     case pianoKeys
     case about
@@ -159,8 +183,6 @@ private enum AppTab: Hashable {
         switch self {
         case .trends:
             "insights.screen.title"
-        case .recording:
-            "recording.screen.title"
         case .practice:
             "practice.hub.tab"
         case .pianoKeys:
@@ -174,8 +196,6 @@ private enum AppTab: Hashable {
         switch self {
         case .trends:
             "chart.line.uptrend.xyaxis"
-        case .recording:
-            "waveform.badge.microphone"
         case .practice:
             "figure.mind.and.body"
         case .pianoKeys:
@@ -186,516 +206,8 @@ private enum AppTab: Hashable {
     }
 }
 
-private struct TrendsView: View {
-    private struct TrendPoint: Identifiable {
-        let id: UUID
-        let date: Date
-        let value: Double
-        let position: Double
-    }
-
-    @Query(sort: \RecordingAssessment.recordedAt, order: .reverse)
-    private var assessments: [RecordingAssessment]
-    @AppStorage(AppStorageKey.openedDateKeys) private var openedDateKeys = ""
-    @State private var selectedRange: InsightsRange = .sevenDays
-    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
-
-    private var voicePreference: VoicePreference {
-        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
-    }
-
-    /// Placeholder for a metric that has no value yet. Kept in one place so
-    /// cards use the same empty state as the rest of the app.
-    private static let noValue = String(localized: "common.placeholder.noValue")
-
-    private var visibleAssessments: [RecordingAssessment] {
-        InsightsData.assessments(assessments, in: selectedRange)
-    }
-
-    private var latestAssessment: RecordingAssessment? {
-        dailyBestAssessments.last
-    }
-
-    private var averages: RecordingAssessmentAverages {
-        RecordingAssessmentAverages(assessments: Array(dailyBestAssessments.dropLast()), preference: voicePreference)
-    }
-
-    /// Keep one representative result per day so repeated recordings do not
-    /// make the trend chart look denser than the activity really was. The
-    /// highest overall score represents that day's best result.
-    private var dailyBestAssessments: [RecordingAssessment] {
-        InsightsData.dailyBest(visibleAssessments, preference: voicePreference)
-    }
-
-    var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 16) {
-                InsightsRangePicker(selection: $selectedRange)
-                summaryCards
-                NavigationLink(value: InsightsDestination.metric(.composite)) {
-                    overallScoreCard
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint("insights.metric.openDetails.hint")
-                metricCards
-
-                if visibleAssessments.isEmpty {
-                    emptyState
-                }
-            }
-            .frame(maxWidth: 720)
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
-            .padding(.bottom, 24)
-        }
-        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
-        .navigationTitle(Text(verbatim: "Pitchee"))
-        .navigationBarTitleDisplayMode(.large)
-        .onAppear(perform: recordTodayAsOpened)
-        .navigationDestination(for: InsightsDestination.self) { destination in
-            switch destination {
-            case .history:
-                RecordingHistoryView(range: $selectedRange)
-            case .activity:
-                InsightsActivityView(range: $selectedRange)
-            case .metric(let metric):
-                InsightsMetricDetailView(metric: metric, range: $selectedRange)
-            }
-        }
-    }
-
-    private var summaryCards: some View {
-        LazyVGrid(
-            columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
-            spacing: 12
-        ) {
-            NavigationLink(value: InsightsDestination.history) {
-                summaryCard(
-                    title: "insights.summary.analysisCount.title",
-                    value: visibleAssessments.count.formatted(),
-                    symbol: "waveform",
-                    tint: .blue
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("insights.history.openDetails.hint")
-            NavigationLink(value: InsightsDestination.activity) {
-                summaryCard(
-                    title: "insights.summary.openedDays.title",
-                    value: openedDays.formatted(),
-                    symbol: "calendar",
-                    tint: .orange
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("insights.activity.openDetails.hint")
-        }
-    }
-
-    private func summaryCard(
-        title: LocalizedStringKey,
-        value: String,
-        symbol: String,
-        tint: Color
-    ) -> some View {
-        dashboardCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: symbol)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(tint)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tertiary)
-                }
-
-                Text(value)
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
-                    .foregroundStyle(tint)
-                    .minimumScaleFactor(0.7)
-                    .lineLimit(1)
-
-                Text(title)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    private var overallScoreCard: some View {
-        dashboardCard(minHeight: 0) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text(voicePreference.scoreTitle)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.tertiary)
-                }
-
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(latestAssessment.map { scoreText($0.finalScore(for: voicePreference)) } ?? Self.noValue)
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundStyle(latestAssessment == nil ? Color.secondary : Color.blue)
-                        .minimumScaleFactor(0.7)
-
-                    scoreChangeText
-                }
-
-                if let baseline = averages.finalScore {
-                    Text("insights.metric.baselineAverage.caption \(scoreText(baseline))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text("insights.metric.compositeScore.caption")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                scoreChart
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var scoreChart: some View {
-        trendChart(
-            points: scorePoints,
-            tint: .purple,
-            yDomain: 0...100,
-            height: 126,
-            showsXAxis: true
-        )
-        .accessibilityLabel(Text(voicePreference.scoreTitle))
-        .accessibilityValue(chartAccessibilityValue)
-    }
-
-    @ViewBuilder
-    private var scoreChangeText: some View {
-        if let current = latestAssessment?.finalScore(for: voicePreference), let baseline = averages.finalScore, baseline != 0 {
-            let change = (current - baseline) / abs(baseline) * 100
-            // A tiny difference is normal rounding noise. Do not present it
-            // as a direction of travel (for example, “↓ 0%”).
-            if abs(change) >= 0.5 {
-                let symbol = change > 0 ? "↑" : "↓"
-                Text(verbatim: "\(symbol) \(abs(change).formatted(.number.precision(.fractionLength(0))))%")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(change > 0 ? Color.green : Color.red)
-            }
-        }
-    }
-
-    private var scorePoints: [TrendPoint] {
-        dailyBestAssessments.enumerated().map { index, assessment in
-            TrendPoint(id: assessment.id, date: chartDate(for: assessment), value: assessment.finalScore(for: voicePreference), position: Double(index))
-        }
-    }
-
-    private var chartAccessibilityValue: Text {
-        guard let first = scorePoints.first, let last = scorePoints.last else {
-            return Text(verbatim: "")
-        }
-        return Text("insights.chart.scoreTrend.a11y \(scoreText(first.value)) \(scoreText(last.value))")
-    }
-
-    @ViewBuilder
-    private func trendChart(
-        points: [TrendPoint],
-        tint: Color,
-        yDomain: ClosedRange<Double>,
-        height: CGFloat,
-        showsXAxis: Bool
-    ) -> some View {
-        if points.isEmpty {
-            EmptyView()
-        } else if showsXAxis {
-            baseTrendChart(points: points, tint: tint, yDomain: yDomain, height: height)
-                .chartXAxis {
-                    AxisMarks(values: points.map(\.position)) { value in
-                        AxisGridLine().foregroundStyle(.clear)
-                        AxisTick().foregroundStyle(.clear)
-                        AxisValueLabel(anchor: .top) {
-                            if let position = value.as(Double.self),
-                               let point = points.first(where: { $0.position == position }) {
-                                Text(point.date, format: .dateTime.month(.defaultDigits).day(.defaultDigits))
-                            }
-                        }
-                    }
-                }
-        } else {
-            baseTrendChart(points: points, tint: tint, yDomain: yDomain, height: height)
-                .chartXAxis(.hidden)
-        }
-    }
-
-    private func baseTrendChart(
-        points: [TrendPoint],
-        tint: Color,
-        yDomain: ClosedRange<Double>,
-        height: CGFloat
-    ) -> some View {
-        Chart(points) { point in
-            if points.count > 1 {
-                AreaMark(
-                    x: .value(String(localized: "insights.chart.date.label"), point.position),
-                    yStart: .value(String(localized: "insights.chart.baseline.label"), yDomain.lowerBound),
-                    yEnd: .value(String(localized: "insights.chart.value.label"), point.value)
-                )
-                .interpolationMethod(.catmullRom)
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [tint.opacity(0.24), tint.opacity(0.03)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-            }
-
-            LineMark(
-                x: .value(String(localized: "insights.chart.date.label"), point.position),
-                y: .value(String(localized: "insights.chart.value.label"), point.value)
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(tint)
-            .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-
-            PointMark(
-                x: .value(String(localized: "insights.chart.date.label"), point.position),
-                y: .value(String(localized: "insights.chart.value.label"), point.value)
-            )
-            .foregroundStyle(tint)
-            .symbolSize(28)
-        }
-        .chartXScale(domain: xDomain(for: points))
-        .chartYScale(
-            domain: yDomain,
-            range: .plotDimension(startPadding: 4, endPadding: 6)
-        )
-        .chartYAxis(.hidden)
-        .chartPlotStyle { plot in
-            plot
-                .frame(height: height)
-                .clipped()
-        }
-    }
-
-    private var metricCards: some View {
-        LazyVGrid(
-            columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
-            spacing: 12
-        ) {
-            NavigationLink(value: InsightsDestination.metric(.naturalness)) {
-                metricCard(
-                    title: "common.metric.naturalness.title",
-                    value: latestAssessment.map { scoreText($0.naturalnessScore) } ?? Self.noValue,
-                    current: latestAssessment?.naturalnessScore,
-                    baseline: averages.naturalnessScore,
-                    baselineText: averages.naturalnessScore.map(scoreText),
-                    symbol: "waveform.path.ecg",
-                    tint: .purple,
-                    points: naturalnessPoints,
-                    yDomain: 0...100
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("insights.metric.openDetails.hint")
-            NavigationLink(value: InsightsDestination.metric(.pitch)) {
-                metricCard(
-                    title: "common.metric.meanPitch.title",
-                    value: latestAssessment?.meanPitchHz.map(decimalText) ?? Self.noValue,
-                    current: latestAssessment?.meanPitchHz,
-                    baseline: averages.meanPitchHz,
-                    baselineText: averages.meanPitchHz.map(decimalText),
-                    symbol: "tuningfork",
-                    tint: .teal,
-                    points: pitchPoints,
-                    yDomain: pitchChartDomain
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("insights.metric.openDetails.hint")
-        }
-    }
-
-    private var naturalnessPoints: [TrendPoint] {
-        dailyBestAssessments.enumerated().map { index, assessment in
-            TrendPoint(id: assessment.id, date: chartDate(for: assessment), value: assessment.naturalnessScore, position: Double(index))
-        }
-    }
-
-    private var pitchPoints: [TrendPoint] {
-        dailyBestAssessments
-            .compactMap { assessment -> (RecordingAssessment, Double)? in
-                guard let pitch = assessment.meanPitchHz else { return nil }
-                return (assessment, pitch)
-            }
-            .enumerated()
-            .map { index, item in
-                TrendPoint(
-                    id: item.0.id,
-                    date: chartDate(for: item.0),
-                    value: item.1,
-                    position: Double(index)
-                )
-            }
-    }
-
-    private func xDomain(for points: [TrendPoint]) -> ClosedRange<Double> {
-        guard let first = points.first?.position, let last = points.last?.position else {
-            return 0...1
-        }
-        if first == last { return (first - 0.5)...(last + 0.5) }
-        return (first - 0.15)...(last + 0.15)
-    }
-
-    private func chartDate(for assessment: RecordingAssessment) -> Date {
-        Calendar.current.startOfDay(for: assessment.recordedAt)
-    }
-
-    private var pitchChartDomain: ClosedRange<Double> {
-        let values = pitchPoints.map(\.value)
-        guard let minimum = values.min(), let maximum = values.max() else {
-            return 0...1
-        }
-        let padding = max((maximum - minimum) * 0.2, 1)
-        return max(0, minimum - padding)...(maximum + padding)
-    }
-
-    private func metricCard(
-        title: LocalizedStringKey,
-        value: String,
-        current: Double?,
-        baseline: Double?,
-        baselineText: String?,
-        symbol: String,
-        tint: Color,
-        points: [TrendPoint],
-        yDomain: ClosedRange<Double>
-    ) -> some View {
-        dashboardCard(minHeight: 0) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Image(systemName: symbol)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(tint)
-                    Text(title)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.tertiary)
-                }
-
-                Text(value)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(value == Self.noValue ? Color.secondary : tint)
-                    .minimumScaleFactor(0.65)
-                    .lineLimit(1)
-
-                if let baseline {
-                    VStack(alignment: .leading, spacing: 3) {
-                        trendText(current: current, baseline: baseline)
-                            .font(.caption.weight(.semibold))
-                        if let baselineText {
-                            Text("insights.metric.baselineAverage.caption \(baselineText)")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                } else {
-                    Text("insights.metric.baselineAverage.caption \(Self.noValue)")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-
-                trendChart(
-                    points: points,
-                    tint: tint,
-                    yDomain: yDomain,
-                    height: 54,
-                    showsXAxis: false
-                )
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("insights.history.empty.description")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-    }
-
-    private func dashboardCard<Content: View>(
-        minHeight: CGFloat = 138,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        content()
-            .padding(16)
-            .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .topLeading)
-            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-    }
-
-    private var openedDays: Int {
-        InsightsData.openedDates(from: openedDateKeys).filter { selectedRange.contains($0) }.count
-    }
-
-    private func scoreText(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(0)))
-    }
-
-    private func decimalText(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(1)))
-    }
-
-    @ViewBuilder
-    private func trendText(current: Double?, baseline: Double?) -> some View {
-        if let current, let baseline, baseline != 0 {
-            let change = (current - baseline) / abs(baseline) * 100
-            if abs(change) >= 0.5 {
-                let symbol = change > 0 ? "↑" : "↓"
-                Text(verbatim: "\(symbol) \(abs(change).formatted(.number.precision(.fractionLength(0))))%")
-                    .foregroundStyle(change > 0 ? Color.green : Color.red)
-            }
-        }
-    }
-
-    private func recordTodayAsOpened() {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        guard let year = components.year, let month = components.month, let day = components.day else {
-            return
-        }
-
-        let todayKey = "\(year)-\(month)-\(day)"
-        var dateKeys = Set(
-            openedDateKeys
-                .split(separator: ",")
-                .map(String.init)
-        )
-        dateKeys.insert(todayKey)
-        openedDateKeys = dateKeys.sorted().joined(separator: ",")
-    }
-}
-
 private struct PianoKeysView: View {
+    @AppStorage(AppStorageKey.themeSelection) private var savedTheme = AppThemeOption.twilt.rawValue
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var soundEngine = PianoSoundEngine()
     @State private var activeNote: PianoNote?
@@ -711,16 +223,20 @@ private struct PianoKeysView: View {
                 .environment(\.layoutDirection, .leftToRight)
         }
         .background {
-            LinearGradient(
-                colors: [
-                    Color.blue.opacity(0.08),
-                    Color.purple.opacity(0.05),
-                    Color(uiColor: .systemBackground)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            if savedTheme == AppThemeOption.pure.rawValue {
+                AppThemeBackground()
+            } else {
+                LinearGradient(
+                    colors: [
+                        Color.blue.opacity(0.08),
+                        Color.purple.opacity(0.05),
+                        Color(uiColor: .systemBackground)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+            }
         }
         .navigationTitle("piano.screen.title")
         .navigationBarTitleDisplayMode(.inline)
@@ -824,7 +340,11 @@ private struct PianoNoteButton: View {
         .padding(.vertical, 14)
         .contentShape(Rectangle())
         .scaleEffect(isActive ? 0.97 : 1)
-        .liquidGlass(tint: tint.opacity(isActive ? 0.30 : 0.14), cornerRadius: 20)
+        .liquidGlass(
+            tint: tint.opacity(isActive ? 0.30 : 0.14),
+            cornerRadius: 20,
+            interactive: true
+        )
         .overlay {
             PianoKeyTouchSurface(onSustainChanged: onSustainChanged)
                 .accessibilityHidden(true)
@@ -899,33 +419,6 @@ private struct PianoKeyTouchSurface: UIViewRepresentable {
             isSustaining = false
             onSustainChanged(false)
         }
-    }
-}
-
-private struct LiquidGlassModifier: ViewModifier {
-    let tint: Color
-    let cornerRadius: CGFloat
-
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.glassEffect(
-                .regular.tint(tint).interactive(),
-                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            )
-        } else {
-            content
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .stroke(tint.opacity(0.35), lineWidth: 1)
-                }
-        }
-    }
-}
-
-private extension View {
-    func liquidGlass(tint: Color, cornerRadius: CGFloat) -> some View {
-        modifier(LiquidGlassModifier(tint: tint, cornerRadius: cornerRadius))
     }
 }
 

@@ -1,3 +1,10 @@
+//
+//  MonitorSpectrumTests.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import Foundation
 
 @main
@@ -31,6 +38,7 @@ enum MonitorSpectrumTests {
               "first timestamp is the end of the first FFT window")
         check(silent.magnitudesDB.allSatisfy { $0 == -120 },
               "silence produces finite -120 dBFS bins")
+        check(silent.isValid && silent.peak == nil, "A silent frame has no cached visible peak")
 
         let signal = tone(1_000, amplitude: 0.5, count: 16_000)
         let whole = try MonitorSpectrumAnalyzer().process(signal)
@@ -41,6 +49,8 @@ enum MonitorSpectrumTests {
         let frame = whole[0]
         let peak = frame.magnitudesDB.indices.max { frame.magnitudesDB[$0] < frame.magnitudesDB[$1] }!
         check(peak == 128, "1 kHz input peaks at the correct frequency bin")
+        check(frame.peak?.frequencyHz == 1_000 && frame.peak?.amplitudeDBFS == frame.magnitudesDB[128],
+              "The cached peak matches the strongest visible FFT bin")
         check(abs(frame.magnitudesDB[128] - (-6.020_6)) < 0.01,
               "Hann coherent gain preserves half-scale sine amplitude")
         check(frame.magnitudesDB[110] < -90 && frame.magnitudesDB[150] < -90,
@@ -59,6 +69,29 @@ enum MonitorSpectrumTests {
               "packed Nyquist receives the correct amplitude scaling")
         check(nyquist.magnitudesDB[0] < -90 && dc.magnitudesDB[1_024] < -90,
               "DC and Nyquist are distinct spectrum bins")
+        let endpointPeak = MonitorSpectrumFrame(elapsedTime: 1, magnitudesDB: [0, -60], binWidthHz: 8_000)
+        check(endpointPeak.peak?.frequencyHz == 8_000,
+              "Visible peak selection excludes DC and includes the Nyquist endpoint")
+
+        let boundedPeak = MonitorSpectrumFrame(elapsedTime: 1,
+                                               magnitudesDB: [0, -95, -40, -40, -10], binWidthHz: 2_500)
+        check(boundedPeak.peak?.frequencyHz == 5_000 && boundedPeak.peak?.amplitudeDBFS == -40,
+              "Peak selection ignores inaudible bins and keeps the first strongest visible bin on ties")
+        let shiftedPeak = boundedPeak.offset(by: 60)
+        check(shiftedPeak.elapsedTime == 61 && shiftedPeak.magnitudesDB == boundedPeak.magnitudesDB
+              && shiftedPeak.peak?.frequencyHz == boundedPeak.peak?.frequencyHz
+              && shiftedPeak.peak?.amplitudeDBFS == boundedPeak.peak?.amplitudeDBFS,
+              "Resuming capture offsets the frame clock without changing its cached spectrum")
+        let threshold = MonitorSpectrumFrame(elapsedTime: 1, magnitudesDB: [-10, -95], binWidthHz: 100)
+        check(threshold.peak == nil, "A peak at the silence threshold stays hidden")
+        for invalid in [
+            MonitorSpectrumFrame(elapsedTime: 1, magnitudesDB: [], binWidthHz: 1),
+            MonitorSpectrumFrame(elapsedTime: 1, magnitudesDB: [-20, .nan], binWidthHz: 100),
+            MonitorSpectrumFrame(elapsedTime: 1, magnitudesDB: [-20], binWidthHz: .infinity),
+            MonitorSpectrumFrame(elapsedTime: 1, magnitudesDB: [-20], binWidthHz: 0)
+        ] {
+            check(!invalid.isValid && invalid.peak == nil, "Invalid spectrum data cannot populate cached readouts")
+        }
 
         let secondTone = tone(2_500, amplitude: 0.125, count: 2_048)
         let mixedSignal = zip(signal.prefix(2_048), secondTone).map(+)

@@ -148,6 +148,7 @@ enum DebugPreviewDefaults {
             AppStorageKey.onboardingCompletedVersion: 0,
             AppStorageKey.voicePreference: VoicePreference.feminine.rawValue,
             AppStorageKey.customThemeColor: "",
+            AppStorageKey.themeSelection: AppThemeOption.twilt.rawValue,
             AppStorageKey.openedDateKeys: ""
         ])
         return store

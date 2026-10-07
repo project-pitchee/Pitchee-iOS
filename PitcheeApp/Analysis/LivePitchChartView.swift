@@ -82,7 +82,8 @@ struct PitchPlot: View {
 
             var line = Path()
             var previousTime: TimeInterval?
-            for sample in samples {
+            for sample in TimelineSearch.samples(in: samples, range: timeRange, time: \.elapsedTime,
+                                                 includingNeighbors: true) {
                 guard let pitch = sample.pitchHz, pitch.isFinite, pitch > 0 else {
                     previousTime = nil
                     continue

@@ -1,3 +1,10 @@
+//
+//  PracticeSuggestionsSection.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import SwiftUI
 
 /// One compact group of next steps; the whole row opens its supporting guide.

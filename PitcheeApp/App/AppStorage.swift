@@ -19,12 +19,23 @@ enum AppStorageKey {
     /// The person's voice-direction preference, stored as `VoicePreference.rawValue`.
     static let voicePreference = "voiceProfile.selection.preference"
 
-    /// An optional custom theme color, stored as an sRGB hex string. An empty
-    /// value means the theme follows the selected voice direction.
+    /// Legacy optional custom theme color, stored as an sRGB hex string. New
+    /// selections in Personalization clear this value.
     static let customThemeColor = "appearance.theme.customHex"
+
+    /// The selected theme, stored as an `AppThemeOption` raw value.
+    /// Each theme automatically follows the system's light or dark appearance.
+    static let themeSelection = "appearance.theme.selection"
 
     /// Comma-separated `yyyy-M-d` strings, one per day the app was opened.
     static let openedDateKeys = "insights.activity.openedDates"
+
+    /// Comma-separated dashboard component identifiers in the person's order.
+    /// An empty value is valid and means every optional component is hidden.
+    static let dashboardComponentOrder = "insights.dashboard.componentOrder"
+
+    /// JSON mapping of component identifiers to their selected widget size.
+    static let dashboardComponentSizes = "insights.dashboard.componentSizes"
 }
 
 /// The onboarding flow revision the app currently ships.

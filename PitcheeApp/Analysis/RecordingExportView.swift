@@ -762,7 +762,7 @@ private struct ExportReportPage: View {
             Spacer(minLength: 12)
 
             HStack(spacing: 7) {
-                Image("PitcheeOnboardingIcon")
+                Image("Default")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)

@@ -31,6 +31,44 @@ nonisolated enum VoicePreference: String, Codable, CaseIterable, Identifiable, S
     }
 }
 
+/// Scalar fields needed by history and scoring. Window/segment arrays belong to
+/// detail views and are deliberately not decoded or retained by this projection.
+nonisolated struct VoiceAnalysisSummary: Decodable, Sendable {
+    let scoreProfile: String?
+    let standardScore: Double
+    let naturalnessScore: Double
+    let pitchHz: Double?
+    let pitchVariationHz: Double?
+    let composite: PitcheeAnalysisResult.CompositeScore
+
+    init(result: PitcheeAnalysisResult) {
+        scoreProfile = result.scoreProfile
+        standardScore = result.vfp.vfpStandardScore
+        naturalnessScore = result.naturalness.score
+        pitchHz = result.f0.meanHz
+        pitchVariationHz = result.f0.standardDeviationHz
+        composite = result.composite
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        scoreProfile = try container.decodeIfPresent(String.self, forKey: .scoreProfile)
+        let pitch = try container.nestedContainer(keyedBy: PitchKeys.self, forKey: .f0)
+        pitchHz = try pitch.decodeIfPresent(Double.self, forKey: .meanHz)
+        pitchVariationHz = try pitch.decodeIfPresent(Double.self, forKey: .standardDeviationHz)
+        let voice = try container.nestedContainer(keyedBy: VoiceKeys.self, forKey: .vfp)
+        standardScore = try voice.decode(Double.self, forKey: .vfpStandardScore)
+        let naturalness = try container.nestedContainer(keyedBy: NaturalnessKeys.self, forKey: .naturalness)
+        naturalnessScore = try naturalness.decode(Double.self, forKey: .score)
+        composite = try container.decode(PitcheeAnalysisResult.CompositeScore.self, forKey: .composite)
+    }
+
+    private enum CodingKeys: String, CodingKey { case scoreProfile, f0, vfp, naturalness, composite }
+    private enum PitchKeys: String, CodingKey { case meanHz, standardDeviationHz }
+    private enum VoiceKeys: String, CodingKey { case vfpStandardScore }
+    private enum NaturalnessKeys: String, CodingKey { case score }
+}
+
 /// A presentation of the immutable engine result for the current practice goal.
 /// VFP remains a feminine reference score in storage and in the two-sided chart.
 /// New analyses request Core's explicit masculinization profile. The local
@@ -47,30 +85,34 @@ nonisolated struct VoiceDirectionScore {
     var rule: String { composite.rule }
 
     init(preference: VoicePreference, result: PitcheeAnalysisResult) {
-        naturalnessScore = result.naturalness.score
+        self.init(preference: preference, summary: VoiceAnalysisSummary(result: result))
+    }
+
+    init(preference: VoicePreference, summary: VoiceAnalysisSummary) {
+        naturalnessScore = summary.naturalnessScore
         if preference == .masculine {
-            standardScore = 100 - Self.clamp(result.vfp.vfpStandardScore, to: 100)
-            if result.scoreProfile == "masculinization" {
-                composite = result.composite
+            standardScore = 100 - Self.clamp(summary.standardScore, to: 100)
+            if summary.scoreProfile == "masculinization" {
+                composite = summary.composite
             } else {
                 composite = Self.masculineComposite(
-                    feminineScore: result.vfp.vfpStandardScore,
-                    naturalness: result.naturalness.score,
-                    pitchHz: result.f0.meanHz
+                    feminineScore: summary.standardScore,
+                    naturalness: summary.naturalnessScore,
+                    pitchHz: summary.pitchHz
                 )
             }
-        } else if preference == .feminine, result.scoreProfile == "masculinization" {
-            standardScore = Self.clamp(result.vfp.vfpStandardScore, to: 100)
+        } else if preference == .feminine, summary.scoreProfile == "masculinization" {
+            standardScore = Self.clamp(summary.standardScore, to: 100)
             composite = Self.feminineComposite(
-                standardScore: result.vfp.vfpStandardScore,
-                naturalness: result.naturalness.score,
-                pitchHz: result.f0.meanHz
+                standardScore: summary.standardScore,
+                naturalness: summary.naturalnessScore,
+                pitchHz: summary.pitchHz
             )
         } else {
             // Preserve the engine's original result for feminine/undecided
             // results that already use the matching profile or an older schema.
-            standardScore = result.vfp.vfpStandardScore
-            composite = result.composite
+            standardScore = summary.standardScore
+            composite = summary.composite
         }
     }
 

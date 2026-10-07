@@ -1,3 +1,10 @@
+//
+//  MonitorViewModel.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import AVFoundation
 import Foundation
 import Observation
@@ -20,12 +27,13 @@ final class MonitorViewModel {
     enum State { case idle, preparing, live, paused, replaying }
 
     let kind: MonitorKind
+    private let includesSpectrogram: Bool
     private(set) var state: State = .idle
     private(set) var errorMessage: String?
     private(set) var windowDuration: TimeInterval = 10
     private(set) var cursorTime: TimeInterval = 0
-    private var timeline = MonitorTimeline()
-    private var playbackRange: ClosedRange<TimeInterval>?
+    private let presentation = MonitorPresentation()
+    @ObservationIgnored private var playbackRange: ClosedRange<TimeInterval>?
 
     @ObservationIgnored private var capture: MonitorAudioCapture?
     @ObservationIgnored private var analyzer: PitcheeCoreAnalyzer?
@@ -33,6 +41,9 @@ final class MonitorViewModel {
     @ObservationIgnored private var playerDelegate: MonitorPlaybackDelegate?
     @ObservationIgnored private var operation: Task<Void, Never>?
     @ObservationIgnored private var playbackClock: Task<Void, Never>?
+    @ObservationIgnored private var displayClock: Task<Void, Never>?
+    @ObservationIgnored private var needsPresentation = false
+    @ObservationIgnored private var audioTeardown: Task<Void, Never>?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var sessionOwner: UUID?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
@@ -41,8 +52,9 @@ final class MonitorViewModel {
 
     nonisolated private static let logger = Logger(subsystem: "com.lvyzhan.Pitchee", category: "Monitoring")
 
-    init(kind: MonitorKind) {
+    init(kind: MonitorKind, includesSpectrogram: Bool = false) {
         self.kind = kind
+        self.includesSpectrogram = includesSpectrogram
     }
 
     var statusKey: String {
@@ -55,49 +67,37 @@ final class MonitorViewModel {
         }
     }
 
-    var availableRange: ClosedRange<TimeInterval> { timeline.availableRange }
+    var availableRange: ClosedRange<TimeInterval> { presentation.availableRange }
     var hasAudio: Bool { availableRange.upperBound > availableRange.lowerBound }
     var canRewind: Bool { !isBusy && cursorTime > availableRange.lowerBound }
     var isBusy: Bool { state == .preparing }
 
-    var visibleRange: ClosedRange<TimeInterval> {
-        if let playbackRange { return playbackRange }
-        guard hasAudio else { return 0...windowDuration }
-        let range = MonitorTimeline.window(
-            endingAt: cursorTime, duration: windowDuration, availableRange: availableRange
-        )
-        // Give a cursor at the oldest retained sample a nonzero chart domain.
-        return range.lowerBound...max(range.lowerBound + 0.001, range.upperBound)
-    }
+    var visibleRange: ClosedRange<TimeInterval> { presentation.pitchWindow.range }
 
     var visiblePitchSamples: [LivePitchSample] {
+        presentation.pitchWindow.samples
+    }
+
+    var visiblePitchRange: ClosedRange<Double>? { presentation.pitchWindow.pitchRange }
+
+    var visibleSpectrogramColumns: [MonitorSpectrogramColumn] {
+        presentation.visibleSpectrogramColumns
+    }
+
+    /// A partial capture fills a fixed-width time window from the left. Its
+    /// existing columns keep their scale while new audio fills the empty area.
+    var spectrogramTimeRange: ClosedRange<TimeInterval> {
         let range = visibleRange
-        return timeline.pitchSamples.filter { range.contains($0.elapsedTime) }
+        return range.lowerBound...max(range.upperBound, range.lowerBound + windowDuration)
     }
 
-    var currentPitchHz: Double? {
-        guard let sample = timeline.pitchSamples.last(where: { $0.elapsedTime <= cursorTime }),
-              cursorTime - sample.elapsedTime <= 0.4 else { return nil }
-        return sample.pitchHz
-    }
+    var currentPitchHz: Double? { presentation.currentPitchHz }
 
-    var currentSpectrum: MonitorSpectrumFrame? {
-        guard let frame = timeline.spectrumFrames.last(where: { $0.elapsedTime <= cursorTime }),
-              cursorTime - frame.elapsedTime <= 0.4 else { return nil }
-        return frame
-    }
+    var currentSpectrum: MonitorSpectrumFrame? { presentation.currentSpectrum }
 
     /// Frequency and amplitude readouts use the same strongest visible bin.
     var currentSpectrumPeak: (frequencyHz: Double, amplitudeDBFS: Float)? {
-        guard let frame = currentSpectrum else { return nil }
-        var peak: (frequencyHz: Double, amplitudeDBFS: Float)?
-        for (index, magnitude) in frame.magnitudesDB.enumerated() {
-            let frequency = Double(index) * frame.binWidthHz
-            guard (40...8_000).contains(frequency), magnitude.isFinite,
-                  magnitude > (peak?.amplitudeDBFS ?? -95) else { continue }
-            peak = (frequency, magnitude)
-        }
-        return peak
+        currentSpectrum?.peak
     }
 
     var currentFrequencyHz: Double? {
@@ -109,18 +109,26 @@ final class MonitorViewModel {
         stopAudio()
         installObservers()
         errorMessage = nil
-        cursorTime = timeline.duration
+        cursorTime = presentation.duration
         state = .preparing
+        refreshPresentation()
         let token = generation
         let owner = UUID()
         sessionOwner = owner
         awaitingPermission = true
+        let renderSpectrogram = includesSpectrogram
+        let previousTeardown = audioTeardown
         operation = Task { [weak self] in
             do {
+                // The previous engine and its in-flight detector callback
+                // must finish before reusing the analyzer or audio session.
+                await previousTeardown?.value
+                try Task.checkCancellation()
+                guard let self, generation == token else { return }
                 let granted = await withCheckedContinuation { continuation in
                     AVAudioApplication.requestRecordPermission { continuation.resume(returning: $0) }
                 }
-                guard let self, generation == token, !Task.isCancelled else { return }
+                guard generation == token, !Task.isCancelled else { return }
                 // Permission completion can arrive before the system dismisses
                 // its prompt. Wait for the view's active event before opening
                 // the microphone; background/leaving cancels this operation.
@@ -153,27 +161,42 @@ final class MonitorViewModel {
                     return
                 }
 
-                let offset = timeline.duration
+                let offset = presentation.duration
                 // Resuming starts a fresh detector context; don't connect the
                 // previous voiced segment across an interval with no capture.
-                timeline.appendPitch([LivePitchSample(elapsedTime: offset, pitchHz: nil)])
+                presentation.append(audio: [], pitch: [LivePitchSample(elapsedTime: offset, pitchHz: nil)], spectra: [])
                 let newCapture = MonitorAudioCapture()
                 capture = newCapture
-                try newCapture.start(analyzer: preparedAnalyzer, onUpdate: { [weak self] update in
-                    await MainActor.run { [weak self] in
-                        guard let self, generation == token, state == .live else { return }
-                        append(update, offset: offset)
+                try await newCapture.start(
+                    analyzer: preparedAnalyzer,
+                    needsSpectrum: kind == .spectrum,
+                    onUpdate: { [weak self] update in
+                        guard !Task.isCancelled else { return }
+                        // The capture worker calls this off MainActor. Render
+                        // each new FFT column once, within its bounded delivery
+                        // budget, so scrolling never repeats rasterization.
+                        let columns = renderSpectrogram
+                            ? Self.makeSpectrogramColumns(update.spectrumFrames, offset: offset) : []
+                        await MainActor.run { [weak self] in
+                            // First PCM can arrive before start resumes here.
+                            guard let self, generation == token,
+                                  state == .preparing || state == .live else { return }
+                            append(update, columns: columns, offset: offset)
+                        }
+                    },
+                    onError: { [weak self] error in
+                        Self.logger.error("Monitor capture failed: \(String(describing: error), privacy: .private)")
+                        Task { @MainActor [weak self] in
+                            guard let self, generation == token else { return }
+                            fail(String(localized: "monitor.error.capture"))
+                        }
                     }
-                }, onError: { [weak self] error in
-                    Self.logger.error("Monitor capture failed: \(String(describing: error), privacy: .private)")
-                    Task { @MainActor [weak self] in
-                        guard let self, generation == token else { return }
-                        fail(String(localized: "monitor.error.capture"))
-                    }
-                })
+                )
+                guard generation == token, !Task.isCancelled else { return }
                 state = .live
+                refreshPresentation()
+                startDisplayClock(token: token)
             } catch {
-                AudioSessionController.deactivate(owner: owner)
                 guard let self, generation == token, !Task.isCancelled else { return }
                 Self.logger.error("Unable to start monitoring: \(String(describing: error), privacy: .private)")
                 if error is AudioSessionCoordinator.Failure {
@@ -188,10 +211,14 @@ final class MonitorViewModel {
     func pause() {
         if let player, let playbackRange {
             cursorTime = min(playbackRange.upperBound, playbackRange.lowerBound + player.currentTime)
+        } else if playbackRange == nil, state == .live || state == .preparing {
+            // Include already-delivered PCM since the last display tick.
+            cursorTime = presentation.duration
         }
         let preserveReplaySelection = playbackRange != nil
             && (state == .preparing || state == .replaying)
         stopAudio(clearPlaybackRange: !preserveReplaySelection)
+        refreshPresentation()
         state = hasAudio ? .paused : .idle
     }
 
@@ -200,6 +227,7 @@ final class MonitorViewModel {
         pause()
         playbackRange = nil
         cursorTime = MonitorTimeline.clampedTime(time, availableRange: availableRange)
+        refreshPresentation()
     }
 
     func rewindFiveSeconds() {
@@ -207,6 +235,7 @@ final class MonitorViewModel {
         pause()
         playbackRange = nil
         cursorTime = MonitorTimeline.rewind(time: cursorTime, by: 5, availableRange: availableRange)
+        refreshPresentation()
     }
 
     func setWindowDuration(_ seconds: TimeInterval) {
@@ -214,6 +243,7 @@ final class MonitorViewModel {
         if state == .replaying || state == .preparing { pause() }
         playbackRange = nil
         windowDuration = seconds
+        refreshPresentation()
     }
 
     /// Toggles the compact transport's middle control. A paused replay keeps
@@ -238,16 +268,24 @@ final class MonitorViewModel {
     func replayWindow() {
         guard sceneIsActive, hasAudio, !isBusy else { return }
         pause()
-        let range = MonitorTimeline.window(
+        var range = MonitorTimeline.window(
             endingAt: cursorTime, duration: windowDuration, availableRange: availableRange
         )
+        // At the beginning of the retained timeline there is no preceding
+        // audio, so start at the playhead and play forward through the window.
+        if range.upperBound <= range.lowerBound {
+            let start = MonitorTimeline.clampedTime(cursorTime, availableRange: availableRange)
+            let end = min(availableRange.upperBound, start + windowDuration)
+            range = start...end
+        }
         beginPlayback(range: range, startingAt: range.lowerBound)
     }
 
     private func beginPlayback(range: ClosedRange<TimeInterval>, startingAt: TimeInterval) {
-        let samples = timeline.audio(in: range)
+        let samples = presentation.audio(in: range)
         guard !samples.isEmpty else {
             playbackRange = nil
+            refreshPresentation()
             return
         }
         installObservers()
@@ -258,8 +296,14 @@ final class MonitorViewModel {
         state = .preparing
         playbackRange = range
         let initialTime = min(range.upperBound, max(range.lowerBound, startingAt))
+        cursorTime = initialTime
+        refreshPresentation()
+        let previousTeardown = audioTeardown
         operation = Task { [weak self] in
             do {
+                await previousTeardown?.value
+                try Task.checkCancellation()
+                guard let self, generation == token else { return }
                 let data = await Task.detached(priority: .userInitiated) {
                     MonitorWaveEncoder.encode(samples)
                 }.value
@@ -267,7 +311,7 @@ final class MonitorViewModel {
                 try await AudioSessionController.activate(owner: owner, use: .playback) { [weak self] in
                     self?.pause()
                 }
-                guard let self, generation == token, !Task.isCancelled else {
+                guard generation == token, !Task.isCancelled else {
                     AudioSessionController.deactivate(owner: owner)
                     return
                 }
@@ -278,6 +322,7 @@ final class MonitorViewModel {
                         cursorTime = range.upperBound
                         stopAudio()
                         state = .paused
+                        refreshPresentation()
                     } else {
                         fail(String(localized: "monitor.error.playback"))
                     }
@@ -300,6 +345,7 @@ final class MonitorViewModel {
                 }
                 cursorTime = initialTime
                 state = .replaying
+                refreshPresentation()
                 startPlaybackClock(token: token, range: range)
             } catch {
                 AudioSessionController.deactivate(owner: owner)
@@ -325,7 +371,7 @@ final class MonitorViewModel {
         observers.forEach(NotificationCenter.default.removeObserver)
         observers.removeAll()
         // Monitoring audio is ephemeral, never a saved recording.
-        timeline = MonitorTimeline()
+        presentation.reset(windowDuration: windowDuration, includesPitch: kind == .pitch)
         cursorTime = 0
         playbackRange = nil
         analyzer = nil
@@ -335,16 +381,47 @@ final class MonitorViewModel {
 
     func clearError() { errorMessage = nil }
 
-    private func append(_ update: MonitorCaptureUpdate, offset: TimeInterval) {
-        timeline.appendAudio(update.samples)
-        timeline.appendPitch(update.pitchFrames.map {
+    nonisolated private static func makeSpectrogramColumns(
+        _ frames: [MonitorSpectrumFrame], offset: TimeInterval = 0
+    ) -> [MonitorSpectrogramColumn] {
+        frames.compactMap { frame in
+            guard let image = MonitorSpectrogramRasterizer.makeColumn(frame: frame) else { return nil }
+            return MonitorSpectrogramColumn(elapsedTime: frame.elapsedTime + offset, image: image)
+        }
+    }
+
+    private func append(
+        _ update: MonitorCaptureUpdate, columns: [MonitorSpectrogramColumn], offset: TimeInterval
+    ) {
+        presentation.append(audio: update.samples, pitch: update.pitchFrames.map {
             LivePitchSample(elapsedTime: offset + $0.elapsedTime, pitchHz: $0.pitchHz)
-        })
-        timeline.appendSpectra(update.spectrumFrames.map {
-            MonitorSpectrumFrame(elapsedTime: offset + $0.elapsedTime,
-                                 magnitudesDB: $0.magnitudesDB, binWidthHz: $0.binWidthHz)
-        })
-        cursorTime = timeline.duration
+        }, spectra: update.spectrumFrames.map {
+            $0.offset(by: offset)
+        }, columns: columns)
+        needsPresentation = true
+    }
+
+    private func refreshPresentation() {
+        if state == .live { cursorTime = presentation.duration }
+        presentation.publish(
+            cursorTime: cursorTime, windowDuration: windowDuration,
+            playbackRange: playbackRange, includesPitch: kind == .pitch
+        )
+        needsPresentation = false
+    }
+
+    private func startDisplayClock(token: UUID) {
+        displayClock?.cancel()
+        // Use elapsed wall time rather than capture timestamps: a burst of
+        // queued PCM must not turn into an equally large burst of UI updates.
+        let interval: Duration = kind == .pitch ? .nanoseconds(33_333_334) : .milliseconds(100)
+        displayClock = Task { [weak self] in
+            while !Task.isCancelled {
+                do { try await Task.sleep(for: interval) } catch { return }
+                guard let self, generation == token, state == .live else { return }
+                if needsPresentation { refreshPresentation() }
+            }
+        }
     }
 
     private func startPlaybackClock(token: UUID, range: ClosedRange<TimeInterval>) {
@@ -353,6 +430,7 @@ final class MonitorViewModel {
                 do { try await Task.sleep(for: .milliseconds(33)) } catch { return }
                 guard let self, generation == token, state == .replaying, let player else { return }
                 cursorTime = min(range.upperBound, range.lowerBound + player.currentTime)
+                refreshPresentation()
             }
         }
     }
@@ -364,14 +442,29 @@ final class MonitorViewModel {
         operation = nil
         playbackClock?.cancel()
         playbackClock = nil
-        capture?.stop()
+        displayClock?.cancel()
+        displayClock = nil
+        let captureTeardown = capture?.stop()
         capture = nil
         player?.stop()
         player = nil
         playerDelegate = nil
         if clearPlaybackRange { playbackRange = nil }
-        if let sessionOwner { AudioSessionController.deactivate(owner: sessionOwner) }
+        let owner = sessionOwner
         sessionOwner = nil
+        if let captureTeardown {
+            let previousTeardown = audioTeardown
+            // Teardown includes onUpdate, which needs MainActor. Wait in this
+            // independent task before releasing the old recording session.
+            audioTeardown = Task {
+                await previousTeardown?.value
+                await captureTeardown.value
+                if let owner { AudioSessionController.deactivate(owner: owner) }
+            }
+        } else if let owner {
+            // Playback can release synchronously for coordinator handoff.
+            AudioSessionController.deactivate(owner: owner)
+        }
     }
 
     private func fail(_ message: String) {
@@ -404,24 +497,63 @@ final class MonitorViewModel {
     #if DEBUG
     /// Isolated fixtures for previews and the opt-in simulator review launch argument.
     /// No microphone, audio session, or persistent data is used.
-    static func preview(kind: MonitorKind) -> MonitorViewModel {
+    static func preview(kind: MonitorKind, includesSpectrogram: Bool = false) -> MonitorViewModel {
+        if includesSpectrogram { return spectrogramPreview(kind: kind) }
         let model = MonitorViewModel(kind: kind)
         let sampleRate = MonitorTimeline.sampleRate
         let samples: [Float] = (0..<Int(sampleRate * 12)).map { index in
             let time = Double(index) / sampleRate
             return Float(sin(2 * .pi * 196 * time) * 0.16 + sin(2 * .pi * 392 * time) * 0.05)
         }
-        model.timeline.appendAudio(samples)
-        model.timeline.appendPitch((0...120).map { index in
+        let pitches = (0...120).map { index in
             let time = Double(index) * 0.1
             let pitch = (42...49).contains(index) || (84...90).contains(index)
                 ? nil : 196 + sin(time * 1.6) * 14 + sin(time * 4.1) * 3
             return LivePitchSample(elapsedTime: time, pitchHz: pitch)
-        })
+        }
         let analyzer = try! MonitorSpectrumAnalyzer()
-        model.timeline.appendSpectra(analyzer.process(samples))
+        model.presentation.append(audio: samples, pitch: pitches, spectra: analyzer.process(samples))
         model.cursorTime = 11.9
         model.state = .paused
+        model.refreshPresentation()
+        return model
+    }
+
+    private static func spectrogramPreview(kind: MonitorKind) -> MonitorViewModel {
+        let model = MonitorViewModel(kind: kind, includesSpectrogram: true)
+        let sampleRate = MonitorTimeline.sampleRate
+        func pitch(at time: TimeInterval) -> Double? {
+            let phraseTime = time.truncatingRemainder(dividingBy: 3.2)
+            guard (0.22..<2.55).contains(phraseTime) else { return nil }
+            let progress = (phraseTime - 0.22) / 2.33
+            return 188 + 44 * sin(progress * .pi) + 4 * sin(time * 4.1)
+        }
+        // Integrate the changing fundamental into phase so its harmonics bend
+        // together. Short fades keep pauses from adding artificial click bands.
+        var phase = 0.0
+        let samples: [Float] = (0..<Int(sampleRate * 12)).map { index in
+            let time = Double(index) / sampleRate
+            let frequency = pitch(at: time)
+            phase += 2 * .pi * (frequency ?? 188) / sampleRate
+            guard frequency != nil else { return 0 }
+            let phraseTime = time.truncatingRemainder(dividingBy: 3.2)
+            let envelope = min(1, (phraseTime - 0.22) / 0.04, (2.55 - phraseTime) / 0.06)
+            let signal = sin(phase) * 0.22 + sin(2 * phase) * 0.10
+                + sin(3 * phase) * 0.055 + sin(4 * phase) * 0.028
+                + sin(5 * phase) * 0.015 + sin(7 * phase) * 0.008
+            return Float(signal * envelope)
+        }
+        let pitches = (0...120).map { index in
+            let time = Double(index) * 0.1
+            return LivePitchSample(elapsedTime: time, pitchHz: pitch(at: time))
+        }
+        let analyzer = try! MonitorSpectrumAnalyzer()
+        let spectra = analyzer.process(samples)
+        model.presentation.append(audio: samples, pitch: pitches, spectra: spectra,
+                                  columns: Self.makeSpectrogramColumns(spectra))
+        model.cursorTime = 11.9
+        model.state = .paused
+        model.refreshPresentation()
         return model
     }
     #endif

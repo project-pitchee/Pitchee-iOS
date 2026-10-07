@@ -1,3 +1,10 @@
+//
+//  InsightsThemeSupport.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/4.
+//
+
 import SwiftUI
 
 // The standalone macOS data tests do not load the UIKit app theme or user

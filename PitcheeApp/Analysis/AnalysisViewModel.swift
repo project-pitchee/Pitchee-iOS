@@ -14,6 +14,7 @@ import SwiftData
 @MainActor
 final class AnalysisViewModel: NSObject, ObservableObject {
     private static let logger = Logger(subsystem: "com.lvyzhan.Pitchee", category: "Analysis")
+    private static let livePitchRetention: TimeInterval = 30
     enum State: Equatable {
         case idle
         case requestingPermission
@@ -133,18 +134,22 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     /// route change. The user restarts the same passage; completed takes survive.
     func interruptCapture() {
         playback.stop()
+        cancelRecording(message: String(localized: "practice.recording.interrupted"))
+    }
+
+    private func cancelRecording(message: String) {
         guard state == .recording || state == .requestingPermission else { return }
+        captureGeneration = UUID()
         permissionTask?.cancel()
         stopTimer()
-        audioCapture?.stop()
+        discardCapture(audioCapture, url: recordingURL)
         audioCapture = nil
-        if let recordingURL { try? FileManager.default.removeItem(at: recordingURL) }
         recordingURL = nil
         recordingStartedAt = nil
         recordingStudyAuthorization = nil
         recordingStudyDirection = nil
         deactivateAudioSession()
-        showRecordingError(String(localized: "practice.recording.interrupted"))
+        showRecordingError(message)
     }
 
     // Deinitialization can read these Sendable URLs without accessing the
@@ -155,10 +160,14 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private var recordingStartedAt: Date?
     private var timerTask: Task<Void, Never>?
     private var analyzer: PitcheeCoreAnalyzer?
+    private var analyzerPreparationTask: Task<Void, Never>?
     private var analysisTask: Task<Void, Never>?
     private var permissionTask: Task<Void, Never>?
+    private var recordingStopTask: Task<Void, Never>?
+    private var captureCleanupTask: Task<Void, Never>?
+    private var captureGeneration = UUID()
     private var recordedPitchSamples: [LivePitchSample] = []
-    private let audioSessionOwner = UUID()
+    private var audioSessionOwner: UUID?
     private var recordingStudyAuthorization: LocalScoreStudyStore.Authorization?
     private var recordingStudyDirection: ScoreStudyDirection?
     private var feedbackTimeoutTask: Task<Void, Never>?
@@ -209,6 +218,21 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         result != nil && state == .completed
     }
 
+    /// Load the native model before the user starts a take. The work runs at
+    /// utility priority so entering the page stays responsive, and a later
+    /// tap only needs to reset the realtime stream and open the microphone.
+    func prepareForRecording() {
+        guard state == .idle, analyzer == nil, analyzerPreparationTask == nil else { return }
+        analyzerPreparationTask = Task { [weak self] in
+            guard let self else { return }
+            guard let analyzer = try? await self.preparedAnalyzer() else { return }
+            // Allocate the realtime detector while the page is idle. The
+            // recording tap can then reset an existing stream instead of
+            // creating native state during the button interaction.
+            try? await analyzer.resetRealtimeF0()
+        }
+    }
+
     func primaryButtonTapped(modelContext: ModelContext) {
         #if DEBUG
         if usesPreviewData {
@@ -244,7 +268,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             return
         }
         if state == .completed, !prepareRetake() { return }
-        if practice == nil { selectPractice(.dailyReading) }
         playback.stop()
         recordingStudyAuthorization = LocalScoreStudyStore.shared.authorizeRecording()
         let preference = practice?.target ?? .undecided
@@ -258,14 +281,16 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         volumeStatistics = nil
         recordingStartedAt = nil
         state = .requestingPermission
+        let generation = UUID()
+        captureGeneration = generation
 
         permissionTask = Task { [weak self] in
             guard let self else { return }
             let granted = await requestMicrophonePermission()
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, captureGeneration == generation else { return }
 
             if granted {
-                await beginRecording()
+                await beginRecording(generation: generation)
             } else {
                 showRecordingError(String(localized: "recording.error.microphonePermissionDenied"))
             }
@@ -280,20 +305,34 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         }
     }
 
-    private func beginRecording() async {
-        guard state == .requestingPermission else { return }
+    private func beginRecording(generation: UUID) async {
+        guard state == .requestingPermission, captureGeneration == generation else { return }
+        let owner = UUID()
+        var startedCapture: LivePitchAudioCapture?
+        var startedURL: URL?
 
         do {
+            // A previous cancellation closes its WAV and engine before the next
+            // take opens the microphone. Waiting here leaves the UI responsive.
+            await captureCleanupTask?.value
+            guard isCurrentRecordingRequest(generation) else { return }
+            if let preparationTask = analyzerPreparationTask {
+                await preparationTask.value
+                analyzerPreparationTask = nil
+            }
+            guard isCurrentRecordingRequest(generation) else { return }
             let analyzer = try await preparedAnalyzer()
+            guard isCurrentRecordingRequest(generation) else { return }
             try await analyzer.resetRealtimeF0()
-            guard !Task.isCancelled, state == .requestingPermission else { return }
+            guard isCurrentRecordingRequest(generation) else { return }
+            audioSessionOwner = owner
             try await AudioSessionController.activate(
-                owner: audioSessionOwner,
+                owner: owner,
                 use: .recording,
                 stopPlayback: { [weak self] in self?.playback.stop() }
             )
-            guard !Task.isCancelled, state == .requestingPermission else {
-                deactivateAudioSession()
+            guard isCurrentRecordingRequest(generation) else {
+                releaseAudioSession(owner)
                 return
             }
 
@@ -301,67 +340,119 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                 .appendingPathComponent("pitchee-\(UUID().uuidString)")
                 .appendingPathExtension("wav")
             let newCapture = LivePitchAudioCapture()
+            startedCapture = newCapture
+            startedURL = url
             recordingURL = url
-            try newCapture.start(writingTo: url, analyzer: analyzer, onPitch: { [weak self] frames in
+            audioCapture = newCapture
+            recordingStartedAt = Date()
+            let onPitch: @Sendable ([PitcheeF0Frame]) -> Void = { [weak self] frames in
                 Task { @MainActor [weak self] in
-                    guard let self,
-                          self.state == .recording,
+                    guard let self, self.captureGeneration == generation,
+                          self.state == .recording || self.state == .requestingPermission,
                           self.recordingURL == url else { return }
                     self.appendLivePitch(frames)
                 }
-            }, onError: { [weak self] error in
+            }
+            let onError: @Sendable (Error) -> Void = { [weak self] error in
                 Task { @MainActor [weak self] in
-                    guard let self, self.state == .recording, self.recordingURL == url else { return }
+                    guard let self, self.captureGeneration == generation,
+                          self.state == .recording || self.state == .requestingPermission,
+                          self.recordingURL == url else { return }
                     Self.logger.error("Realtime F0 failed: \(String(describing: error), privacy: .private)")
                     self.recordingError = String(localized: "recording.error.realtimePitchUnavailable")
                 }
-            })
+            }
+            let onRecordingError: @Sendable (Error) -> Void = { [weak self] error in
+                Task { @MainActor [weak self] in
+                    guard let self, self.captureGeneration == generation, self.recordingURL == url else { return }
+                    Self.logger.error("Recording capture failed: \(String(describing: error), privacy: .private)")
+                    self.cancelRecording(message: String(localized: "recording.error.saveFailed"))
+                }
+            }
 
-            audioCapture = newCapture
-            recordingURL = url
-            recordingStartedAt = Date()
+            try await Task.detached(priority: .userInitiated) {
+                try newCapture.start(
+                    writingTo: url,
+                    analyzer: analyzer,
+                    onPitch: onPitch,
+                    onError: onError,
+                    onRecordingError: onRecordingError
+                )
+            }.value
+            guard isCurrentRecordingRequest(generation) else {
+                discardCapture(newCapture, url: url)
+                releaseAudioSession(owner)
+                return
+            }
             state = .recording
             startTimer()
         } catch {
-            if let recordingURL { try? FileManager.default.removeItem(at: recordingURL) }
+            discardCapture(startedCapture, url: startedURL)
+            releaseAudioSession(owner)
+            // An obsolete startup must not clear a newer recording's state.
+            guard !Task.isCancelled, captureGeneration == generation else { return }
+            audioCapture = nil
             recordingURL = nil
-            deactivateAudioSession()
+            recordingStartedAt = nil
+            stopTimer()
             showRecordingError(recordingErrorMessage(for: error))
         }
     }
 
+    private func isCurrentRecordingRequest(_ generation: UUID) -> Bool {
+        !Task.isCancelled && captureGeneration == generation && state == .requestingPermission
+    }
+
     private func stopRecording(modelContext: ModelContext) {
-        guard state == .recording, let audioCapture else { return }
-
+        guard state == .recording, let audioCapture, let url = recordingURL else { return }
         stopTimer()
-        if let recordingStartedAt { elapsedTime = Date().timeIntervalSince(recordingStartedAt) }
-        let writeError = audioCapture.stop()
-        self.audioCapture = nil
-        deactivateAudioSession()
-
-        if let writeError {
-            Self.logger.error("Recording write failed: \(String(describing: writeError), privacy: .private)")
-            if let recordingURL { try? FileManager.default.removeItem(at: recordingURL) }
-            recordingURL = nil
-            recordingStartedAt = nil
-            showRecordingError(String(localized: "recording.error.saveFailed"))
-            return
-        }
-
-        guard let recordingURL else {
-            showRecordingError(String(localized: "recording.error.fileMissing"))
-            return
-        }
-
         let recordedAt = recordingStartedAt ?? Date()
-        self.recordingURL = nil
+        elapsedTime = Date().timeIntervalSince(recordedAt)
+        let generation = captureGeneration
+        let owner = audioSessionOwner
+        let studyAuthorization = recordingStudyAuthorization
+        let studyDirection = recordingStudyDirection
+        self.audioCapture = nil
+        recordingURL = nil
         recordingStartedAt = nil
-        clearRecordingError()
-        let invitation = LocalScoreStudyStore.shared.invite(
-            authorizedBy: recordingStudyAuthorization, direction: recordingStudyDirection
-        )
         recordingStudyAuthorization = nil
         recordingStudyDirection = nil
+        clearRecordingError()
+        state = .analyzing
+
+        recordingStopTask = Task { [weak self] in
+            // Stop hardware and finish accepted writes before Core sees the WAV.
+            // The analysis screen can render while this drains off the main actor.
+            let writeError = await audioCapture.finish()
+            if let owner { AudioSessionController.deactivate(owner: owner) }
+            guard let self, !Task.isCancelled, self.captureGeneration == generation else {
+                try? FileManager.default.removeItem(at: url)
+                return
+            }
+            if self.audioSessionOwner == owner { self.audioSessionOwner = nil }
+            self.recordingStopTask = nil
+            if let writeError {
+                Self.logger.error("Recording write failed: \(String(describing: writeError), privacy: .private)")
+                try? FileManager.default.removeItem(at: url)
+                self.analysisError = String(localized: "recording.error.saveFailed")
+                self.state = .idle
+                return
+            }
+            self.completeRecording(url, recordedAt: recordedAt, modelContext: modelContext,
+                                   studyAuthorization: studyAuthorization, studyDirection: studyDirection)
+        }
+    }
+
+    private func completeRecording(
+        _ recordingURL: URL,
+        recordedAt: Date,
+        modelContext: ModelContext,
+        studyAuthorization: LocalScoreStudyStore.Authorization?,
+        studyDirection: ScoreStudyDirection?
+    ) {
+        let invitation = LocalScoreStudyStore.shared.invite(
+            authorizedBy: studyAuthorization, direction: studyDirection
+        )
         if let invitation {
             pendingStudy = PendingStudy(url: recordingURL, recordedAt: recordedAt,
                                         modelContext: modelContext, attempt: invitation)
@@ -400,7 +491,9 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         timerTask?.cancel()
         timerTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 50_000_000)
+                // Elapsed-time text has its own low-frequency subscription;
+                // the pitch chart advances independently with detector frames.
+                do { try await Task.sleep(for: .milliseconds(200)) } catch { return }
                 guard let self,
                       self.state == .recording,
                       let recordingStartedAt = self.recordingStartedAt else { return }
@@ -415,20 +508,41 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     }
 
     private func appendLivePitch(_ frames: [PitcheeF0Frame]) {
+        guard !frames.isEmpty else { return }
         let samples = frames.map { LivePitchSample(elapsedTime: $0.elapsedTime, pitchHz: $0.pitchHz) }
         recordedPitchSamples.append(contentsOf: samples)
-        livePitchSamples.append(contentsOf: samples)
 
-        let oldestVisibleTime = max(0, (samples.last?.elapsedTime ?? 0) - PitchTimeline.visibleSeconds)
-        if let firstVisibleIndex = livePitchSamples.firstIndex(where: {
-            $0.elapsedTime >= oldestVisibleTime
-        }), firstVisibleIndex > 1 {
-            livePitchSamples.removeFirst(firstVisibleIndex - 1)
-        }
+        // Capture already coalesces delivery at the chart's display cadence. Trim
+        // the rolling window before publishing it so a batch invalidates the
+        // observing views once, with no second main-actor throttle or buffer.
+        let newestTime = samples.last?.elapsedTime ?? 0
+        let oldestVisibleTime = max(0, newestTime - Self.livePitchRetention)
+        var visible = livePitchSamples
+        visible.append(contentsOf: samples)
+        let firstVisibleIndex = TimelineSearch.lowerBound(in: visible, at: oldestVisibleTime, time: \.elapsedTime)
+        if firstVisibleIndex > 0 { visible.removeFirst(firstVisibleIndex) }
+        livePitchSamples = visible
     }
 
     private func deactivateAudioSession() {
-        AudioSessionController.deactivate(owner: audioSessionOwner)
+        guard let owner = audioSessionOwner else { return }
+        releaseAudioSession(owner)
+    }
+
+    private func releaseAudioSession(_ owner: UUID) {
+        AudioSessionController.deactivate(owner: owner)
+        if audioSessionOwner == owner { audioSessionOwner = nil }
+    }
+
+    private func discardCapture(_ capture: LivePitchAudioCapture?, url: URL?) {
+        guard capture != nil || url != nil else { return }
+        let previousCleanup = captureCleanupTask
+        let cancellation = capture?.cancel()
+        captureCleanupTask = Task.detached(priority: .utility) {
+            await previousCleanup?.value
+            if let cancellation { _ = await cancellation.value }
+            if let url { try? FileManager.default.removeItem(at: url) }
+        }
     }
 
     private func analyze(
@@ -571,7 +685,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
 
     private func preparedAnalyzer() async throws -> PitcheeCoreAnalyzer {
         if let analyzer { return analyzer }
-        let analyzer = try await Task.detached(priority: .userInitiated) {
+        let analyzer = try await Task.detached(priority: .utility) {
             try PitcheeCoreAnalyzer()
         }.value
         self.analyzer = analyzer
@@ -617,9 +731,11 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         permissionTask?.cancel()
         timerTask?.cancel()
         analysisTask?.cancel()
+        analyzerPreparationTask?.cancel()
         feedbackTimeoutTask?.cancel()
-        audioCapture?.stop()
-        if let recordingURL { try? FileManager.default.removeItem(at: recordingURL) }
+        recordingStopTask?.cancel()
+        discardCapture(audioCapture, url: recordingURL)
+        deactivateAudioSession()
         if let pendingStudy { try? FileManager.default.removeItem(at: pendingStudy.url) }
         for url in retainedPracticeURLs { try? FileManager.default.removeItem(at: url) }
     }

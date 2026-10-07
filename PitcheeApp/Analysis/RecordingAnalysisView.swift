@@ -97,6 +97,7 @@ struct RecordingResultView: View {
     let saveError: String?
     let quality: RecordingQuality?
     let recordedPreference: VoicePreference?
+    private let showsBackground: Bool
     private let pitchStatistics: RecordingPitchStatistics
 
     @State private var showsVoiceDetails = false
@@ -126,13 +127,15 @@ struct RecordingResultView: View {
         volumeStatistics: RecordingVolumeStatistics?,
         saveError: String?,
         quality: RecordingQuality? = nil,
-        recordedPreference: VoicePreference? = nil
+        recordedPreference: VoicePreference? = nil,
+        showsBackground: Bool = true
     ) {
         self.result = result
         self.volumeStatistics = volumeStatistics
         self.saveError = saveError
         self.quality = quality
         self.recordedPreference = recordedPreference
+        self.showsBackground = showsBackground
         self.pitchStatistics = RecordingPitchStatistics(pitch: result.f0)
     }
 
@@ -142,7 +145,11 @@ struct RecordingResultView: View {
             secondary: { resultPane(resultSecondary) },
             regular: { resultScroll(allContent) }
         )
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background {
+            if showsBackground {
+                Color(uiColor: .systemGroupedBackground)
+            }
+        }
         .sheet(isPresented: $showsVoiceDetails) {
             voiceDetailsSheet
         }

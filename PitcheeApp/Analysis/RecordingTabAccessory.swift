@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 /// Uses the system's shared glass surface so recording controls stay attached
 /// to the tab bar and remain reachable when the page scrolls.
@@ -49,8 +50,21 @@ struct TabBarAccessory<Accessory: View>: ViewModifier {
 }
 
 struct RecordingAccessoryContent: View {
-    @ObservedObject var viewModel: AnalysisViewModel
+    let viewModel: AnalysisViewModel
     let action: () -> Void
+    var iconSize: CGFloat = 26
+    @State private var state: AnalysisViewModel.State
+
+    init(viewModel: AnalysisViewModel, action: @escaping () -> Void, iconSize: CGFloat = 26) {
+        self.viewModel = viewModel
+        self.action = action
+        self.iconSize = iconSize
+        _state = State(initialValue: viewModel.state)
+    }
+
+    private var isRecording: Bool { state == .recording }
+    private var isRequestingPermission: Bool { state == .requestingPermission }
+    private var needsAnalysisScreen: Bool { state == .analyzing || state == .awaitingFeedback }
 
     var body: some View {
         HStack(spacing: 16) {
@@ -70,14 +84,15 @@ struct RecordingAccessoryContent: View {
 
             RecordingAccessoryButton(
                 symbol: actionSymbol,
-                color: viewModel.needsAnalysisScreen ? .primary : .red,
-                isPreparing: viewModel.isRequestingPermission,
+                color: needsAnalysisScreen ? .primary : .red,
+                iconSize: iconSize,
+                isPreparing: isRequestingPermission,
                 action: action
             )
             .accessibilityLabel(accessibilityLabel)
             .accessibilityIdentifier("recording.primaryAction")
             .accessibilityInputLabels([accessibilityLabel])
-            .accessibilityHint(viewModel.isRecording
+            .accessibilityHint(isRecording
                 ? String(localized: "recording.controls.stopAndAnalyze.hint")
                 : "")
         }
@@ -85,34 +100,35 @@ struct RecordingAccessoryContent: View {
         .padding(.horizontal, 18)
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity)
-        .sensoryFeedback(.impact(weight: .light), trigger: viewModel.isRecording)
+        .sensoryFeedback(.impact(weight: .light), trigger: isRecording)
+        .onReceive(viewModel.$state.removeDuplicates()) { state = $0 }
     }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var actionSymbol: String {
-        if viewModel.isRecording { return "stop.circle" }
-        if viewModel.needsAnalysisScreen { return "arrow.up.right.circle" }
+        if isRecording { return "stop.circle" }
+        if needsAnalysisScreen { return "arrow.up.right.circle" }
         return "record.circle"
     }
 
     private var accessibilityLabel: String {
-        if viewModel.isRecording { return String(localized: "recording.controls.stopAndAnalyze") }
-        if viewModel.needsAnalysisScreen { return String(localized: "recording.controls.viewAnalysisProgress") }
+        if isRecording { return String(localized: "recording.controls.stopAndAnalyze") }
+        if needsAnalysisScreen { return String(localized: "recording.controls.viewAnalysisProgress") }
         return String(localized: "recording.controls.startRecording")
     }
 
     private var title: String {
-        if viewModel.isRecording { return String(localized: "recording.controls.recordingInProgress") }
-        if viewModel.isRequestingPermission { return String(localized: "recording.controls.preparingMicrophone") }
-        if viewModel.needsAnalysisScreen { return String(localized: "recording.controls.analyzingAudio") }
+        if isRecording { return String(localized: "recording.controls.recordingInProgress") }
+        if isRequestingPermission { return String(localized: "recording.controls.preparingMicrophone") }
+        if needsAnalysisScreen { return String(localized: "recording.controls.analyzingAudio") }
         return String(localized: "recording.controls.startRecording")
     }
 
     private var subtitle: LocalizedStringKey {
-        if viewModel.isRecording { return "recording.controls.stopAndAnalyze.subtitle" }
-        if viewModel.isRequestingPermission { return "recording.controls.preparingMicrophone.subtitle" }
-        if viewModel.needsAnalysisScreen { return "recording.controls.viewAnalysisProgress.subtitle" }
+        if isRecording { return "recording.controls.stopAndAnalyze.subtitle" }
+        if isRequestingPermission { return "recording.controls.preparingMicrophone.subtitle" }
+        if needsAnalysisScreen { return "recording.controls.viewAnalysisProgress.subtitle" }
         return "recording.controls.startRecording.subtitle"
     }
 }

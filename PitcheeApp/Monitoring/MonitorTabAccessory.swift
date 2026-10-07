@@ -1,3 +1,10 @@
+//
+//  MonitorTabAccessory.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import SwiftUI
 
 /// One compact row shares the recording tab's control appearance and press feedback.
@@ -11,7 +18,7 @@ struct MonitorAccessoryContent: View {
     private var replayToggleEnabled: Bool {
         guard model.hasAudio, !model.isBusy else { return false }
         if model.state == .replaying { return true }
-        return model.cursorTime > model.availableRange.lowerBound
+        return model.cursorTime >= model.availableRange.lowerBound
     }
 
     private enum Metrics {

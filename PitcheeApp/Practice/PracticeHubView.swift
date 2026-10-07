@@ -1,4 +1,19 @@
+//
+//  PracticeHubView.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/4.
+//
+
 import SwiftUI
+
+enum PracticeRoute: Hashable {
+    case scoring
+    case analysis
+    case pitch
+    case spectrum
+    case spectrogram
+}
 
 /// Live tools and library topics share one native, searchable navigation list.
 struct PracticeHubView: View {
@@ -9,18 +24,11 @@ struct PracticeHubView: View {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private var categories: [(id: String, title: String)] {
-        Dictionary(grouping: store.articles, by: \.category)
-            .compactMap { category, articles in
-                articles.first.map { (id: category, title: $0.categoryDisplayTitle) }
-            }
-            .sorted { $0.id < $1.id }
-    }
-
     var body: some View {
+        let results = isSearching ? store.search(query: searchText) : []
         List {
             if isSearching {
-                ForEach(store.search(query: searchText)) { article in
+                ForEach(results) { article in
                     NavigationLink {
                         VoiceArticleContentView(article: article)
                     } label: {
@@ -30,21 +38,25 @@ struct PracticeHubView: View {
                 }
             } else {
                 Section("practice.hub.live.title") {
-                    NavigationLink {
-                        PitchMonitorView()
-                    } label: {
+                    NavigationLink(value: PracticeRoute.scoring) {
+                        Label("recording.screen.title", systemImage: "checkmark.seal")
+                    }
+                    .accessibilityIdentifier("practice.openScoring")
+                    NavigationLink(value: PracticeRoute.pitch) {
                         Label(LocalizedStringKey(MonitorKind.pitch.titleKey), systemImage: MonitorKind.pitch.symbol)
                     }
                     .accessibilityIdentifier("monitor.openPitch")
-                    NavigationLink {
-                        SpectrumMonitorView()
-                    } label: {
+                    NavigationLink(value: PracticeRoute.spectrum) {
                         Label(LocalizedStringKey(MonitorKind.spectrum.titleKey), systemImage: MonitorKind.spectrum.symbol)
                     }
                     .accessibilityIdentifier("monitor.openSpectrum")
+                    NavigationLink(value: PracticeRoute.spectrogram) {
+                        Label("practice.spectrum.title", systemImage: "waveform.badge.magnifyingglass")
+                    }
+                    .accessibilityIdentifier("practice.openSpectrogram")
                 }
                 Section("voiceLibrary.title") {
-                    ForEach(categories, id: \.id) { category in
+                    ForEach(store.categories, id: \.id) { category in
                         NavigationLink {
                             VoiceTrainingLibraryContentView(initialCategory: category.id)
                         } label: {
@@ -57,10 +69,10 @@ struct PracticeHubView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("practice.hub.tab")
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always),
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic),
                     prompt: Text("practice.hub.search"))
         .overlay {
-            if isSearching && store.search(query: searchText).isEmpty {
+            if isSearching && results.isEmpty {
                 ContentUnavailableView.search(text: searchText)
             }
         }

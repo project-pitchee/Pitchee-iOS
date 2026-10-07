@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import Foundation
 #if canImport(UIKit)
 import UIKit
@@ -108,6 +109,12 @@ nonisolated struct VoiceArticle: Identifiable, Codable, Sendable, Hashable {
     let scoreRange: ScoreRange
     let sections: [Section]
     let rawContent: String
+
+    /// The public permalink depends only on the stable article ID.
+    var webURL: URL {
+        URL(string: "https://articles.pitchee.dev")!
+            .appendingPathComponent(id.lowercased(), isDirectory: false)
+    }
 
     init(
         id: String,
@@ -261,6 +268,15 @@ nonisolated struct VoiceTrainingRecommendation: Sendable {
 nonisolated final class VoiceTrainingLibraryStore: Sendable {
     static let shared = VoiceTrainingLibraryStore()
 
+    nonisolated struct Category: Identifiable, Sendable {
+        let id: String
+        let articles: [VoiceArticle]
+
+        // Keep localization at the point of use. The immutable index contains
+        // article data, never a title captured in the launch-time language.
+        var title: String { articles.first?.categoryDisplayTitle ?? id }
+    }
+
     nonisolated private struct Container: Codable {
         let schemaVersion: String
         let totalArticles: Int
@@ -268,7 +284,9 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
     }
 
     let articles: [VoiceArticle]
+    let categories: [Category]
     private let articleMap: [String: VoiceArticle]
+    private let categoryMap: [String: Category]
     let ruleMatrix: [String: [String]]
 
     init(bundle: Bundle = Bundle.main) {
@@ -356,6 +374,9 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
             map[article.id] = article
         }
         self.articleMap = map
+        let groups = Dictionary(grouping: loadedArticles, by: \.category)
+        self.categories = groups.keys.sorted().map { Category(id: $0, articles: groups[$0] ?? []) }
+        self.categoryMap = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
         self.ruleMatrix = loadedMatrix
     }
 
@@ -372,26 +393,36 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
     }
 
     func articles(inCategory categoryPrefix: String) -> [VoiceArticle] {
-        articles.filter { $0.category.hasPrefix(categoryPrefix) }
+        if let category = categoryMap[categoryPrefix] { return category.articles }
+        return articles.filter { $0.category.hasPrefix(categoryPrefix) }
+    }
+
+    func categories(matching query: String, category: String? = nil) -> [Category] {
+        let candidates: [Category]
+        if let category, !category.isEmpty {
+            candidates = categoryMap[category].map { [$0] } ?? []
+        } else {
+            candidates = categories
+        }
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return candidates }
+        let matches = Dictionary(grouping: search(query: query, category: category), by: \.category)
+        return candidates.compactMap { category in
+            matches[category.id].map { Category(id: category.id, articles: $0) }
+        }
     }
 
     func search(query: String, category: String? = nil, preference: VoicePreference? = nil) -> [VoiceArticle] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        return articles.filter { article in
-            if let category, !category.isEmpty, article.category != category {
-                return false
-            }
-            if let preference {
-                let targetKey: String
-                switch preference {
-                case .feminine: targetKey = "feminine"
-                case .masculine: targetKey = "masculine"
-                case .undecided: targetKey = "undecided"
-                }
-                if !article.targetPreferences.contains(targetKey) {
-                    return false
-                }
-            }
+        let candidates: [VoiceArticle]
+        if let category, !category.isEmpty {
+            candidates = categoryMap[category]?.articles ?? []
+        } else {
+            candidates = articles
+        }
+        guard !trimmed.isEmpty || preference != nil else { return candidates }
+        let targetKey = preference?.rawValue
+        return candidates.filter { article in
+            if let targetKey, !article.targetPreferences.contains(targetKey) { return false }
             if trimmed.isEmpty {
                 return true
             }
@@ -737,19 +768,18 @@ struct VoiceArticleContentView: View {
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                ShareLink(item: articleShareText) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Link(destination: article.webURL) {
+                    Label(String(localized: "voiceLibrary.action.openInBrowser", defaultValue: "在浏览器中打开"), systemImage: "safari")
+                }
+                .accessibilityIdentifier("voiceLibrary.openArticleInBrowser")
+
+                ShareLink(item: article.webURL, subject: Text(article.title), preview: SharePreview(article.title)) {
                     Label(String(localized: "voiceLibrary.action.share", defaultValue: "分享文章"), systemImage: "square.and.arrow.up")
                 }
                 .accessibilityIdentifier("voiceLibrary.shareArticle")
             }
         }
-    }
-
-    private var articleShareText: String {
-        let goalLabel = String(localized: "voiceLibrary.article.goal", defaultValue: "核心训练目标")
-        let source = String(localized: "voiceLibrary.article.shareSource", defaultValue: "来源：Pitchee 嗓音训练知识库")
-        return "\(article.title)\n\n\(article.summary)\n\n\(goalLabel)：\(article.coreGoal)\n\n\(source)"
     }
 
     private var articleHeader: some View {
@@ -900,13 +930,13 @@ struct VoiceTrainingLibraryContentView: View {
     private let store = VoiceTrainingLibraryStore.shared
 
     var body: some View {
-        let articles = filteredArticles
-        let groups = Dictionary(grouping: articles, by: \.category)
+        let groups = store.categories(matching: searchText, category: selectedCategory)
+        let articleCount = groups.reduce(0) { $0 + $1.articles.count }
 
         List {
-            ForEach(categoryOptions.filter { groups[$0.id] != nil }, id: \.id) { category in
+            ForEach(groups) { category in
                 Section(category.title) {
-                    ForEach(groups[category.id] ?? []) { article in
+                    ForEach(category.articles) { article in
                         NavigationLink {
                             VoiceArticleContentView(article: article)
                         } label: {
@@ -917,10 +947,10 @@ struct VoiceTrainingLibraryContentView: View {
                 }
             }
 
-            if !articles.isEmpty {
+            if articleCount > 0 {
                 Section {
                 } footer: {
-                    Text(String(localized: "voiceLibrary.articleCount", defaultValue: "共 \(articles.count) 篇教程与说明"))
+                    Text(String(localized: "voiceLibrary.articleCount", defaultValue: "共 \(articleCount) 篇教程与说明"))
                 }
             }
         }
@@ -930,7 +960,7 @@ struct VoiceTrainingLibraryContentView: View {
         .listStyle(.inset)
         #endif
         .overlay {
-            if articles.isEmpty {
+            if articleCount == 0 {
                 emptyStateView
             }
         }
@@ -989,22 +1019,11 @@ struct VoiceTrainingLibraryContentView: View {
         }
     }
 
-    private var categoryOptions: [(id: String, title: String)] {
-        Dictionary(grouping: store.articles, by: \.category)
-            .compactMap { category, articles in
-                guard let article = articles.first else { return nil }
-                return (id: category, title: article.categoryDisplayTitle)
-            }
-            .sorted { $0.id < $1.id }
-    }
+    private var categoryOptions: [VoiceTrainingLibraryStore.Category] { store.categories }
 
     private var selectedCategoryTitle: String {
         categoryOptions.first(where: { $0.id == selectedCategory })?.title
             ?? String(localized: "voiceLibrary.filter.all", defaultValue: "全部分类")
-    }
-
-    private var filteredArticles: [VoiceArticle] {
-        store.search(query: searchText, category: selectedCategory)
     }
 }
 
@@ -1172,13 +1191,17 @@ struct RichInlineText: View {
             && !content.contains("$$")
     }
 
+    nonisolated private static let mathDelimiterExpression = try? NSRegularExpression(
+        pattern: #"(?<!\\)\\\((.+?)(?<!\\)\\\)|(?<!\\)\\\[(.+?)(?<!\\)\\\]"#,
+        options: .dotMatchesLineSeparators
+    )
+
     /// LaTeXSwiftUI uses dollar delimiters; leave incomplete or nested pairs intact.
     nonisolated static func normalizedMathText(_ text: String) -> String {
         guard text.contains(#"\("#) || text.contains(#"\["#) else {
             return text
         }
-        let pattern = #"(?<!\\)\\\((.+?)(?<!\\)\\\)|(?<!\\)\\\[(.+?)(?<!\\)\\\]"#
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {
+        guard let regex = Self.mathDelimiterExpression else {
             return text
         }
         let source = text as NSString
@@ -1201,10 +1224,11 @@ struct RichInlineText: View {
 /// Structured body renderer for voice articles parsing subheadings, tables, and lists.
 struct ArticleBodyView: View {
     let bodyText: String
+    @StateObject private var parser = ArticleBodyParser()
     @ScaledMetric(relativeTo: .subheadline) private var tableMinimumColumnWidth: CGFloat = 100
     @ScaledMetric(relativeTo: .subheadline) private var tableMaximumColumnWidth: CGFloat = 280
 
-    enum BodyElement: Identifiable {
+    nonisolated enum BodyElement: Identifiable, Equatable, Sendable {
         case subheading(id: String, text: String)
         case table(id: String, headers: [String], rows: [[String]])
         case bulletItem(id: String, level: Int, text: String)
@@ -1227,7 +1251,7 @@ struct ArticleBodyView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(parseElements(bodyText)) { element in
+            ForEach(parser.document(for: bodyText).elements) { element in
                 renderElement(element)
             }
         }
@@ -1337,9 +1361,33 @@ struct ArticleBodyView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
     }
+}
 
-    private func parseElements(_ raw: String) -> [BodyElement] {
-        var elements: [BodyElement] = []
+/// One parsed document per mounted article section. Changes to its source text
+/// replace the document immediately; leaving the reader releases the cache.
+@MainActor
+final class ArticleBodyParser: ObservableObject {
+    nonisolated final class Document: Sendable {
+        let source: String
+        let elements: [ArticleBodyView.BodyElement]
+
+        init(source: String) {
+            self.source = source
+            self.elements = ArticleBodyParser.parseElements(source)
+        }
+    }
+
+    private var cachedDocument: Document?
+
+    func document(for source: String) -> Document {
+        if let cachedDocument, cachedDocument.source == source { return cachedDocument }
+        let document = Document(source: source)
+        cachedDocument = document
+        return document
+    }
+
+    nonisolated private static func parseElements(_ raw: String) -> [ArticleBodyView.BodyElement] {
+        var elements: [ArticleBodyView.BodyElement] = []
         let lines = raw.components(separatedBy: "\n")
         var i = 0
         var idCounter = 0

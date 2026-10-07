@@ -1,3 +1,10 @@
+//
+//  MonitorCharts.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import SwiftUI
 
 /// Chart surfaces deliberately have no surrounding chrome. The monitor page
@@ -38,14 +45,13 @@ struct MonitorSpectrumPlot: View {
                              anchor: index == 0 ? .leading : (index == frequencies.count - 1 ? .trailing : .center))
             }
 
-            guard let frame, frame.binWidthHz.isFinite, frame.binWidthHz > 0 else { return }
+            guard let frame, frame.isValid else { return }
             var trace = Path()
             var firstPoint: CGPoint?
             var lastPoint: CGPoint?
-            var peak: (point: CGPoint, magnitude: Float)?
             for (index, magnitude) in frame.magnitudesDB.enumerated() {
                 let frequency = Double(index) * frame.binWidthHz
-                guard (40...8_000).contains(frequency), magnitude.isFinite else { continue }
+                guard MonitorSpectrumFrame.frequencyRange.contains(frequency) else { continue }
                 let point = CGPoint(
                     x: spectrumX(frequency, in: plot),
                     y: plot.minY + plot.height * -Double(min(0, max(-100, magnitude))) / 100
@@ -57,9 +63,6 @@ struct MonitorSpectrumPlot: View {
                     trace.addLine(to: point)
                 }
                 lastPoint = point
-                if magnitude > (peak?.magnitude ?? -.infinity) {
-                    peak = (point, magnitude)
-                }
             }
 
             context.clip(to: Path(plot.insetBy(dx: -6, dy: -6)))
@@ -80,13 +83,17 @@ struct MonitorSpectrumPlot: View {
 
             // The marker matches the strongest visible FFT bin. Silence has
             // no marker, consistent with the page's frequency readout.
-            if let peak, peak.magnitude > -95 {
+            if let peak = frame.peak {
+                let point = CGPoint(
+                    x: spectrumX(peak.frequencyHz, in: plot),
+                    y: plot.minY + plot.height * -Double(min(0, max(-100, peak.amplitudeDBFS))) / 100
+                )
                 var guide = Path()
-                guide.move(to: CGPoint(x: peak.point.x, y: peak.point.y + 7))
-                guide.addLine(to: CGPoint(x: peak.point.x, y: plot.maxY))
+                guide.move(to: CGPoint(x: point.x, y: point.y + 7))
+                guide.addLine(to: CGPoint(x: point.x, y: plot.maxY))
                 context.stroke(guide, with: .color(.pitcheeAccent.opacity(0.24)),
                                style: StrokeStyle(lineWidth: 1, dash: [3, 4]))
-                layout.drawMarker(at: peak.point, in: &context)
+                layout.drawMarker(at: point, in: &context)
             }
         }
         .clipped()
@@ -101,6 +108,86 @@ struct MonitorPitchPlot: View {
     let samples: [LivePitchSample]
     let timeRange: ClosedRange<Double>
     let cursorTime: Double
+
+    var body: some View {
+        ZStack {
+            // Grid text is independent of live samples. Keep it on its own
+            // surface so a new trace does not resolve and lay it out again.
+            MonitorPitchGrid()
+            MonitorPitchTimeAxis(
+                start: timeLabel(timeRange.lowerBound),
+                middle: timeLabel((timeRange.lowerBound + timeRange.upperBound) / 2),
+                end: timeLabel(timeRange.upperBound)
+            )
+            MonitorPitchTrace(samples: samples, timeRange: timeRange, cursorTime: cursorTime)
+        }
+        .clipped()
+    }
+
+    private func timeLabel(_ seconds: Double) -> String {
+        max(0, seconds).formatted(.number.precision(.fractionLength(1)))
+    }
+}
+
+private struct MonitorPitchGrid: View {
+    @Environment(\.colorSchemeContrast) private var contrast
+    @ScaledMetric(relativeTo: .caption2) private var scaledLabelSize = 11.0
+
+    var body: some View {
+        Canvas { context, size in
+            let layout = MonitorChartLayout(size: size, labelSize: scaledLabelSize,
+                                            increasedContrast: contrast == .increased)
+            let plot = layout.plot
+            layout.drawUnits(
+                vertical: String(localized: "monitor.unit.hertz"),
+                horizontal: String(localized: "monitor.unit.seconds"),
+                in: &context
+            )
+
+            let frequencies: [Double] = plot.height < 140 ? [1_000, 250, 50] : [1_000, 500, 250, 100, 50]
+            for frequency in frequencies {
+                let y = layout.pitchY(frequency)
+                context.draw(layout.label(MonitorChartLayout.frequencyLabel(frequency)),
+                             at: CGPoint(x: plot.minX - 8, y: y), anchor: .trailing)
+                layout.drawGrid(from: CGPoint(x: plot.minX, y: y),
+                                to: CGPoint(x: plot.maxX, y: y),
+                                baseline: frequency == 50, in: &context)
+            }
+
+        }
+    }
+}
+
+private struct MonitorPitchTimeAxis: View {
+    let start: String
+    let middle: String
+    let end: String
+    @ScaledMetric(relativeTo: .caption2) private var scaledLabelSize = 11.0
+
+    var body: some View {
+        Canvas { context, size in
+            let layout = MonitorChartLayout(size: size, labelSize: scaledLabelSize,
+                                            increasedContrast: false)
+            let plot = layout.plot
+            let longestTimeLabel = max(start.count, middle.count, end.count)
+            let labelWidth = Double(longestTimeLabel) * layout.labelSize * 0.65
+            let fractions: [Double] = plot.width >= labelWidth * 3 + 40 ? [0, 0.5, 1] : [0, 1]
+            for fraction in fractions {
+                let x = plot.minX + plot.width * fraction
+                let label = fraction == 0 ? start : (fraction == 1 ? end : middle)
+                context.draw(layout.label(label),
+                             at: CGPoint(x: x, y: plot.maxY + layout.tickOffset),
+                             anchor: fraction == 0 ? .leading : (fraction == 1 ? .trailing : .center))
+            }
+
+        }
+    }
+}
+
+private struct MonitorPitchTrace: View {
+    let samples: [LivePitchSample]
+    let timeRange: ClosedRange<Double>
+    let cursorTime: Double
     @Environment(\.colorSchemeContrast) private var contrast
     @ScaledMetric(relativeTo: .caption2) private var scaledLabelSize = 11.0
 
@@ -110,44 +197,17 @@ struct MonitorPitchPlot: View {
                                             increasedContrast: contrast == .increased)
             let plot = layout.plot
             let duration = max(0.001, timeRange.upperBound - timeRange.lowerBound)
-            layout.drawUnits(
-                vertical: String(localized: "monitor.unit.hertz"),
-                horizontal: String(localized: "monitor.unit.seconds"),
-                in: &context
-            )
-
-            let frequencies: [Double] = plot.height < 140 ? [1_000, 250, 50] : [1_000, 500, 250, 100, 50]
-            for frequency in frequencies {
-                let y = pitchY(frequency, in: plot)
-                context.draw(layout.label(MonitorChartLayout.frequencyLabel(frequency)),
-                             at: CGPoint(x: plot.minX - 8, y: y), anchor: .trailing)
-                layout.drawGrid(from: CGPoint(x: plot.minX, y: y),
-                                to: CGPoint(x: plot.maxX, y: y),
-                                baseline: frequency == 50, in: &context)
-            }
-
-            let longestTimeLabel = max(timeLabel(timeRange.lowerBound).count, timeLabel(timeRange.upperBound).count)
-            let labelWidth = Double(longestTimeLabel) * layout.labelSize * 0.65
-            let fractions: [Double] = plot.width >= labelWidth * 3 + 40 ? [0, 0.5, 1] : [0, 1]
-            for fraction in fractions {
-                let x = plot.minX + plot.width * fraction
-                let seconds = timeRange.lowerBound + duration * fraction
-                context.draw(layout.label(timeLabel(seconds)),
-                             at: CGPoint(x: x, y: plot.maxY + layout.tickOffset),
-                             anchor: fraction == 0 ? .leading : (fraction == 1 ? .trailing : .center))
-            }
-
             var trace = Path()
             var previousTime: Double?
-            for sample in samples {
-                guard timeRange.contains(sample.elapsedTime), let pitch = sample.pitchHz,
+            for sample in TimelineSearch.samples(in: samples, range: timeRange, time: \.elapsedTime) {
+                guard let pitch = sample.pitchHz,
                       pitch.isFinite, (50...1_000).contains(pitch) else {
                     previousTime = nil
                     continue
                 }
                 let point = CGPoint(
                     x: plot.minX + plot.width * (sample.elapsedTime - timeRange.lowerBound) / duration,
-                    y: pitchY(pitch, in: plot)
+                    y: layout.pitchY(pitch)
                 )
                 if let previousTime, (0...0.4).contains(sample.elapsedTime - previousTime) {
                     trace.addLine(to: point)
@@ -172,13 +232,13 @@ struct MonitorPitchPlot: View {
 
             // Use the real sample position rather than drawing an interpolated
             // point under the cursor or carrying a pitch through silence.
-            if let sample = samples.last(where: { $0.elapsedTime <= cursorTime }),
+            if let sample = TimelineSearch.latest(in: samples, at: cursorTime, time: \.elapsedTime),
                cursorTime - sample.elapsedTime <= 0.15,
                timeRange.contains(sample.elapsedTime), let pitch = sample.pitchHz,
                pitch.isFinite, (50...1_000).contains(pitch) {
                 let point = CGPoint(
                     x: plot.minX + plot.width * (sample.elapsedTime - timeRange.lowerBound) / duration,
-                    y: pitchY(pitch, in: plot)
+                    y: layout.pitchY(pitch)
                 )
                 layout.drawMarker(at: point, in: &context)
             }
@@ -186,13 +246,6 @@ struct MonitorPitchPlot: View {
         .clipped()
     }
 
-    private func pitchY(_ frequency: Double, in plot: CGRect) -> Double {
-        plot.minY + plot.height * (1 - log(frequency / 50) / log(1_000.0 / 50))
-    }
-
-    private func timeLabel(_ seconds: Double) -> String {
-        max(0, seconds).formatted(.number.precision(.fractionLength(1)))
-    }
 }
 
 private struct MonitorChartLayout {
@@ -200,6 +253,10 @@ private struct MonitorChartLayout {
     let labelSize: Double
     let increasedContrast: Bool
     var tickOffset: Double { labelSize / 2 + 11 }
+
+    func pitchY(_ frequency: Double) -> Double {
+        plot.minY + plot.height * (1 - log(frequency / 50) / log(1_000.0 / 50))
+    }
 
     init(size: CGSize, labelSize: Double, increasedContrast: Bool) {
         // Tick labels supplement the fully scalable readout and accessible

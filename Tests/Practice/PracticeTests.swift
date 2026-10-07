@@ -101,6 +101,26 @@ enum PracticeTests {
               "Listening feedback persists with its explicit comparison pair")
         check(saved.first(where: { $0.id == a.id })?.quality?.canCompare == true, "Quality snapshot survives history save")
 
+        let originalQualityPayload = a.qualityPayload
+        a.qualityPayload = try JSONEncoder().encode(quality(2))
+        check(!a.isBaselineEligible, "Replacing cached quality immediately updates comparison eligibility")
+        a.qualityPayload = nil
+        check(a.quality == nil && a.cohort == nil, "Removing quality clears the decoded snapshot and cohort")
+        a.qualityPayload = Data("invalid".utf8)
+        check(a.quality == nil && !a.isBaselineEligible, "Invalid quality cannot reuse a prior eligible snapshot")
+        a.qualityPayload = originalQualityPayload
+        check(a.isBaselineEligible, "Restoring valid quality recovers from a cached decoding failure")
+        let originalPracticePayload = a.practicePayload
+        a.practicePayload = try JSONEncoder().encode(PracticeContext(kind: .pitchStability, target: .feminine))
+        check(a.cohort?.kind == .pitchStability && a.cohort?.target == .feminine,
+              "Replacing cached practice changes cohort membership")
+        a.practicePayload = nil
+        check(a.practice == nil && a.cohort == nil, "Removing practice clears cohort membership")
+        a.practicePayload = Data("invalid".utf8)
+        check(a.practice == nil, "Invalid practice never reuses a prior decoded context")
+        a.practicePayload = originalPracticePayload
+        check(a.practice == context && a.isBaselineEligible, "Restoring practice recovers its original cohort")
+
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }

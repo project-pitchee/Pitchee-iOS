@@ -1,3 +1,10 @@
+//
+//  LocalizationRuntimeTests.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import Foundation
 
 @main

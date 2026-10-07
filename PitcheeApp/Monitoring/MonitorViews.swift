@@ -1,3 +1,10 @@
+//
+//  MonitorViews.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import SwiftUI
 
 struct MonitoringHubView: View {
@@ -125,8 +132,9 @@ private struct MonitorReadout: View {
         if model.kind == .spectrum {
             return model.currentSpectrumPeak.map { Double($0.amplitudeDBFS).formatted(.number.precision(.fractionLength(1))) } ?? "—"
         }
-        let pitches = model.visiblePitchSamples.compactMap(\.pitchHz).filter { $0.isFinite && $0 > 0 }
-        guard let low = pitches.min(), let high = pitches.max() else { return "—" }
+        guard let range = model.visiblePitchRange else { return "—" }
+        let low = range.lowerBound
+        let high = range.upperBound
         return "\(low.formatted(.number.precision(.fractionLength(0))))–\(high.formatted(.number.precision(.fractionLength(0))))"
     }
 
@@ -184,7 +192,7 @@ private struct MonitorInstrument: View {
     private var emptyKey: String? {
         if model.isBusy { return "monitor.status.preparing" }
         if !model.hasAudio { return model.state == .live ? "monitor.signal.waiting" : "monitor.signal.waitingHint" }
-        if model.kind == .pitch && model.visiblePitchSamples.allSatisfy({ $0.pitchHz == nil }) {
+        if model.kind == .pitch && model.visiblePitchRange == nil {
             return "monitor.signal.unvoiced"
         }
         return nil
@@ -290,7 +298,16 @@ private struct MonitorWindowMenu: View {
                 Text("monitor.window.thirty").tag(30.0)
             }
         } label: {
-            Text(selectedWindowLabel).font(.subheadline.monospacedDigit())
+            Label {
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("monitor.window.title")
+                        .font(.caption2)
+                    Text(selectedWindowLabel)
+                        .font(.subheadline.monospacedDigit())
+                }
+            } icon: {
+                Image(systemName: "clock")
+            }
         }
         .disabled(model.isBusy)
         .accessibilityLabel("monitor.window.title")

@@ -14,6 +14,158 @@ nonisolated struct LivePitchSample: Identifiable, Sendable {
     var id: TimeInterval { elapsedTime }
 }
 
+/// Searches the finite, ascending timestamps produced by capture and analysis.
+/// The returned slice shares storage with its source; selecting a short chart
+/// window does not scan or copy the complete recording.
+nonisolated enum TimelineSearch {
+    static func lowerBound<Element>(
+        in elements: [Element],
+        at timestamp: TimeInterval,
+        time: KeyPath<Element, TimeInterval>
+    ) -> Int {
+        boundary(in: elements, at: timestamp, time: time, includingEqual: false)
+    }
+
+    static func upperBound<Element>(
+        in elements: [Element],
+        at timestamp: TimeInterval,
+        time: KeyPath<Element, TimeInterval>
+    ) -> Int {
+        boundary(in: elements, at: timestamp, time: time, includingEqual: true)
+    }
+
+    static func samples<Element>(
+        in elements: [Element],
+        range: ClosedRange<TimeInterval>,
+        time: KeyPath<Element, TimeInterval>,
+        includingNeighbors: Bool = false
+    ) -> ArraySlice<Element> {
+        guard range.lowerBound.isFinite, range.upperBound.isFinite else { return elements[0..<0] }
+        var lower = lowerBound(in: elements, at: range.lowerBound, time: time)
+        var upper = upperBound(in: elements, at: range.upperBound, time: time)
+        if includingNeighbors {
+            lower = max(0, lower - 1)
+            upper = min(elements.count, upper + 1)
+        }
+        return elements[lower..<upper]
+    }
+
+    static func latest<Element>(
+        in elements: [Element],
+        at timestamp: TimeInterval,
+        time: KeyPath<Element, TimeInterval>
+    ) -> Element? {
+        guard timestamp.isFinite else { return nil }
+        let end = upperBound(in: elements, at: timestamp, time: time)
+        return end > 0 ? elements[end - 1] : nil
+    }
+
+    private static func boundary<Element>(
+        in elements: [Element],
+        at timestamp: TimeInterval,
+        time: KeyPath<Element, TimeInterval>,
+        includingEqual: Bool
+    ) -> Int {
+        // Most live queries target the newest frame or the oldest retained
+        // boundary. Keep these cases constant-time as the history grows.
+        guard let first = elements.first else { return 0 }
+        let firstTime = first[keyPath: time]
+        if includingEqual ? firstTime > timestamp : firstTime >= timestamp { return 0 }
+        let lastTime = elements[elements.count - 1][keyPath: time]
+        if includingEqual ? lastTime <= timestamp : lastTime < timestamp { return elements.count }
+
+        var lower = 0
+        var upper = elements.count
+        while lower < upper {
+            let middle = lower + (upper - lower) / 2
+            let candidate = elements[middle][keyPath: time]
+            if includingEqual ? candidate <= timestamp : candidate < timestamp {
+                lower = middle + 1
+            } else {
+                upper = middle
+            }
+        }
+        return lower
+    }
+}
+
+/// A display-sized snapshot of the scoring page's latest ten seconds. Capture
+/// keeps every detector frame; only this plotting copy is reduced.
+nonisolated struct ScoringPitchSnapshot: Sendable {
+    private static let visibleSeconds: TimeInterval = 10
+    private static let maximumPointCount = 640
+
+    let samples: [LivePitchSample]
+    let timeRange: ClosedRange<TimeInterval>
+    let cursorTime: TimeInterval
+    let currentPitch: Double?
+
+    init(samples source: [LivePitchSample]) {
+        let latestTime = source.last?.elapsedTime ?? 0
+        cursorTime = latestTime.isFinite ? max(0, latestTime) : 0
+        let end = max(Self.visibleSeconds, cursorTime)
+        timeRange = (end - Self.visibleSeconds)...end
+        currentPitch = Self.currentPitch(in: source)
+        samples = Self.plotSamples(in: TimelineSearch.samples(
+            in: source, range: timeRange, time: \.elapsedTime
+        ))
+    }
+
+    /// The readout uses real detector samples, including pitches outside the
+    /// chart's vertical range, without rebuilding the plotting snapshot.
+    static func currentPitch(in samples: [LivePitchSample]) -> Double? {
+        guard let latestTime = samples.last?.elapsedTime, latestTime.isFinite else { return nil }
+        let recent = TimelineSearch.samples(
+            in: samples, range: (latestTime - 0.6)...latestTime, time: \.elapsedTime
+        )
+        return recent.last { sample in
+            guard let pitch = sample.pitchHz else { return false }
+            return pitch.isFinite && pitch > 0
+        }?.pitchHz
+    }
+
+    private static func plotSamples(in visible: ArraySlice<LivePitchSample>) -> [LivePitchSample] {
+        guard visible.count > maximumPointCount else { return Array(visible) }
+
+        // Each bucket retains its endpoints and both extrema in timestamp
+        // order. At most three gap markers separate those four selected points,
+        // so the output stays below 640 even for rapidly alternating voicing.
+        let bucketCount = maximumPointCount / 7
+        var output: [LivePitchSample] = []
+        output.reserveCapacity(maximumPointCount)
+        for bucket in 0..<bucketCount {
+            let start = visible.startIndex + bucket * visible.count / bucketCount
+            let end = visible.startIndex + (bucket + 1) * visible.count / bucketCount
+            var minimum: Int?
+            var maximum: Int?
+            for index in start..<end {
+                guard isDrawable(visible[index]) else { continue }
+                if minimum == nil || visible[index].pitchHz! < visible[minimum!].pitchHz! { minimum = index }
+                if maximum == nil || visible[index].pitchHz! > visible[maximum!].pitchHz! { maximum = index }
+            }
+
+            let selected = [start, minimum, maximum, end - 1].compactMap { $0 }.sorted()
+            var previous: Int?
+            for index in selected where index != previous {
+                if let previous, isDrawable(visible[previous]), isDrawable(visible[index]),
+                   let gap = ((previous + 1)..<index).first(where: { !isDrawable(visible[$0]) }) {
+                    // Keep an actual missing/invalid frame. Removing it would
+                    // fabricate a voiced line through a short silent interval.
+                    output.append(visible[gap])
+                }
+                output.append(visible[index])
+                previous = index
+            }
+        }
+        return output
+    }
+
+    private static func isDrawable(_ sample: LivePitchSample) -> Bool {
+        guard let pitch = sample.pitchHz else { return false }
+        return pitch.isFinite && (50...1_000).contains(pitch)
+    }
+}
+
 /// A bounded snapshot for chart exploration. Missing/unvoiced samples stay in
 /// the table and split the audio graph, so silence is never reported as 0 Hz.
 nonisolated struct PitchAccessibilitySnapshot: Identifiable, Sendable {

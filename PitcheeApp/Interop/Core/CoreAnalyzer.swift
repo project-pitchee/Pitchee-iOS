@@ -12,7 +12,7 @@ public enum PitcheeScoreProfile: Sendable {
     case feminization
     case masculinization
 
-    fileprivate var cValue: pitchee_score_profile_t {
+    nonisolated fileprivate var cValue: pitchee_score_profile_t {
         switch self {
         case .feminization: PITCHEE_SCORE_PROFILE_FEMINIZATION
         case .masculinization: PITCHEE_SCORE_PROFILE_MASCULINIZATION

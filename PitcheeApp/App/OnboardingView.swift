@@ -92,7 +92,7 @@ struct OnboardingView: View {
     private var header: some View {
         HStack {
             HStack(spacing: 10) {
-                Image("PitcheeOnboardingIcon")
+                Image("Default")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 34, height: 34)

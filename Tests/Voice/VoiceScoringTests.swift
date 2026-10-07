@@ -87,6 +87,26 @@ enum VoiceScoringTests {
         let decoded = try JSONDecoder().decode(PitcheeAnalysisResult.self, from: payload)
         check(VoicePreference.masculine.score(for: decoded).finalScore == masculine.finalScore, "Persisted raw results reproduce the displayed score")
 
+        for profile: String? in [nil, "feminization", "masculinization", "future-profile"] {
+            for pitch: Double? in [nil, 0, -1, 120, 200] {
+                for naturalness in [0.0, 100.0] {
+                    let full = result(pitch: pitch, scoreProfile: profile, naturalness: naturalness)
+                    let summary = try JSONDecoder().decode(VoiceAnalysisSummary.self, from: JSONEncoder().encode(full))
+                    for preference in VoicePreference.allCases {
+                        let expected = preference.score(for: full)
+                        let actual = VoiceDirectionScore(preference: preference, summary: summary)
+                        check(actual.standardScore == expected.standardScore && actual.naturalnessScore == expected.naturalnessScore,
+                              "History projections preserve metrics for every profile and direction")
+                        check(close(actual.baseScore, expected.baseScore) && close(actual.finalScore, expected.finalScore)
+                                && actual.rule == expected.rule && actual.composite.cap == expected.composite.cap
+                                && actual.composite.limited == expected.composite.limited
+                                && actual.composite.boosted == expected.composite.boosted,
+                              "History projections share all scoring rules and engine flags with full results")
+                    }
+                }
+            }
+        }
+
         for pitch: Double? in [nil, 0, -1, .nan, .infinity, -.infinity] {
             let score = VoicePreference.masculine.score(for: result(pitch: pitch))
             check(score.finalScore == 69 && score.baseScore == 69, "Missing or invalid pitch removes only the F0 contribution")

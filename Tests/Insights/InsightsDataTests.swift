@@ -51,12 +51,12 @@ enum InsightsDataTests {
 
         func assessment(_ recordedAt: Date, score: Double, pitch: Double? = 175,
                         standard: Double = 65, naturalness: Double = 70,
-                        scoreProfile: String? = nil) throws -> RecordingAssessment {
+                        scoreProfile: String? = nil, variation: Double? = nil) throws -> RecordingAssessment {
             let result = PitcheeAnalysisResult(
                 schemaVersion: scoreProfile == nil ? 2 : 3, modelVersion: "insights-tests", scoreProfile: scoreProfile,
                 audio: .init(sourceSampleRate: 16_000, sourceChannels: 1, inputSeconds: 12, analyzedSeconds: 12),
                 vad: .init(segmentCount: 0, speechSeconds: 10, sileroSegmentCount: 0, discardedBreathLikeCount: 0, trimmedSegmentCount: 0, segments: []),
-                f0: .init(windowSeconds: 0.5, meanHz: pitch, standardDeviationHz: nil, voicedFrameCount: 0, voicedWindowCount: 0, windows: []),
+                f0: .init(windowSeconds: 0.5, meanHz: pitch, standardDeviationHz: variation, voicedFrameCount: 0, voicedWindowCount: 0, windows: []),
                 vfp: .init(vfpStandardScore: standard, windowCount: 0, windowDurationSeconds: 1, windows: []),
                 naturalness: .init(score: naturalness, windowCount: 0, windowDurationSeconds: 1, windows: []),
                 composite: .init(baseScore: score, finalScore: score, cap: nil, rule: "continuous", limited: false, boosted: false)
@@ -72,9 +72,24 @@ enum InsightsDataTests {
         let all = [latest, lower, older, tiedLater, first, future]
         let visible = InsightsData.assessments(all, in: .sevenDays, relativeTo: now, calendar: calendar)
         check(visible.count == 4, "History includes every recording within the selected period")
+        check(InsightsData.assessments(all, in: .all, relativeTo: now, calendar: calendar).map(\.id)
+                == all.filter { $0.id != future.id }.map(\.id),
+              "All-history filtering preserves input order and still excludes future days")
+        for transitionDay in [date(2026, 3, 10, 12), date(2026, 11, 3, 12)] {
+            let start = InsightsRange.sevenDays.startDate(relativeTo: transitionDay, calendar: calendar)!
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: transitionDay))!
+            let boundaryRecords = try [start.addingTimeInterval(-1), start, tomorrow.addingTimeInterval(-1), tomorrow]
+                .map { try assessment($0, score: 70) }
+            check(InsightsData.assessments(boundaryRecords, in: .sevenDays, relativeTo: transitionDay, calendar: calendar)
+                    .map(\.id) == [boundaryRecords[1].id, boundaryRecords[2].id],
+                  "History filtering includes whole calendar days across daylight-saving transitions")
+        }
         let best = InsightsData.dailyBest(visible, calendar: calendar)
         check(best.map(\.id) == [tiedLater.id, latest.id], "Daily results choose the highest score, break ties by recency, and sort by day")
         check(InsightsData.dailyBest([], calendar: calendar).isEmpty, "Empty histories have no daily results")
+        let sameTimeTie = try assessment(first.recordedAt, score: first.finalScore)
+        check(InsightsData.dailyBest([first, sameTimeTie], calendar: calendar).first?.id == first.id,
+              "Identical score and timestamp ties preserve the first recording")
         check(InsightsMetric.composite.value(in: latest) == 80, "Read the saved composite score")
         check(InsightsMetric.naturalness.value(in: latest) == 70, "Read the saved naturalness score")
         check(InsightsMetric.pitch.value(in: first) == 175, "Read a valid saved pitch")
@@ -119,8 +134,52 @@ enum InsightsDataTests {
         let saved = try container.mainContext.fetch(FetchDescriptor<RecordingAssessment>())
         check(saved.count == 1, "Saved analyses can be queried by the history page")
         check(saved.first?.result?.composite.finalScore == 90, "Saved result payload reconstructs full analysis details")
+        let originalPayload = first.resultPayload
         first.resultPayload = Data("invalid".utf8)
         check(first.result == nil, "Unreadable payloads use the detail page error state without crashing")
+        check(first.result == nil, "Repeated access to an unreadable payload remains unavailable")
+        first.resultPayload = latest.resultPayload
+        check(first.result?.composite.finalScore == 80 && first.finalScore(for: .feminine) == 80,
+              "Replacing an unreadable payload refreshes details and directional scoring")
+        first.resultPayload = originalPayload
+        check(first.result?.composite.finalScore == 90,
+              "Replacing a previously decoded payload never returns stale analysis details")
+
+        let summaryRecord = try assessment(now, score: 81, pitch: 120, standard: 20, naturalness: 100,
+                                           scoreProfile: "masculinization", variation: 12)
+        summaryRecord.capturedFinalScore = -100
+        summaryRecord.scoringRulesVersion = "older-rules"
+        check(summaryRecord.finalScore(for: .masculine) == 81,
+              "History uses profile inputs rather than a captured score from a different rules version")
+        check(InsightsMetric.variation.value(in: summaryRecord) == 12,
+              "Variation history reads the scalar pitch summary")
+        let summaryPayload = summaryRecord.resultPayload
+        var damaged = try JSONSerialization.jsonObject(with: summaryPayload) as! [String: Any]
+        var damagedVoice = damaged["vfp"] as! [String: Any]
+        damagedVoice["vfpStandardScore"] = "invalid"
+        damaged["vfp"] = damagedVoice
+        summaryRecord.resultPayload = try JSONSerialization.data(withJSONObject: damaged)
+        check(summaryRecord.finalScore(for: .masculine) == 84 && summaryRecord.finalScore(for: .feminine) == 81,
+              "Invalid required score fields retain the historical column-based fallback")
+        check(summaryRecord.pitchVariationHz == nil && summaryRecord.result == nil,
+              "A failed summary decode cannot retain an earlier pitch variation")
+        summaryRecord.resultPayload = Data("{".utf8)
+        check(summaryRecord.finalScore(for: .masculine) == 84 && summaryRecord.finalScore(for: .feminine) == 81,
+              "Malformed JSON retains the historical column-based fallback")
+        summaryRecord.resultPayload = summaryPayload
+        check(summaryRecord.finalScore(for: .masculine) == 81 && summaryRecord.pitchVariationHz == 12,
+              "Restored payloads invalidate failed summary decodes")
+        damaged = try JSONSerialization.jsonObject(with: summaryPayload) as! [String: Any]
+        var damagedPitch = damaged["f0"] as! [String: Any]
+        damagedPitch["windows"] = ["invalid window"]
+        damaged["f0"] = damagedPitch
+        summaryRecord.resultPayload = try JSONSerialization.data(withJSONObject: damaged)
+        check(summaryRecord.result == nil,
+              "Full detail decoding still rejects damaged per-window results")
+        check(summaryRecord.finalScore(for: .masculine) == 81
+                && abs(summaryRecord.finalScore(for: .feminine) - 32) < 0.000_001
+                && InsightsMetric.variation.value(in: summaryRecord) == 12,
+              "Valid scalar history remains usable independently of unused damaged window details")
         print("Insights: \(checks) checks passed")
     }
 }

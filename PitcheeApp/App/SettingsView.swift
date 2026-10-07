@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
-    @AppStorage(AppStorageKey.customThemeColor) private var customThemeColor = ""
+    @AppStorage(AppStorageKey.themeSelection) private var savedThemeSelection = AppThemeOption.twilt.rawValue
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var selectedIconName = UIApplication.shared.alternateIconName
 
     private var selectedVoice: VoicePreference {
         VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
@@ -51,28 +55,38 @@ struct SettingsView: View {
                     SettingsLabel("voiceProfile.privacyPromise.title", systemImage: "hand.raised.fill", tint: .blue)
                 }
                 .accessibilityIdentifier("settings.privacy")
+            }
 
+            Section("settings.personalization.sectionTitle") {
                 NavigationLink {
-                    ThemeSettingsView()
+                    PersonalizationSettingsView()
                 } label: {
                     HStack(spacing: 12) {
-                        SettingsIcon(systemImage: "paintpalette.fill", tint: themeColor)
-                        LabeledContent {
-                            Circle()
-                                .fill(themeColor)
-                                .frame(width: 22, height: 22)
-                                .overlay {
-                                    Circle().strokeBorder(Color.primary.opacity(0.16), lineWidth: 1)
-                                }
-                                .accessibilityHidden(true)
-                        } label: {
+                        ThemeThumbnail(
+                            theme: selectedTheme,
+                            appearance: currentAppearance,
+                            size: 36
+                        )
+                        VStack(alignment: .leading, spacing: 3) {
                             Text("settings.theme.sectionTitle")
+                                .font(.subheadline.weight(.medium))
+                            Text(selectedTheme.title(for: currentAppearance))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .overlay(alignment: .trailing) {
+                            Text(selectedAppIcon.title)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .padding(.trailing, 4)
                         }
                     }
                 }
-                .accessibilityLabel("settings.theme.sectionTitle")
-                .accessibilityValue(Text(themeColorDescription))
-                .accessibilityIdentifier("settings.theme")
+                .accessibilityLabel("settings.personalization.sectionTitle")
+                .accessibilityValue(Text(selectedTheme.title(for: currentAppearance)))
+                .accessibilityIdentifier("settings.personalization")
             }
 
             Section("about.app.title") {
@@ -96,16 +110,26 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .navigationTitle("about.screen.title")
         .navigationBarTitleDisplayMode(.large)
+        .onAppear {
+            selectedIconName = UIApplication.shared.alternateIconName
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                selectedIconName = UIApplication.shared.alternateIconName
+            }
+        }
     }
 
-    private var themeColor: Color {
-        AppTheme.color(for: selectedVoice, customHex: customThemeColor)
+    private var currentAppearance: GradientAppearance {
+        colorScheme == .dark ? .dark : .light
     }
 
-    private var themeColorDescription: String {
-        customThemeColor.isEmpty
-            ? String(localized: "settings.theme.followVoice")
-            : String(localized: "settings.theme.customColor")
+    private var selectedTheme: AppThemeOption {
+        AppThemeOption(rawValue: savedThemeSelection) ?? .twilt
+    }
+
+    private var selectedAppIcon: AppIconOption {
+        AppIconOption(alternateIconName: selectedIconName) ?? .defaultIcon
     }
 }
 
@@ -146,6 +170,42 @@ private struct SettingsIcon: View {
     }
 }
 
+/// Compact preview used anywhere a theme is represented in a settings row.
+/// It follows the same plain or gradient background as the selected theme.
+struct ThemeThumbnail: View {
+    let theme: AppThemeOption
+    let appearance: GradientAppearance
+    private let fixedSize: CGFloat?
+    @ScaledMetric(relativeTo: .body) private var size = 56
+
+    init(theme: AppThemeOption, appearance: GradientAppearance, size: CGFloat? = nil) {
+        self.theme = theme
+        self.appearance = appearance
+        fixedSize = size
+    }
+
+    private var renderedSize: CGFloat {
+        min(fixedSize ?? size, 72)
+    }
+
+    var body: some View {
+        ThemeBackground(theme: theme, appearance: appearance, intensity: 0.95)
+            .frame(width: renderedSize, height: renderedSize)
+            .clipShape(RoundedRectangle(cornerRadius: renderedSize * 0.22, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: renderedSize * 0.22, style: .continuous)
+                    .strokeBorder(
+                        theme == .pure
+                            ? (appearance == .light ? Color.black : .white).opacity(0.14)
+                            : .white.opacity(appearance == .light ? 0.45 : 0.24),
+                        lineWidth: 1
+                    )
+            }
+            .clipped()
+            .accessibilityHidden(true)
+    }
+}
+
 struct VoicePreferenceSettingsView: View {
     @Binding var selection: VoicePreference
 
@@ -181,79 +241,8 @@ struct VoicePreferenceSettingsView: View {
 }
 
 struct ThemeSettingsView: View {
-    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
-    @AppStorage(AppStorageKey.customThemeColor) private var customThemeColor = ""
-
-    private var selectedVoice: VoicePreference {
-        VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
-    }
-
-    private var themeColor: Color {
-        AppTheme.color(for: selectedVoice, customHex: customThemeColor)
-    }
-
-    private var customColor: Binding<Color> {
-        Binding(
-            get: { themeColor },
-            set: { customThemeColor = $0.appThemeHex ?? "" }
-        )
-    }
-
     var body: some View {
-        Form {
-            Section {
-                ColorPicker(
-                    "settings.theme.customColor",
-                    selection: customColor,
-                    supportsOpacity: false
-                )
-                .accessibilityIdentifier("settings.theme.customColor")
-
-                Button {
-                    customThemeColor = ""
-                } label: {
-                    HStack {
-                        Text("settings.theme.reset")
-                        Spacer()
-                        if customThemeColor.isEmpty {
-                            Image(systemName: "checkmark")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(Color.pitcheeAccent)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-                .disabled(customThemeColor.isEmpty)
-                .accessibilityIdentifier("settings.theme.reset")
-            } footer: {
-                Text("settings.theme.description")
-            }
-
-            Section {
-                HStack(spacing: 12) {
-                    Circle()
-                        .fill(themeColor)
-                        .frame(width: 34, height: 34)
-                        .overlay {
-                            Circle().strokeBorder(Color.primary.opacity(0.16), lineWidth: 1)
-                        }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("settings.theme.sectionTitle")
-                            .font(.body.weight(.medium))
-                        Text(LocalizedStringKey(customThemeColor.isEmpty
-                            ? "settings.theme.followVoice"
-                            : "settings.theme.customColor"))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityElement(children: .combine)
-            }
-        }
-        .formStyle(.grouped)
-        .navigationTitle("settings.theme.sectionTitle")
-        .navigationBarTitleDisplayMode(.inline)
+        PersonalizationSettingsView()
     }
 }
 

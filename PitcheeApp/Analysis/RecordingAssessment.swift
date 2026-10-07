@@ -43,6 +43,13 @@ final class RecordingAssessment {
     var comparedToID: UUID?
     var comparisonFeedbackRawValue: String?
 
+    // History keeps only scalar inputs; full window/segment arrays are decoded
+    // on demand for detail/export. These caches never change the store schema.
+    @Transient private var summaryCache = DecodedPayloadCache<VoiceAnalysisSummary>()
+    @Transient private var resultCache = DecodedPayloadCache<PitcheeAnalysisResult>()
+    @Transient private var practiceCache = DecodedPayloadCache<PracticeContext>()
+    @Transient private var qualityCache = DecodedPayloadCache<RecordingQuality>()
+
     init(
         id: UUID = UUID(),
         recordedAt: Date,
@@ -74,8 +81,8 @@ final class RecordingAssessment {
         self.comparedToID = comparedToID
     }
 
-    var practice: PracticeContext? { practicePayload.flatMap { try? Self.decoder.decode(PracticeContext.self, from: $0) } }
-    var quality: RecordingQuality? { qualityPayload.flatMap { try? Self.decoder.decode(RecordingQuality.self, from: $0) } }
+    var practice: PracticeContext? { practiceCache.value(for: practicePayload, decoder: Self.decoder) }
+    var quality: RecordingQuality? { qualityCache.value(for: qualityPayload, decoder: Self.decoder) }
     var recordedTarget: VoicePreference? { recordedTargetRawValue.flatMap(VoicePreference.init(rawValue:)) }
     var isBaselineEligible: Bool { quality?.canCompare == true && cohort != nil }
     var cohort: PracticeCohort? {
@@ -88,14 +95,22 @@ final class RecordingAssessment {
 
     /// The complete result as returned by PitcheeCore.
     var result: PitcheeAnalysisResult? {
-        try? Self.decoder.decode(PitcheeAnalysisResult.self, from: resultPayload)
+        resultCache.value(for: resultPayload, decoder: Self.decoder)
+    }
+
+    var pitchVariationHz: Double? { summary?.pitchVariationHz }
+
+    // Valid summary fields remain usable even if unused window details are
+    // malformed. Full-detail decoding still rejects an unreadable result.
+    private var summary: VoiceAnalysisSummary? {
+        summaryCache.value(for: resultPayload, decoder: Self.decoder)
     }
 
     /// Re-evaluate existing recordings without rewriting their raw results.
     func finalScore(for preference: VoicePreference) -> Double {
         guard preference != .undecided else { return finalScore }
-        if let result {
-            return preference.score(for: result).finalScore
+        if let summary {
+            return VoiceDirectionScore(preference: preference, summary: summary).finalScore
         }
         if preference == .masculine {
             return VoiceDirectionScore.masculineComposite(
@@ -107,6 +122,20 @@ final class RecordingAssessment {
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
+}
+
+/// Cache successful and failed decodes, refreshing whenever persisted bytes change.
+/// Keeping the source Data also detects edits made through another model context.
+nonisolated private struct DecodedPayloadCache<Value: Decodable> {
+    private var source: Data?
+    private var decoded: Value?
+
+    mutating func value(for payload: Data?, decoder: JSONDecoder) -> Value? {
+        guard source != payload else { return decoded }
+        source = payload
+        decoded = payload.flatMap { try? decoder.decode(Value.self, from: $0) }
+        return decoded
+    }
 }
 
 /// Derived dashboard values for all successfully persisted assessments.

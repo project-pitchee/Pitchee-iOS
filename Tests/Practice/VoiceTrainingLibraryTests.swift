@@ -1,3 +1,10 @@
+//
+//  VoiceTrainingLibraryTests.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import Foundation
 
 @main
@@ -9,6 +16,89 @@ enum VoiceTrainingLibraryTests {
             assert(article.sections.map(\.iconName) == ["gearshape.2.fill", "stethoscope", "figure.run", "books.vertical.fill"])
             assert(article.sections.allSatisfy { $0.body.count >= 80 })
         }
+
+        assert(store.categories.map(\.id) == Set(store.articles.map(\.category)).sorted())
+        for category in store.categories {
+            let expected = store.articles.filter { $0.category == category.id }
+            assert(category.articles == expected)
+            assert(store.articles(inCategory: category.id) == expected)
+            assert(category.title == expected.first?.categoryDisplayTitle)
+        }
+        for query in ["", "  \n", "吸管", "RULE", "f0", "no-matching-article-xyz"] {
+            for category in [nil, "", "Module-01-Engine-Rules", "Module-04-Masculine-Voice", "missing"] as [String?] {
+                for preference in [nil, .feminine, .masculine, .undecided] as [VoicePreference?] {
+                    let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    let expected = store.articles.filter { article in
+                        if let category, !category.isEmpty, article.category != category { return false }
+                        if let preference, !article.targetPreferences.contains(preference.rawValue) { return false }
+                        return trimmed.isEmpty || [article.title, article.summary, article.coreGoal, article.id, article.rawContent]
+                            .contains { $0.localizedCaseInsensitiveContains(trimmed) }
+                    }
+                    assert(store.search(query: query, category: category, preference: preference) == expected)
+                    if preference == nil {
+                        let groups = store.categories(matching: query, category: category)
+                        let expectedGroups = Dictionary(grouping: expected, by: \.category)
+                        assert(groups.map(\.id) == expectedGroups.keys.sorted())
+                        assert(groups.allSatisfy { $0.articles == expectedGroups[$0.id] })
+                    }
+                }
+            }
+        }
+        print("✓ Indexed categories and searches preserve article order, category prefixes, goal filters and current localized titles")
+
+        let parser = ArticleBodyParser()
+        let markdown = """
+        ### 小标题
+        一段 **强调** 文字。
+        - 一级条目
+          * 二级条目
+        2. 编号条目
+        3、另一个编号
+        | 指标 | 说明 |
+        | --- | --- |
+        | F0 | 频率 |
+        ---
+        #### 第二标题
+        """
+        let document = parser.document(for: markdown)
+        assert(document === parser.document(for: markdown))
+        assert(document.elements == [
+            .subheading(id: "elem-1", text: "小标题"),
+            .paragraph(id: "elem-2", text: "一段 **强调** 文字。"),
+            .bulletItem(id: "elem-3", level: 0, text: "一级条目"),
+            .bulletItem(id: "elem-4", level: 1, text: "二级条目"),
+            .numberedItem(id: "elem-5", number: "2", text: "编号条目"),
+            .numberedItem(id: "elem-6", number: "3", text: "另一个编号"),
+            .table(id: "elem-7", headers: ["指标", "说明"], rows: [["F0", "频率"]]),
+            .divider(id: "elem-8"),
+            .subheading(id: "elem-9", text: "第二标题")
+        ])
+        let translated = parser.document(for: "### Updated heading\nChanged **content**.")
+        assert(translated !== document)
+        assert(translated.elements == [.subheading(id: "elem-1", text: "Updated heading"),
+                                        .paragraph(id: "elem-2", text: "Changed **content**.")])
+        assert(parser.document(for: "").elements.isEmpty)
+        assert(parser.document(for: markdown) !== document) // The cache retains one source, not all prior articles.
+        for article in store.articles {
+            for section in article.sections {
+                let parsed = parser.document(for: section.body)
+                assert(!parsed.elements.isEmpty && Set(parsed.elements.map(\.id)).count == parsed.elements.count)
+                assert(parser.document(for: section.body) === parsed)
+            }
+        }
+        print("✓ Markdown is reused for unchanged sections; changed or localized text immediately replaces the single cached document")
+
+        for _ in 0..<3 {
+            assert(RichInlineText.normalizedMathText(#"Inline \(f_0\), display \[x + y\]."#)
+                   == "Inline $f_0$, display $$x + y$$.")
+            assert(RichInlineText.normalizedMathText(#"Incomplete \(x"#) == #"Incomplete \(x"#)
+            assert(RichInlineText.normalizedMathText(#"Nested \(x \(y\)\)"#) == #"Nested \(x \(y\)\)"#)
+            assert(RichInlineText.normalizedMathText(#"Escaped \\(x\\)"#) == #"Escaped \\(x\\)"#)
+            assert(RichInlineText.normalizedMathText(#"Empty \( \)"#) == #"Empty \( \)"#)
+        }
+        assert(RichInlineText.isStandaloneDisplayMath(" $$x + y$$ "))
+        assert(!RichInlineText.isStandaloneDisplayMath("$$x$$ and $$y$$"))
+        print("✓ Shared math matching preserves inline, display, escaped, incomplete and nested delimiters")
 
         func quality(_ speech: Double = 8, level: Double? = -25, background: Double? = -50, clipped: Double? = 0) -> RecordingQuality {
             RecordingQuality(speechSeconds: speech, speechDBFS: level, backgroundDBFS: background, clippedFraction: clipped)

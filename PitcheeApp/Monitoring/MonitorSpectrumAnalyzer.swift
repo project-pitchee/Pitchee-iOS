@@ -1,3 +1,10 @@
+//
+//  MonitorSpectrumAnalyzer.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import Accelerate
 import Foundation
 

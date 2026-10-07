@@ -1,9 +1,51 @@
+//
+//  MonitorTimeline.swift
+//  Pitchee
+//
+//  Created by Ryo on 2026/10/5.
+//
+
 import Foundation
 
 nonisolated struct MonitorSpectrumFrame: Sendable {
-    let elapsedTime: TimeInterval
+    static let frequencyRange: ClosedRange<Double> = 40...8_000
+
+    private(set) var elapsedTime: TimeInterval
     let magnitudesDB: [Float]
     let binWidthHz: Double
+    let peak: (frequencyHz: Double, amplitudeDBFS: Float)?
+    let isValid: Bool
+
+    init(elapsedTime: TimeInterval, magnitudesDB: [Float], binWidthHz: Double) {
+        self.elapsedTime = elapsedTime
+        self.magnitudesDB = magnitudesDB
+        self.binWidthHz = binWidthHz
+
+        guard binWidthHz.isFinite, binWidthHz > 0, !magnitudesDB.isEmpty else {
+            peak = nil
+            isValid = false
+            return
+        }
+        var valid = true
+        var strongest: (frequencyHz: Double, amplitudeDBFS: Float)?
+        for (index, magnitude) in magnitudesDB.enumerated() {
+            guard magnitude.isFinite else { valid = false; continue }
+            let frequency = Double(index) * binWidthHz
+            if Self.frequencyRange.contains(frequency), magnitude > (strongest?.amplitudeDBFS ?? -95) {
+                strongest = (frequency, magnitude)
+            }
+        }
+        // Validate and find the peak once when the FFT result arrives. Chart,
+        // gauge, and accessibility readouts can then share the same result.
+        isValid = valid
+        peak = valid ? strongest : nil
+    }
+
+    func offset(by seconds: TimeInterval) -> Self {
+        var shifted = self
+        shifted.elapsedTime += seconds
+        return shifted
+    }
 }
 
 /// The microphone's captured time is the clock for both charts and replay.
@@ -75,9 +117,7 @@ nonisolated struct MonitorTimeline: Sendable {
         guard retainedSampleCount > 0 else { return }
         let range = availableRange
         for frame in frames where frame.elapsedTime.isFinite && range.contains(frame.elapsedTime) {
-            guard frame.binWidthHz.isFinite, frame.binWidthHz > 0,
-                  !frame.magnitudesDB.isEmpty,
-                  frame.magnitudesDB.allSatisfy(\.isFinite) else { continue }
+            guard frame.isValid else { continue }
             Self.insert(frame, into: &spectrumFrames, time: \.elapsedTime)
         }
     }
@@ -148,9 +188,9 @@ nonisolated struct MonitorTimeline: Sendable {
 
     private mutating func trimAnalysis() {
         let lower = availableRange.lowerBound
-        let pitchCount = pitchSamples.firstIndex { $0.elapsedTime >= lower } ?? pitchSamples.count
+        let pitchCount = TimelineSearch.lowerBound(in: pitchSamples, at: lower, time: \.elapsedTime)
         if pitchCount > 0 { pitchSamples.removeFirst(pitchCount) }
-        let spectrumCount = spectrumFrames.firstIndex { $0.elapsedTime >= lower } ?? spectrumFrames.count
+        let spectrumCount = TimelineSearch.lowerBound(in: spectrumFrames, at: lower, time: \.elapsedTime)
         if spectrumCount > 0 { spectrumFrames.removeFirst(spectrumCount) }
     }
 
@@ -167,16 +207,7 @@ nonisolated struct MonitorTimeline: Sendable {
             elements.append(element)
             return
         }
-        var lower = 0
-        var upper = elements.count
-        while lower < upper {
-            let middle = lower + (upper - lower) / 2
-            if elements[middle][keyPath: time] < timestamp {
-                lower = middle + 1
-            } else {
-                upper = middle
-            }
-        }
+        let lower = TimelineSearch.lowerBound(in: elements, at: timestamp, time: time)
         if lower < elements.count, elements[lower][keyPath: time] == timestamp {
             elements[lower] = element
         } else {
