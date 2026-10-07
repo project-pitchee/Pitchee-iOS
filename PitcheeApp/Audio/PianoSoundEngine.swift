@@ -27,6 +27,7 @@ struct PianoNote: Identifiable, Hashable {
     ].map { PianoNote(midi: $0.1, displayName: $0.0) }
 }
 
+@MainActor
 final class PianoSoundEngine: ObservableObject {
     private let logger = Logger(subsystem: "com.lvyzhan.Pitchee", category: "Piano")
     private let engine = AVAudioEngine()
@@ -46,7 +47,7 @@ final class PianoSoundEngine: ObservableObject {
         let task = Task { [weak self] in
             guard let self else { return false }
             do {
-                try await AudioSessionController.activate(owner: owner, use: .piano) { [weak self] in
+                try await AudioSessionController.activate(owner: owner, use: .piano, holder: self) { [weak self] in
                     self?.stopAll()
                 }
                 guard !Task.isCancelled, sessionOwner == owner else {
@@ -144,5 +145,12 @@ final class PianoSoundEngine: ObservableObject {
         engine.pause()
         if let sessionOwner { AudioSessionController.deactivate(owner: sessionOwner) }
         sessionOwner = nil
+    }
+
+    isolated deinit {
+        pendingNote?.cancel()
+        preparation?.cancel()
+        engine.stop()
+        if let sessionOwner { AudioSessionController.deactivate(owner: sessionOwner) }
     }
 }

@@ -10,6 +10,9 @@ import Combine
 import Foundation
 import OSLog
 import SwiftData
+#if os(iOS)
+import UIKit
+#endif
 
 @MainActor
 final class AnalysisViewModel: NSObject, ObservableObject {
@@ -33,6 +36,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     // Recording alerts and analysis feedback belong to separate screens.
     @Published private(set) var recordingError: String?
     @Published private(set) var analysisError: String?
+    @Published private(set) var captureNotice: String?
     @Published private(set) var practice: PracticeContext?
     @Published private(set) var takes: [PracticeTake] = [] {
         didSet { retainedPracticeURLs = takes.map(\.url) }
@@ -72,6 +76,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         elapsedTime = 0
         livePitchSamples = []
         recordedPitchSamples = []
+        captureNotice = nil
         state = .idle
         return true
     }
@@ -92,6 +97,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         elapsedTime = 0
         livePitchSamples = []
         recordedPitchSamples = []
+        captureNotice = nil
         state = .idle
         return true
     }
@@ -130,11 +136,35 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         }
     }
 
-    /// Do not silently resume a partial utterance after an interruption or a
-    /// route change. The user restarts the same passage; completed takes survive.
+    /// End this take at the interruption. Accepted PCM is drained into a valid
+    /// WAV, and analysis resumes in the foreground without reopening the mic.
     func interruptCapture() {
         playback.stop()
+        if let context = recordingModelContext, audioCapture != nil, recordingURL != nil,
+           state == .recording || state == .requestingPermission {
+            captureGeneration = UUID()
+            permissionTask?.cancel()
+            stopRecording(modelContext: context, interrupted: true)
+            return
+        }
         cancelRecording(message: String(localized: "practice.recording.interrupted"))
+    }
+
+    func handleSceneInactive(isBackground: Bool) {
+        sceneIsActive = false
+        // A microphone permission prompt temporarily makes the scene inactive.
+        // Going to the background still cancels that pending request.
+        if isBackground || !awaitingPermission { interruptCapture() }
+    }
+
+    func handleSceneActive() {
+        sceneIsActive = true
+        if let pendingRecording {
+            self.pendingRecording = nil
+            completeRecording(pendingRecording.url, recordedAt: pendingRecording.recordedAt,
+                              modelContext: pendingRecording.modelContext,
+                              studyAuthorization: nil, studyDirection: nil)
+        }
     }
 
     private func cancelRecording(message: String) {
@@ -142,13 +172,17 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         captureGeneration = UUID()
         permissionTask?.cancel()
         stopTimer()
+        let hadCapture = audioCapture != nil
         discardCapture(audioCapture, url: recordingURL)
         audioCapture = nil
         recordingURL = nil
         recordingStartedAt = nil
         recordingStudyAuthorization = nil
         recordingStudyDirection = nil
-        deactivateAudioSession()
+        recordingModelContext = nil
+        awaitingPermission = false
+        if hadCapture { audioSessionOwner = nil }
+        else { deactivateAudioSession() }
         showRecordingError(message)
     }
 
@@ -172,6 +206,17 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private var recordingStudyDirection: ScoreStudyDirection?
     private var feedbackTimeoutTask: Task<Void, Never>?
     private var pendingStudy: PendingStudy?
+    private var recordingModelContext: ModelContext?
+    private var pendingRecording: PendingRecording?
+    private var sceneIsActive = true
+    private var awaitingPermission = false
+    private var observers: [NSObjectProtocol] = []
+
+    private struct PendingRecording {
+        let url: URL
+        let recordedAt: Date
+        let modelContext: ModelContext
+    }
 
     private struct PendingStudy {
         let url: URL
@@ -252,7 +297,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         case .recording:
             stopRecording(modelContext: modelContext)
         case .idle, .completed:
-            startRecording()
+            startRecording(modelContext: modelContext)
         case .requestingPermission, .awaitingFeedback, .analyzing:
             break
         }
@@ -262,7 +307,8 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         recordingError = nil
     }
 
-    private func startRecording() {
+    private func startRecording(modelContext: ModelContext) {
+        guard sceneIsActive else { return }
         guard !needsAudioCleanup else {
             recordingError = String(localized: "practice.audio.cleanupError")
             return
@@ -274,6 +320,8 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         recordingStudyDirection = ScoreStudyEvaluator.direction(for: preference)
         recordingError = nil
         analysisError = nil
+        captureNotice = nil
+        recordingModelContext = modelContext
         result = nil
         elapsedTime = 0
         livePitchSamples = []
@@ -281,6 +329,8 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         volumeStatistics = nil
         recordingStartedAt = nil
         state = .requestingPermission
+        awaitingPermission = true
+        installObservers()
         let generation = UUID()
         captureGeneration = generation
 
@@ -289,9 +339,17 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             let granted = await requestMicrophonePermission()
             guard !Task.isCancelled, captureGeneration == generation else { return }
 
+            // Permission completion can precede dismissal of the system prompt.
+            while !sceneIsActive {
+                do { try await Task.sleep(for: .milliseconds(50)) } catch { return }
+                guard captureGeneration == generation else { return }
+            }
+            awaitingPermission = false
+
             if granted {
                 await beginRecording(generation: generation)
             } else {
+                recordingModelContext = nil
                 showRecordingError(String(localized: "recording.error.microphonePermissionDenied"))
             }
         }
@@ -329,6 +387,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             try await AudioSessionController.activate(
                 owner: owner,
                 use: .recording,
+                holder: self,
                 stopPlayback: { [weak self] in self?.playback.stop() }
             )
             guard isCurrentRecordingRequest(generation) else {
@@ -380,20 +439,24 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                 )
             }.value
             guard isCurrentRecordingRequest(generation) else {
-                discardCapture(newCapture, url: url)
-                releaseAudioSession(owner)
+                // Cancellation/interruption owns teardown, including a take
+                // finalized while this detached engine startup was pending.
                 return
             }
             state = .recording
             startTimer()
         } catch {
+            guard captureGeneration == generation else { return }
             discardCapture(startedCapture, url: startedURL)
-            releaseAudioSession(owner)
             // An obsolete startup must not clear a newer recording's state.
             guard !Task.isCancelled, captureGeneration == generation else { return }
             audioCapture = nil
             recordingURL = nil
             recordingStartedAt = nil
+            recordingModelContext = nil
+            // No engine exists if startup failed before constructing capture.
+            if startedCapture == nil { releaseAudioSession(owner) }
+            else if audioSessionOwner == owner { audioSessionOwner = nil }
             stopTimer()
             showRecordingError(recordingErrorMessage(for: error))
         }
@@ -403,8 +466,9 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         !Task.isCancelled && captureGeneration == generation && state == .requestingPermission
     }
 
-    private func stopRecording(modelContext: ModelContext) {
-        guard state == .recording, let audioCapture, let url = recordingURL else { return }
+    private func stopRecording(modelContext: ModelContext, interrupted: Bool = false) {
+        guard state == .recording || state == .requestingPermission,
+              let audioCapture, let url = recordingURL else { return }
         stopTimer()
         let recordedAt = recordingStartedAt ?? Date()
         elapsedTime = Date().timeIntervalSince(recordedAt)
@@ -412,18 +476,31 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         let owner = audioSessionOwner
         let studyAuthorization = recordingStudyAuthorization
         let studyDirection = recordingStudyDirection
+        if let owner { AudioSessionController.retainUntilStopped(owner: owner, holder: audioCapture) }
         self.audioCapture = nil
         recordingURL = nil
         recordingStartedAt = nil
         recordingStudyAuthorization = nil
         recordingStudyDirection = nil
+        recordingModelContext = nil
+        awaitingPermission = false
         clearRecordingError()
+        if interrupted { captureNotice = String(localized: "recording.interruption.saved") }
         state = .analyzing
+
+        #if os(iOS)
+        // Only finishing accepted writes needs background time. The microphone
+        // stops immediately, and protected-file analysis waits for foreground.
+        let backgroundTask = CaptureBackgroundTask()
+        #endif
 
         recordingStopTask = Task { [weak self] in
             // Stop hardware and finish accepted writes before Core sees the WAV.
             // The analysis screen can render while this drains off the main actor.
             let writeError = await audioCapture.finish()
+            #if os(iOS)
+            backgroundTask.end()
+            #endif
             if let owner { AudioSessionController.deactivate(owner: owner) }
             guard let self, !Task.isCancelled, self.captureGeneration == generation else {
                 try? FileManager.default.removeItem(at: url)
@@ -438,8 +515,14 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                 self.state = .idle
                 return
             }
-            self.completeRecording(url, recordedAt: recordedAt, modelContext: modelContext,
-                                   studyAuthorization: studyAuthorization, studyDirection: studyDirection)
+            if !self.sceneIsActive {
+                self.pendingRecording = PendingRecording(url: url, recordedAt: recordedAt,
+                                                         modelContext: modelContext)
+            } else {
+                self.completeRecording(url, recordedAt: recordedAt, modelContext: modelContext,
+                                       studyAuthorization: interrupted ? nil : studyAuthorization,
+                                       studyDirection: interrupted ? nil : studyDirection)
+            }
         }
     }
 
@@ -537,11 +620,40 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private func discardCapture(_ capture: LivePitchAudioCapture?, url: URL?) {
         guard capture != nil || url != nil else { return }
         let previousCleanup = captureCleanupTask
+        let owner = audioSessionOwner
+        if let capture, let owner {
+            AudioSessionController.retainUntilStopped(owner: owner, holder: capture)
+        }
         let cancellation = capture?.cancel()
         captureCleanupTask = Task.detached(priority: .utility) {
             await previousCleanup?.value
             if let cancellation { _ = await cancellation.value }
             if let url { try? FileManager.default.removeItem(at: url) }
+            if let owner { await AudioSessionController.deactivate(owner: owner) }
+        }
+    }
+
+    private func installObservers() {
+        guard observers.isEmpty else { return }
+        for name in [AVAudioSession.interruptionNotification, AVAudioSession.routeChangeNotification,
+                     AVAudioSession.mediaServicesWereResetNotification] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) {
+                [weak self] notification in
+                if notification.name == AVAudioSession.interruptionNotification {
+                    let type = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+                    guard type == AVAudioSession.InterruptionType.began.rawValue else { return }
+                }
+                if notification.name == AVAudioSession.routeChangeNotification {
+                    let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+                    // Ignore category changes generated by our own activation.
+                    guard reason == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+                        || reason == AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                        || reason == AVAudioSession.RouteChangeReason.noSuitableRouteForCategory.rawValue else { return }
+                }
+                // NotificationCenter delivers on .main; handle this event now
+                // so a queued task cannot interrupt a later recording attempt.
+                MainActor.assumeIsolated { self?.interruptCapture() }
+            })
         }
     }
 
@@ -727,6 +839,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     }
 
     isolated deinit {
+        observers.forEach(NotificationCenter.default.removeObserver)
         playback.stop()
         permissionTask?.cancel()
         timerTask?.cancel()
@@ -735,11 +848,33 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         feedbackTimeoutTask?.cancel()
         recordingStopTask?.cancel()
         discardCapture(audioCapture, url: recordingURL)
-        deactivateAudioSession()
+        if audioCapture == nil, recordingStopTask == nil { deactivateAudioSession() }
+        if let pendingRecording { try? FileManager.default.removeItem(at: pendingRecording.url) }
         if let pendingStudy { try? FileManager.default.removeItem(at: pendingStudy.url) }
         for url in retainedPracticeURLs { try? FileManager.default.removeItem(at: url) }
     }
 }
+
+#if os(iOS)
+@MainActor
+private final class CaptureBackgroundTask {
+    private var identifier: UIBackgroundTaskIdentifier = .invalid
+
+    init() {
+        identifier = UIApplication.shared.beginBackgroundTask(withName: "Finish recording") { [weak self] in
+            self?.end()
+        }
+    }
+
+    func end() {
+        guard identifier != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(identifier)
+        identifier = .invalid
+    }
+
+    isolated deinit { end() }
+}
+#endif
 
 #if DEBUG
 extension AnalysisViewModel {

@@ -93628,6 +93628,186 @@
         }
       }
     },
+    "recording.interruption.saved" : {
+      "comment" : "Explains that an interrupted recording is finalized and its captured audio is analyzed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "توقف التسجيل. سيُحلَّل الصوت المسجَّل قبل التوقف؛ يمكنك التسجيل مجددًا للحصول على تسجيل كامل."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Nahrávání bylo přerušeno. Zvuk zachycený před zastavením bude analyzován; pro úplný záznam můžete nahrávat znovu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Optagelsen blev afbrudt. Lyden optaget før stoppet bliver analyseret; du kan optage igen for at få en komplet optagelse."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Die Aufnahme wurde unterbrochen. Das bis zum Stopp aufgenommene Audio wird analysiert. Für eine vollständige Aufnahme kannst du erneut aufnehmen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Η ηχογράφηση διακόπηκε. Ο ήχος πριν από τη διακοπή θα αναλυθεί. Μπορείτε να ηχογραφήσετε ξανά για μια πλήρη λήψη."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording was interrupted. Audio captured before the stop will be analyzed; you can record again for a complete take."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "La grabación se interrumpió. Se analizará el audio capturado antes de detenerse; puedes volver a grabar una toma completa."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tallennus keskeytyi. Ennen pysäytystä tallennettu ääni analysoidaan. Voit tallentaa uudelleen saadaksesi kokonaisen otoksen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "L’enregistrement a été interrompu. Le son capturé avant l’arrêt sera analysé. Vous pouvez enregistrer à nouveau une prise complète."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ההקלטה הופסקה. השמע שנקלט לפני העצירה ינותח; ניתן להקליט שוב כדי לקבל הקלטה מלאה."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "रिकॉर्डिंग बाधित हुई। रुकने से पहले रिकॉर्ड की गई आवाज़ का विश्लेषण किया जाएगा; पूरी रिकॉर्डिंग के लिए आप फिर से रिकॉर्ड कर सकते हैं।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Snimanje je prekinuto. Zvuk snimljen prije zaustavljanja bit će analiziran; možete ponovno snimiti cijelu snimku."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "A felvétel megszakadt. A leállítás előtt rögzített hang elemzésre kerül; teljes felvételhez újra rögzíthet."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Perekaman terhenti. Audio yang direkam sebelum berhenti akan dianalisis; Anda dapat merekam ulang untuk mendapatkan rekaman lengkap."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "La registrazione è stata interrotta. L’audio acquisito prima dell’arresto verrà analizzato; puoi registrare di nuovo una ripresa completa."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "録音が中断されました。停止までに録音された音声を分析します。全体を録音するには、もう一度録音してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "녹음이 중단되었어요. 중단 전에 녹음된 음성을 분석합니다. 전체 녹음을 원하면 다시 녹음할 수 있어요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Rakaman terganggu. Audio yang dirakam sebelum berhenti akan dianalisis; anda boleh merakam semula untuk rakaman yang lengkap."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "De opname is onderbroken. De audio van vóór het stoppen wordt geanalyseerd; je kunt opnieuw opnemen voor een volledige opname."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Nagrywanie zostało przerwane. Dźwięk nagrany przed zatrzymaniem zostanie przeanalizowany. Możesz nagrać ponownie całość."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "A gravação foi interrompida. O áudio capturado antes da interrupção será analisado; você pode gravar novamente para obter uma gravação completa."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Запись прервана. Звук, записанный до остановки, будет проанализирован. Для полной записи можно записать снова."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Inspelningen avbröts. Ljudet som spelades in före stoppet kommer att analyseras. Du kan spela in igen för en fullständig tagning."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "การบันทึกถูกขัดจังหวะ ระบบจะวิเคราะห์เสียงที่บันทึกไว้ก่อนหยุด คุณสามารถบันทึกใหม่เพื่อให้ได้เสียงครบถ้วน"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Kayıt kesintiye uğradı. Durmadan önce kaydedilen ses analiz edilecek; tam bir kayıt için yeniden kaydedebilirsiniz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Запис перервано. Звук, записаний до зупинки, буде проаналізовано. Для повного запису можна записати знову."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Quá trình ghi âm bị gián đoạn. Âm thanh thu được trước khi dừng sẽ được phân tích; bạn có thể ghi lại để có bản ghi đầy đủ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "录音已中断，将分析停止前录到的内容。你可以重新录制完整片段。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "錄音已中斷，將分析停止前錄到的內容。你可以重新錄製完整片段。"
+          }
+        }
+      }
+    },
     "recording.reference.passage" : {
       "comment" : "Reading passage recorded by the user; keep it natural to read aloud and roughly the same length.",
       "extractionState" : "manual",
@@ -126530,10 +126710,166 @@
       "comment" : "Combined theme and app icon settings section.",
       "extractionState" : "manual",
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "التخصيص"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Přizpůsobení"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tilpasning"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalisierung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Εξατομίκευση"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Personalization"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalización"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mukauttaminen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personnalisation"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "התאמה אישית"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "वैयक्तिकरण"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalizacija"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Személyre szabás"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalisasi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalizzazione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "パーソナライズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "개인화"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Pemperibadian"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalisatie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalizacja"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Personalização"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Персонализация"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Anpassning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "การปรับแต่งเฉพาะบุคคล"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Kişiselleştirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Персоналізація"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cá nhân hóa"
           }
         },
         "zh-Hans" : {
@@ -126550,6 +126886,7 @@
         }
       }
     },
+
     "settings.privateStorage.unavailable.description" : {
       "comment" : "Shown when protected local storage cannot be opened. Existing history is retained.",
       "extractionState" : "manual",

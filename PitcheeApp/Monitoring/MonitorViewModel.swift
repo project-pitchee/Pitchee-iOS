@@ -155,7 +155,7 @@ final class MonitorViewModel {
                     try await preparedAnalyzer?.resetRealtimeF0()
                 }
                 guard generation == token, !Task.isCancelled else { return }
-                try await AudioSessionController.activate(owner: owner, use: .recording)
+                try await AudioSessionController.activate(owner: owner, use: .recording, holder: self)
                 guard generation == token, !Task.isCancelled else {
                     AudioSessionController.deactivate(owner: owner)
                     return
@@ -308,7 +308,7 @@ final class MonitorViewModel {
                     MonitorWaveEncoder.encode(samples)
                 }.value
                 try Task.checkCancellation()
-                try await AudioSessionController.activate(owner: owner, use: .playback) { [weak self] in
+                try await AudioSessionController.activate(owner: owner, use: .playback, holder: self) { [weak self] in
                     self?.pause()
                 }
                 guard generation == token, !Task.isCancelled else {
@@ -444,6 +444,9 @@ final class MonitorViewModel {
         playbackClock = nil
         displayClock?.cancel()
         displayClock = nil
+        if let capture, let sessionOwner {
+            AudioSessionController.retainUntilStopped(owner: sessionOwner, holder: capture)
+        }
         let captureTeardown = capture?.stop()
         capture = nil
         player?.stop()
@@ -492,6 +495,11 @@ final class MonitorViewModel {
             }
             observers.append(observer)
         }
+    }
+
+    isolated deinit {
+        observers.forEach(NotificationCenter.default.removeObserver)
+        stopAudio()
     }
 
     #if DEBUG

@@ -57,6 +57,7 @@ struct ScoringView: View {
             model.prepareForRecording()
             syncModelState()
         }
+        .onDisappear { model.interruptCapture() }
         .onReceive(model.$state.removeDuplicates()
             .combineLatest(model.$recordingError.removeDuplicates())
             .receive(on: RunLoop.main)) { _ in
@@ -77,7 +78,7 @@ struct ScoringView: View {
     }
 
     private func pushAnalysisIfNeeded() {
-        guard model.needsAnalysisScreen, practicePath.last != .analysis else { return }
+        guard model.needsAnalysisScreen, practicePath.last == .scoring else { return }
         practicePath.append(.analysis)
     }
 }

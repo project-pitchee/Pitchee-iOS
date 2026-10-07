@@ -25,13 +25,18 @@ enum AudioSessionController {
     static func activate(
         owner: UUID,
         use: AudioSessionCoordinator.Use,
+        holder: AnyObject,
         stopPlayback: @escaping @MainActor () -> Void = {}
     ) async throws {
-        try await coordinator.activate(owner: owner, use: use, stopPlayback: stopPlayback)
+        try await coordinator.activate(owner: owner, use: use, holder: holder, stopPlayback: stopPlayback)
     }
 
     static func deactivate(owner: UUID) {
         coordinator.release(owner: owner)
+    }
+
+    static func retainUntilStopped(owner: UUID, holder: AnyObject) {
+        coordinator.retainUntilStopped(owner: owner, holder: holder)
     }
 
     private static func configure(_ use: AudioSessionCoordinator.Use) async throws {

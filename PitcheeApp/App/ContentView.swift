@@ -55,6 +55,7 @@ private struct MainTabView: View {
     let themeColor: Color
     let dashboardTint: Color
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     // Keep the reference stable without making the whole TabView observe every
     // realtime pitch frame. ScoringView and the accessory subscribe locally.
     @State private var recordingModel = AnalysisViewModel()
@@ -144,7 +145,15 @@ private struct MainTabView: View {
         .onChange(of: selectedTab) { _, tab in
             if tab != .practice {
                 monitorAccessoryState.leavePractice()
+                recordingModel.interruptCapture()
             }
+        }
+        .onChange(of: practicePath) { _, path in
+            if path.last != .scoring { recordingModel.interruptCapture() }
+        }
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { recordingModel.handleSceneActive() }
+            else { recordingModel.handleSceneInactive(isBackground: phase == .background) }
         }
     }
 

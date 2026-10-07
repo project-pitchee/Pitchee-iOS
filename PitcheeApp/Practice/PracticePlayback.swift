@@ -10,10 +10,11 @@ import Combine
 import Foundation
 
 @MainActor
-final class PracticePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
+final class PracticePlayback: NSObject, ObservableObject {
     @Published private(set) var playingID: UUID?
     @Published private(set) var error: String?
     private var player: AVAudioPlayer?
+    private var playerDelegate: PracticePlaybackDelegate?
     private var activation: Task<Void, Never>?
     private var generation = UUID()
     private var sessionOwner: UUID?
@@ -29,12 +30,22 @@ final class PracticePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate 
         playingID = id
         activation = Task { [weak self] in
             do {
-                try await AudioSessionController.activate(owner: owner, use: .playback) { [weak self] in
+                guard let self else { return }
+                try await AudioSessionController.activate(owner: owner, use: .playback, holder: self) { [weak self] in
                     self?.stop()
                 }
-                guard let self, !Task.isCancelled, generation == token else { return }
+                guard !Task.isCancelled, generation == token else {
+                    AudioSessionController.deactivate(owner: owner)
+                    return
+                }
                 let player = try AVAudioPlayer(contentsOf: url)
-                player.delegate = self
+                let delegate = PracticePlaybackDelegate { [weak self] successful in
+                    guard let self, generation == token else { return }
+                    stop()
+                    if !successful { error = String(localized: "practice.playback.error") }
+                }
+                player.delegate = delegate
+                playerDelegate = delegate
                 self.player = player
                 guard player.play() else { throw CocoaError(.fileReadUnknown) }
             } catch {
@@ -53,24 +64,32 @@ final class PracticePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate 
         activation = nil
         player?.stop()
         player = nil
+        playerDelegate = nil
         playingID = nil
         if let sessionOwner { AudioSessionController.deactivate(owner: sessionOwner) }
         sessionOwner = nil
     }
 
+    isolated deinit {
+        activation?.cancel()
+        player?.stop()
+        if let sessionOwner { AudioSessionController.deactivate(owner: sessionOwner) }
+    }
+}
+
+private final class PracticePlaybackDelegate: NSObject, AVAudioPlayerDelegate {
+    let completion: @MainActor (Bool) -> Void
+
+    init(completion: @escaping @MainActor (Bool) -> Void) {
+        self.completion = completion
+    }
+
     nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        Task { @MainActor [weak self] in
-            guard self?.player === player else { return }
-            self?.stop()
-        }
+        Task { @MainActor [weak self] in self?.completion(flag) }
     }
 
     nonisolated func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        Task { @MainActor [weak self] in
-            guard self?.player === player else { return }
-            self?.stop()
-            self?.error = String(localized: "practice.playback.error")
-        }
+        Task { @MainActor [weak self] in self?.completion(false) }
     }
 }
 

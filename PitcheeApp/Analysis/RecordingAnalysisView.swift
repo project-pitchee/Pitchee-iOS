@@ -24,6 +24,7 @@ struct RecordingAnalysisView: View {
                     result: result,
                     volumeStatistics: viewModel.volumeStatistics,
                     saveError: viewModel.analysisError,
+                    recordingNotice: viewModel.captureNotice,
                     quality: viewModel.assessment?.quality,
                     recordedPreference: viewModel.practice?.target
                 )
@@ -79,6 +80,11 @@ struct RecordingAnalysisView: View {
                 Text("analysis.progress.subtitle")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if let notice = viewModel.captureNotice {
+                    Text(notice)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             ProgressView().controlSize(.large)
             Label("analysis.progress.privacyNote", systemImage: "lock.shield")
@@ -95,6 +101,7 @@ struct RecordingResultView: View {
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
     let saveError: String?
+    let recordingNotice: String?
     let quality: RecordingQuality?
     let recordedPreference: VoicePreference?
     private let showsBackground: Bool
@@ -126,6 +133,7 @@ struct RecordingResultView: View {
         result: PitcheeAnalysisResult,
         volumeStatistics: RecordingVolumeStatistics?,
         saveError: String?,
+        recordingNotice: String? = nil,
         quality: RecordingQuality? = nil,
         recordedPreference: VoicePreference? = nil,
         showsBackground: Bool = true
@@ -133,6 +141,7 @@ struct RecordingResultView: View {
         self.result = result
         self.volumeStatistics = volumeStatistics
         self.saveError = saveError
+        self.recordingNotice = recordingNotice
         self.quality = quality
         self.recordedPreference = recordedPreference
         self.showsBackground = showsBackground
@@ -166,6 +175,12 @@ struct RecordingResultView: View {
             scoreSummary
 
             voiceProfileSection
+
+            if let recordingNotice {
+                Label(recordingNotice, systemImage: "pause.circle")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             if let saveError {
                 Label(saveError, systemImage: "exclamationmark.triangle.fill")
