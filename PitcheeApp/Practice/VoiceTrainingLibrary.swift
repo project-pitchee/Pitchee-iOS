@@ -23,22 +23,6 @@ enum LibraryTheme {
         Color.accentColor
         #endif
     }
-
-    static var groupedBackground: Color {
-        #if os(iOS)
-        Color(uiColor: .systemGroupedBackground)
-        #else
-        Color.secondary.opacity(0.08)
-        #endif
-    }
-
-    static var secondaryGroupedBackground: Color {
-        #if os(iOS)
-        Color(uiColor: .secondarySystemGroupedBackground)
-        #else
-        Color.secondary.opacity(0.12)
-        #endif
-    }
 }
 
 /// Structured model for an article in the Pitchee Voice Training Library.
@@ -217,7 +201,6 @@ nonisolated struct VoiceTrainingRecommendation: Sendable {
     let acousticAlertArticles: [VoiceArticle]
     let deepDiveArticles: [VoiceArticle]
     let matchedRule: String
-    let rationale: String
 
     init(
         primaryArticle: VoiceArticle?,
@@ -225,7 +208,6 @@ nonisolated struct VoiceTrainingRecommendation: Sendable {
         acousticAlertArticles: [VoiceArticle] = [],
         deepDiveArticles: [VoiceArticle],
         matchedRule: String,
-        rationale: String,
         prioritySuggestions: [VoiceTrainingSuggestion] = []
     ) {
         self.primaryArticle = primaryArticle
@@ -233,7 +215,6 @@ nonisolated struct VoiceTrainingRecommendation: Sendable {
         self.acousticAlertArticles = acousticAlertArticles
         self.deepDiveArticles = deepDiveArticles
         self.matchedRule = matchedRule
-        self.rationale = rationale
         self.prioritySuggestions = prioritySuggestions
     }
 
@@ -258,7 +239,7 @@ nonisolated struct VoiceTrainingRecommendation: Sendable {
 /// Storage and access layer for the Voice Training Library.
 nonisolated final class VoiceTrainingLibraryStore: Sendable {
     /// Empty data is safe for advice while the library is loading. It performs no I/O.
-    static let empty = VoiceTrainingLibraryStore(articles: [], ruleMatrix: [:])
+    static let empty = VoiceTrainingLibraryStore()
 
     nonisolated struct Category: Identifiable, Sendable {
         let id: String
@@ -279,7 +260,6 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
     let categories: [Category]
     private let articleMap: [String: VoiceArticle]
     private let categoryMap: [String: Category]
-    let ruleMatrix: [String: [String]]
 
     enum LoadError: Error, LocalizedError, Sendable {
         case missingResource(String)
@@ -357,23 +337,13 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
         let groups = Dictionary(grouping: articles, by: \.category)
         self.categories = groups.keys.sorted().map { Category(id: $0, articles: groups[$0] ?? []) }
         self.categoryMap = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
-        self.ruleMatrix = matrix
     }
 
-    private init(articles: [VoiceArticle], ruleMatrix: [String: [String]]) {
-        self.articles = articles
+    private init() {
+        self.articles = []
         self.articleMap = [:]
         self.categories = []
         self.categoryMap = [:]
-        self.ruleMatrix = ruleMatrix
-    }
-
-    func articleIDs(forMatrixKey key: String) -> [String] {
-        ruleMatrix[key] ?? []
-    }
-
-    func articles(forMatrixKey key: String) -> [VoiceArticle] {
-        articleIDs(forMatrixKey: key).compactMap { article(for: $0) }
     }
 
     func article(for id: String) -> VoiceArticle? {
@@ -703,7 +673,6 @@ nonisolated enum VoiceLibraryMatcher {
             secondaryArticles: Array(articles.dropFirst()),
             deepDiveArticles: [],
             matchedRule: rule,
-            rationale: suggestions.first?.detail ?? "",
             prioritySuggestions: suggestions
         )
     }

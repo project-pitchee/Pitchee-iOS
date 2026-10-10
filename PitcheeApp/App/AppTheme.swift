@@ -242,25 +242,8 @@ struct ThemeBackground: View {
     }
 }
 
-/// The app-wide theme color. Voice direction supplies the default, while an
-/// optional legacy custom color still takes precedence until a named theme is
-/// selected from Personalization.
+/// App-wide accent colors for each named theme and appearance.
 enum AppTheme {
-    static func color(for preference: VoicePreference, customHex: String) -> Color {
-        Color(hex: customHex) ?? defaultColor(for: preference)
-    }
-
-    static func defaultColor(for preference: VoicePreference) -> Color {
-        switch preference {
-        case .masculine:
-            return Color(red: 0.16, green: 0.42, blue: 0.90)
-        case .feminine:
-            return Color(red: 0.91, green: 0.25, blue: 0.52)
-        case .undecided:
-            return Color(red: 0.16, green: 0.42, blue: 0.90)
-        }
-    }
-
     /// Accent used by controls for a selected theme. The values are
     /// intentionally compact and readable over both appearances; the full
     /// background treatment is rendered by `PageGradient`.
@@ -321,23 +304,5 @@ extension Color {
         let blue = Double((number >> (value.count == 8 ? 8 : 0)) & 0xFF) / 255
         let alpha = value.count == 8 ? Double(number & 0xFF) / 255 : 1
         self.init(.sRGB, red: red, green: green, blue: blue, opacity: alpha)
-    }
-
-    /// Returns a stable sRGB representation suitable for `UserDefaults`.
-    var appThemeHex: String? {
-        var red = CGFloat.zero
-        var green = CGFloat.zero
-        var blue = CGFloat.zero
-        var alpha = CGFloat.zero
-        guard UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return nil
-        }
-
-        return String(
-            format: "#%02X%02X%02X",
-            Int((red * 255).rounded()),
-            Int((green * 255).rounded()),
-            Int((blue * 255).rounded())
-        )
     }
 }

@@ -37,6 +37,11 @@
 			path = PitcheeCore/src;
 			sourceTree = "<group>";
 		};
+		A40000000000000000000002 /* PitcheeCore/external */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PitcheeCore/external;
+			sourceTree = "<group>";
+		};
 		B76D28CB2FDC49E3009E536B /* PitcheeApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = PitcheeApp;
@@ -85,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				A40000000000000000000001 /* PitcheeCore/src */,
+				A40000000000000000000002 /* PitcheeCore/external */,
 				A20000000000000000000002 /* PitcheeCore/models */,
 				A20000000000000000000001 /* Artifacts/ONNXRuntime/onnxruntime.xcframework */,
 			);
@@ -143,6 +149,7 @@
 			fileSystemSynchronizedGroups = (
 				55B9F06F30559D0E005ECDBE /* Resources */,
 				A40000000000000000000001 /* PitcheeCore/src */,
+				A40000000000000000000002 /* PitcheeCore/external */,
 				B76D28CB2FDC49E3009E536B /* PitcheeApp */,
 			);
 			name = Pitchee;
@@ -392,7 +399,6 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pitchee 需要使用麦克风录制声音，以完成分析。";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Pitchee 需要将你导出的报告图片保存到相册。";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pitchee 可在本机为练习录音生成字幕，录音不会上传。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -410,11 +416,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INCLUDE_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Dependencies/PitcheeCore/platform/ios",
-					"$(PROJECT_DIR)/PitcheeApp/Audio/RealtimeAtomics",
-				);
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(PROJECT_DIR)/Dependencies/PitcheeCore/platform/ios $(PROJECT_DIR)/PitcheeApp/Audio/RealtimeAtomics";
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -451,7 +453,6 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pitchee 需要使用麦克风录制声音，以完成分析。";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Pitchee 需要将你导出的报告图片保存到相册。";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pitchee 可在本机为练习录音生成字幕，录音不会上传。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -469,11 +470,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INCLUDE_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Dependencies/PitcheeCore/platform/ios",
-					"$(PROJECT_DIR)/PitcheeApp/Audio/RealtimeAtomics",
-				);
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(PROJECT_DIR)/Dependencies/PitcheeCore/platform/ios $(PROJECT_DIR)/PitcheeApp/Audio/RealtimeAtomics";
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;

@@ -37,109 +37,24 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     @Published private(set) var recordingError: String?
     @Published private(set) var analysisError: String?
     @Published private(set) var captureNotice: String?
-    @Published private(set) var practice: PracticeContext?
-    @Published private(set) var takes: [PracticeTake] = [] {
-        didSet { retainedPracticeURLs = takes.map(\.url) }
-    }
     @Published private(set) var assessment: RecordingAssessment?
-    @Published private(set) var comparisonFeedback: PracticeFeedback?
-    @Published private(set) var feedbackError: String?
-    @Published private(set) var needsAudioCleanup = false
-    let playback = PracticePlayback()
-
-    var lastPracticeKind: PracticeKind? {
-        UserDefaults.standard.string(forKey: "practice.lastKind").flatMap(PracticeKind.init(rawValue:))
-    }
-    var canConfigurePractice: Bool { state == .idle && takes.isEmpty }
-
-    func selectPractice(_ kind: PracticeKind) {
-        guard canConfigurePractice else { return }
-        let target = VoicePreference(legacyStoredValue: UserDefaults.standard.string(forKey: AppStorageKey.voicePreference) ?? "") ?? .undecided
-        practice = PracticeContext(kind: kind, target: target)
-        UserDefaults.standard.set(kind.rawValue, forKey: "practice.lastKind")
-    }
 
     @discardableResult
     func prepareRetake() -> Bool {
-        guard state == .completed, !needsAudioCleanup else { return false }
-        playback.stop()
-        // A stays fixed; retry replaces B. Never keep a third audio file.
-        if takes.count == 2 {
-            guard removePracticeAudio([takes[1].url]) else { return false }
-            takes.removeLast()
-        }
+        guard state == .completed else { return false }
         result = nil
         assessment = nil
-        comparisonFeedback = nil
-        feedbackError = nil
         volumeStatistics = nil
         elapsedTime = 0
         livePitchSamples = []
-        recordedPitchSamples = []
         captureNotice = nil
         state = .idle
         return true
-    }
-
-    @discardableResult
-    func endPractice() -> Bool {
-        guard state == .idle || state == .completed else { return false }
-        playback.stop()
-        guard removePracticeAudio(takes.map(\.url)) else { return false }
-        needsAudioCleanup = false
-        takes = []
-        practice = nil
-        assessment = nil
-        comparisonFeedback = nil
-        feedbackError = nil
-        result = nil
-        volumeStatistics = nil
-        elapsedTime = 0
-        livePitchSamples = []
-        recordedPitchSamples = []
-        captureNotice = nil
-        state = .idle
-        return true
-    }
-
-    private func removePracticeAudio(_ urls: [URL]) -> Bool {
-        do {
-            for url in urls {
-                do { try FileManager.default.removeItem(at: url) }
-                catch let error as CocoaError where error.code == .fileNoSuchFile { continue }
-            }
-            return true
-        } catch {
-            needsAudioCleanup = true
-            let message = String(localized: "practice.audio.cleanupError")
-            if state == .idle { recordingError = message }
-            else { analysisError = message }
-            return false
-        }
-    }
-
-    func saveComparisonFeedback(_ feedback: PracticeFeedback, modelContext: ModelContext) {
-        guard takes.count == 2, let assessment, assessment.modelContext != nil,
-              assessment.comparedToID != nil else {
-            feedbackError = String(localized: "practice.feedback.saveError")
-            return
-        }
-        let previous = assessment.comparisonFeedbackRawValue
-        assessment.comparisonFeedbackRawValue = feedback.rawValue
-        do {
-            try modelContext.save()
-            comparisonFeedback = feedback
-            feedbackError = nil
-        } catch {
-            assessment.comparisonFeedbackRawValue = previous
-            feedbackError = String(localized: "practice.feedback.saveError")
-        }
     }
 
     /// End this take at the interruption. Accepted PCM is drained into a valid
     /// WAV, and analysis resumes in the foreground without reopening the mic.
     func interruptCapture() {
-        playback.stop()
         if let context = recordingModelContext, audioCapture != nil, recordingURL != nil,
            state == .recording || state == .requestingPermission {
             captureGeneration = UUID()
@@ -186,9 +101,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         showRecordingError(message)
     }
 
-    // Deinitialization can read these Sendable URLs without accessing the
-    // main-actor-isolated Published getter for the practice UI state.
-    private var retainedPracticeURLs: [URL] = []
     private var audioCapture: LivePitchAudioCapture?
     private var recordingURL: URL?
     private var recordingStartedAt: Date?
@@ -200,7 +112,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private var recordingStopTask: Task<Void, Never>?
     private var captureCleanupTask: Task<Void, Never>?
     private var captureGeneration = UUID()
-    private var recordedPitchSamples: [LivePitchSample] = []
     private var audioSessionOwner: UUID?
     private var recordingStudyAuthorization: LocalScoreStudyStore.Authorization?
     private var recordingStudyDirection: ScoreStudyDirection?
@@ -229,11 +140,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private var usesPreviewData = false
     #endif
 
-    var pitchTimeline: PitchTimeline {
-        if let result { return PitchTimeline(result: result) }
-        return PitchTimeline(samples: recordedPitchSamples, duration: elapsedTime)
-    }
-
     var isRequestingPermission: Bool {
         state == .requestingPermission
     }
@@ -248,16 +154,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
 
     var isAwaitingFeedback: Bool { state == .awaitingFeedback }
     var needsAnalysisScreen: Bool { isAnalyzing || isAwaitingFeedback }
-
-    /// Compatibility surface for the original recording and result screens.
-    /// Newer flows keep recording and analysis errors separate internally, but
-    /// the original UI intentionally presents one alert at a time.
-    var errorMessage: String? { recordingError ?? analysisError }
-
-    func clearError() {
-        recordingError = nil
-        analysisError = nil
-    }
 
     var hasResult: Bool {
         result != nil && state == .completed
@@ -309,15 +205,11 @@ final class AnalysisViewModel: NSObject, ObservableObject {
 
     private func startRecording(modelContext: ModelContext) {
         guard sceneIsActive else { return }
-        guard !needsAudioCleanup else {
-            recordingError = String(localized: "practice.audio.cleanupError")
-            return
-        }
         if state == .completed, !prepareRetake() { return }
-        playback.stop()
         recordingStudyAuthorization = LocalScoreStudyStore.shared.authorizeRecording()
-        let preference = practice?.target ?? .undecided
-        recordingStudyDirection = ScoreStudyEvaluator.direction(for: preference)
+        // Ordinary recordings have no directed-practice context. Preserve
+        // their existing exclusion from the direction-specific study cohort.
+        recordingStudyDirection = ScoreStudyEvaluator.direction(for: .undecided)
         recordingError = nil
         analysisError = nil
         captureNotice = nil
@@ -325,7 +217,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         result = nil
         elapsedTime = 0
         livePitchSamples = []
-        recordedPitchSamples = []
         volumeStatistics = nil
         recordingStartedAt = nil
         state = .requestingPermission
@@ -387,8 +278,7 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             try await AudioSessionController.activate(
                 owner: owner,
                 use: .recording,
-                holder: self,
-                stopPlayback: { [weak self] in self?.playback.stop() }
+                holder: self
             )
             guard isCurrentRecordingRequest(generation) else {
                 releaseAudioSession(owner)
@@ -593,8 +483,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
     private func appendLivePitch(_ frames: [PitcheeF0Frame]) {
         guard !frames.isEmpty else { return }
         let samples = frames.map { LivePitchSample(elapsedTime: $0.elapsedTime, pitchHz: $0.pitchHz) }
-        recordedPitchSamples.append(contentsOf: samples)
-
         // Capture already coalesces delivery at the chart's display cadence. Trim
         // the rolling window before publishing it so a batch invalidates the
         // observing views once, with no second main-actor throttle or buffer.
@@ -664,14 +552,11 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         studyAttempt: LocalScoreStudyStore.Attempt? = nil
     ) {
         analysisTask?.cancel()
-        let practiceSnapshot = practice
         let analysisProfile: PitcheeScoreProfile = {
-            let preference = practiceSnapshot?.target
-                ?? VoicePreference(legacyStoredValue: UserDefaults.standard.string(forKey: AppStorageKey.voicePreference) ?? "")
+            let preference = VoicePreference(legacyStoredValue: UserDefaults.standard.string(forKey: AppStorageKey.voicePreference) ?? "")
                 ?? .undecided
             return preference == .masculine ? .masculinization : .feminization
         }()
-        let previousID = takes.first.flatMap { $0.historySaved ? $0.id : nil }
         let diagnostics = LocalDiagnosticsStore.shared
         let diagnosticToken = diagnostics.beginAttempt()
         let recordedSeconds = elapsedTime
@@ -683,9 +568,8 @@ final class AnalysisViewModel: NSObject, ObservableObject {
             var quality = DiagnosticQuality.unavailable
             var studyPair: ScoreStudyPair?
             var studyFailed = true
-            var retainedForPractice = false
             defer {
-                if !retainedForPractice { try? FileManager.default.removeItem(at: url) }
+                try? FileManager.default.removeItem(at: url)
                 LocalScoreStudyStore.shared.finish(studyAttempt, pair: studyPair, failed: studyFailed)
                 diagnostics.finish(diagnosticToken, outcome: diagnosticOutcome, observation: .init(
                     inputSeconds: inputSeconds, speechSeconds: speechSeconds, quality: quality,
@@ -740,30 +624,19 @@ final class AnalysisViewModel: NSObject, ObservableObject {
                     backgroundDBFS: volumeStatistics?.measuredBackgroundDBFS,
                     clippedFraction: volumeStatistics?.clippedSampleFraction
                 )
-                let assessmentID = UUID()
-                if practiceSnapshot != nil {
-                    takes.append(PracticeTake(id: assessmentID, result: analysisResult, quality: recordingQuality, url: url))
-                    retainedForPractice = true
-                }
                 diagnosticOutcome = .success
                 studyFailed = false
 
                 do {
                     let assessment = try RecordingAssessment(
-                        id: assessmentID,
                         recordedAt: recordedAt,
                         result: analysisResult,
-                        practice: practiceSnapshot,
-                        quality: recordingQuality,
-                        comparedToID: previousID
+                        quality: recordingQuality
                     )
                     self.assessment = assessment
                     modelContext.insert(assessment)
                     do {
                         try modelContext.save()
-                        if let index = takes.firstIndex(where: { $0.id == assessmentID }) {
-                            takes[index].historySaved = true
-                        }
                     } catch {
                         modelContext.delete(assessment)
                         throw error
@@ -840,7 +713,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
 
     isolated deinit {
         observers.forEach(NotificationCenter.default.removeObserver)
-        playback.stop()
         permissionTask?.cancel()
         timerTask?.cancel()
         analysisTask?.cancel()
@@ -851,7 +723,6 @@ final class AnalysisViewModel: NSObject, ObservableObject {
         if audioCapture == nil, recordingStopTask == nil { deactivateAudioSession() }
         if let pendingRecording { try? FileManager.default.removeItem(at: pendingRecording.url) }
         if let pendingStudy { try? FileManager.default.removeItem(at: pendingStudy.url) }
-        for url in retainedPracticeURLs { try? FileManager.default.removeItem(at: url) }
     }
 }
 
@@ -902,7 +773,6 @@ extension AnalysisViewModel {
             elapsedTime = DebugPreviewData.result.audio.inputSeconds
             livePitchSamples = DebugPreviewData.liveSamples
         }
-        recordedPitchSamples = livePitchSamples
         result = state == .completed ? DebugPreviewData.result : nil
         volumeStatistics = state == .completed ? DebugPreviewData.volumeStatistics : nil
         studyFeedbackDirection = state == .awaitingFeedback ? .feminine : nil

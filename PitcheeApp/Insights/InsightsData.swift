@@ -113,14 +113,6 @@ enum InsightsDestination: Hashable {
 }
 
 enum InsightsData {
-    static func cohorts(_ assessments: [RecordingAssessment]) -> [PracticeCohort] {
-        var seen = Set<PracticeCohort>()
-        return assessments.sorted { $0.recordedAt > $1.recordedAt }.compactMap {
-            guard let cohort = $0.cohort, seen.insert(cohort).inserted else { return nil }
-            return cohort
-        }
-    }
-
     static func comparable(_ assessments: [RecordingAssessment], cohort: PracticeCohort) -> [RecordingAssessment] {
         assessments.filter { $0.isBaselineEligible && $0.cohort == cohort }
     }

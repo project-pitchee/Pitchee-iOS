@@ -17,6 +17,31 @@ nonisolated public struct PitcheeAnalysisResult: Codable, Sendable {
     public let vfp: VFP
     public let naturalness: Naturalness
     public let composite: CompositeScore
+    public let voiceQuality: VoiceQuality?
+
+    init(
+        schemaVersion: Int,
+        modelVersion: String,
+        scoreProfile: String?,
+        audio: Audio,
+        vad: VoiceActivity,
+        f0: Pitch,
+        vfp: VFP,
+        naturalness: Naturalness,
+        composite: CompositeScore,
+        voiceQuality: VoiceQuality? = nil
+    ) {
+        self.schemaVersion = schemaVersion
+        self.modelVersion = modelVersion
+        self.scoreProfile = scoreProfile
+        self.audio = audio
+        self.vad = vad
+        self.f0 = f0
+        self.vfp = vfp
+        self.naturalness = naturalness
+        self.composite = composite
+        self.voiceQuality = voiceQuality
+    }
 
     public struct Audio: Codable, Sendable {
         public let sourceSampleRate: Int
@@ -54,6 +79,23 @@ nonisolated public struct PitcheeAnalysisResult: Codable, Sendable {
         public let startSeconds: Double
         public let endSeconds: Double
         public let f0Hz: Double?
+    }
+
+    nonisolated public struct VoiceQuality: Codable, Sendable {
+        public let algorithm: String
+        public let hnrDb: Double?
+        public let hnrWindowCount: Int
+        public let hnrStdDb: Double?
+        /// HNR's own window duration; its overlapping timeline is independent of F0.
+        public let windowSeconds: Double
+        public let windows: [HNRWindow]
+    }
+
+    nonisolated public struct HNRWindow: Codable, Sendable {
+        public let startSeconds: Double
+        public let endSeconds: Double
+        /// Available when the clipped window midpoint passes VAD and correlation is reliable.
+        public let hnrDb: Double?
     }
 
     public struct VFP: Codable, Sendable {

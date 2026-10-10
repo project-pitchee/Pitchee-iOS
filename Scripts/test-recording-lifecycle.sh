@@ -31,7 +31,6 @@ xcrun swiftc -parse-as-library -swift-version 5 -default-isolation MainActor \
     "$project_directory/PitcheeApp/Practice/PracticeData.swift" \
     "$project_directory/PitcheeApp/App/AppStorage.swift" \
     "$project_directory/PitcheeApp/Audio/AudioSessionCoordinator.swift" \
-    "$project_directory/PitcheeApp/Practice/PracticePlayback.swift" \
     "$project_directory/PitcheeApp/Diagnostics/LocalDiagnostics.swift" \
     "$project_directory/PitcheeApp/Diagnostics/LocalScoreStudy.swift" \
     "$project_directory/Tests/Recording/RecordingLifecycleSupport.swift" \

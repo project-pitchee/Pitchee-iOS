@@ -48,13 +48,6 @@ extension VoicePreference {
         }
     }
 
-    var standardMetricTitleText: String {
-        switch self {
-        case .masculine: String(localized: "scoring.masculine.standard.title")
-        case .feminine, .undecided: String(localized: "common.metric.standardScore.title")
-        }
-    }
-
     var scoreExplanationTitle: LocalizedStringKey {
         switch self {
         case .masculine: "scoring.masculine.explanation.title"

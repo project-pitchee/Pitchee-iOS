@@ -88,6 +88,19 @@ struct DashboardView: View {
                     Button("common.action.done", action: finishEditing)
                         .tint(palette.primaryText)
                 }
+            } else {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        ReadinessView()
+                    } label: {
+                        Label {
+                            Text("readiness.title", tableName: "Readiness")
+                        } icon: {
+                            Image(systemName: "heart.text.square")
+                        }
+                    }
+                    .tint(palette.primaryText)
+                }
             }
         }
         .navigationDestination(item: $destination) { destination in

@@ -2,7 +2,7 @@ import AVFoundation
 import Foundation
 
 // Platform/inference substitutes for compiling the production view model on
-// macOS. Production state transitions, persistence and playback are unchanged.
+// macOS. Production state transitions and persistence are unchanged.
 enum AVAudioApplication {
     static var permission: (@Sendable (Bool) -> Void)?
     static func requestRecordPermission(_ response: @escaping @Sendable (Bool) -> Void) {
@@ -86,18 +86,23 @@ nonisolated final class CaptureFixture: @unchecked Sendable {
     private var events: [String] = []
     private var url: URL?
     private var handler: (@Sendable (Error) -> Void)?
+    private var pitchHandler: (@Sendable ([PitcheeF0Frame]) -> Void)?
     private var blockedStart: DispatchSemaphore?
     private var blockedFinish: LifecycleAsyncGate?
     private var failedFinish = false
+    private var failedAnalysis = false
 
-    func reset(start: DispatchSemaphore? = nil, finish: LifecycleAsyncGate? = nil, failFinish: Bool = false) {
+    func reset(start: DispatchSemaphore? = nil, finish: LifecycleAsyncGate? = nil,
+               failFinish: Bool = false, failAnalysis: Bool = false) {
         lock.withLock {
             events = []
             url = nil
             handler = nil
+            pitchHandler = nil
             blockedStart = start
             blockedFinish = finish
             failedFinish = failFinish
+            failedAnalysis = failAnalysis
         }
     }
     func record(_ event: String) { lock.withLock { events.append(event) } }
@@ -105,16 +110,20 @@ nonisolated final class CaptureFixture: @unchecked Sendable {
     var lastURL: URL? { lock.withLock { url } }
     var finishGate: LifecycleAsyncGate? { lock.withLock { blockedFinish } }
     var finishFails: Bool { lock.withLock { failedFinish } }
-    func started(url: URL, handler: (@Sendable (Error) -> Void)?) {
+    var analysisFails: Bool { lock.withLock { failedAnalysis } }
+    func started(url: URL, handler: (@Sendable (Error) -> Void)?,
+                 pitchHandler: @escaping @Sendable ([PitcheeF0Frame]) -> Void) {
         let gate = lock.withLock {
             self.url = url
             self.handler = handler
+            self.pitchHandler = pitchHandler
             events.append("start")
             return blockedStart
         }
         if let gate { precondition(gate.wait(timeout: .now() + 10) == .success) }
     }
     func failWrite() { lock.withLock { handler }?(CocoaError(.fileWriteOutOfSpace)) }
+    func emitPitch(_ frames: [PitcheeF0Frame]) { lock.withLock { pitchHandler }?(frames) }
 }
 
 nonisolated enum LivePitchAudioCaptureError: Error { case inputUnavailable }
@@ -134,7 +143,7 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
             let file = try AVAudioFile(forWriting: url, settings: format.settings)
             try file.write(from: buffer)
         }
-        CaptureFixture.shared.started(url: url, handler: onRecordingError)
+        CaptureFixture.shared.started(url: url, handler: onRecordingError, pitchHandler: onPitch)
     }
     func finish() async -> Error? {
         let fixture = CaptureFixture.shared
@@ -161,6 +170,7 @@ actor PitcheeCoreAnalyzer {
         let file = try AVAudioFile(forReading: wavFile)
         precondition(file.length == 16_000, "Interrupted PCM must remain intact until analysis")
         CaptureFixture.shared.record("analyze")
+        if CaptureFixture.shared.analysisFails { throw CocoaError(.fileReadCorruptFile) }
         return PitcheeAnalysisResult(
             schemaVersion: 3, modelVersion: "lifecycle-test", scoreProfile: "feminization",
             audio: .init(sourceSampleRate: 16_000, sourceChannels: 1, inputSeconds: 1, analyzedSeconds: 1),

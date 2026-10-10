@@ -18,7 +18,6 @@ if os.path.exists(os.path.join(SCRIPT_DIR, "Module-01-Engine-Rules")):
     # Running directly inside Articles repository root
     REPO_ROOT = SCRIPT_DIR
     LOCAL_DOCS_DIR = SCRIPT_DIR
-    STANDALONE_ARTICLES_DIR = SCRIPT_DIR
     LIBRARY_DOCS_DIR = SCRIPT_DIR
     RESOURCES_DIR = SCRIPT_DIR
 else:
@@ -44,13 +43,11 @@ def parse_markdown(filepath):
     filename = os.path.basename(rel_path)
     
     # Extract ID ending with two digits before Chinese/descriptive slug
-    id_match = re.match(r"^([A-Z0-9\-]+?-\d{2})-(.*)\.md$", filename)
+    id_match = re.match(r"^([A-Z0-9\-]+?-\d{2})-.*\.md$", filename)
     if id_match:
         full_id = id_match.group(1)
-        slug = id_match.group(2)
     else:
         full_id = filename.replace(".md", "")
-        slug = full_id
 
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()

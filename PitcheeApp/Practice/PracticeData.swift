@@ -24,13 +24,6 @@ nonisolated enum PracticeKind: String, Codable, CaseIterable, Identifiable, Send
         case .dailyReading: String(localized: "practice.kind.dailyReading.instruction")
         }
     }
-    var metric: PracticeMetric {
-        switch self {
-        case .pitchObservation: .pitch
-        case .pitchStability: .variation
-        case .dailyReading: .speech
-        }
-    }
 }
 
 /// Frozen before microphone permission, including the rendered passage. A locale
@@ -62,21 +55,6 @@ nonisolated enum PracticeMetric: String, CaseIterable, Identifiable {
         case .variation: String(localized: "practice.metric.variation")
         case .speech: String(localized: "practice.metric.speech")
         }
-    }
-    var unit: String { self == .speech ? "s" : "Hz" }
-    func value(in result: PitcheeAnalysisResult) -> Double? {
-        let value: Double?
-        switch self {
-        case .pitch: value = result.f0.meanHz
-        case .variation: value = result.f0.standardDeviationHz
-        case .speech: value = result.vad.speechSeconds
-        }
-        guard let value, value.isFinite, value >= 0, self != .pitch || value > 0 else { return nil }
-        return value
-    }
-    func formatted(_ value: Double?) -> String {
-        guard let value, value.isFinite else { return "—" }
-        return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
     }
 }
 

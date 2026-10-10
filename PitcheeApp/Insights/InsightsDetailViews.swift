@@ -160,10 +160,6 @@ private struct InsightsRecordingRows: View {
         VoicePreference(legacyStoredValue: savedVoicePreference) ?? .undecided
     }
 
-    private var metricTitle: String {
-        metric == .composite ? voicePreference.scoreTitleText : metric.title
-    }
-
     var body: some View {
         ForEach(assessments) { assessment in
             NavigationLink {
@@ -189,7 +185,7 @@ private struct InsightsRecordingRows: View {
                             Text(metric.formatted(metric.value(in: assessment, preference: voicePreference)))
                                 .font(.system(.title3, design: .rounded).weight(.bold))
                                 .foregroundStyle(metric.tint)
-                            Text(metric == .composite ? metricTitle : metric.unit)
+                            Text(voicePreference.scoreTitleText)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }

@@ -8,20 +8,6 @@
 import SwiftUI
 import Combine
 
-/// Uses the system's shared glass surface so recording controls stay attached
-/// to the tab bar and remain reachable when the page scrolls.
-struct RecordingTabAccessory: ViewModifier {
-    let isVisible: Bool
-    @ObservedObject var viewModel: AnalysisViewModel
-    let action: () -> Void
-
-    func body(content: Content) -> some View {
-        content.modifier(TabBarAccessory(isVisible: isVisible) {
-            RecordingAccessoryContent(viewModel: viewModel, action: action)
-        })
-    }
-}
-
 /// Recording and practice share one system-owned accessory above the tab bar.
 struct TabBarAccessory<Accessory: View>: ViewModifier {
     let isVisible: Bool

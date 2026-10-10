@@ -25,8 +25,7 @@ struct RecordingAnalysisView: View {
                     volumeStatistics: viewModel.volumeStatistics,
                     saveError: viewModel.analysisError,
                     recordingNotice: viewModel.captureNotice,
-                    quality: viewModel.assessment?.quality,
-                    recordedPreference: viewModel.practice?.target
+                    quality: viewModel.assessment?.quality
                 )
             } else {
                 stateScroll {

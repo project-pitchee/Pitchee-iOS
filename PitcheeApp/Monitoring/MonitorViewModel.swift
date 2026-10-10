@@ -15,7 +15,6 @@ enum MonitorKind: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var titleKey: String { "monitor.\(rawValue).title" }
-    var subtitleKey: String { "monitor.\(rawValue).subtitle" }
     var symbol: String { self == .spectrum ? "waveform.path" : "waveform.path.ecg" }
 }
 

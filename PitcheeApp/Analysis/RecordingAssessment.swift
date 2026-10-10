@@ -99,6 +99,7 @@ final class RecordingAssessment {
     }
 
     var pitchVariationHz: Double? { summary?.pitchVariationHz }
+    public var hnrDb: Double? { result?.voiceQuality?.hnrDb }
 
     // Valid summary fields remain usable even if unused window details are
     // malformed. Full-detail decoding still rejects an unreadable result.

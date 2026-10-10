@@ -125,6 +125,45 @@ enum RecordingLifecycleTests {
         await waitFor { unchangedRoute.hasResult }
         check(unchangedRoute.captureNotice == nil, "Normal completion does not show an interruption notice")
 
+        // Reusing one scoring page must remain a normal sequence of independent
+        // recordings after removing the abandoned A/B practice session state.
+        fixture.reset()
+        let ordinaryModel = AnalysisViewModel()
+        let historyBeforeRetakes = try context.fetchCount(FetchDescriptor<RecordingAssessment>())
+        var ordinaryURLs: [URL] = []
+        var ordinaryAssessmentIDs: Set<UUID> = []
+        for _ in 0..<3 {
+            ordinaryModel.primaryButtonTapped(modelContext: context)
+            check(ordinaryModel.isRequestingPermission && ordinaryModel.result == nil &&
+                  ordinaryModel.assessment == nil && ordinaryModel.volumeStatistics == nil &&
+                  ordinaryModel.livePitchSamples.isEmpty && ordinaryModel.elapsedTime == 0,
+                  "Ordinary re-recording clears the prior result and realtime presentation")
+            await waitFor { AVAudioApplication.permission != nil }
+            AVAudioApplication.respond(true)
+            await waitFor { ordinaryModel.isRecording }
+            guard let url = fixture.lastURL else { preconditionFailure("Capture must create a WAV") }
+            check(!ordinaryURLs.contains(url), "Each ordinary recording gets its own temporary WAV")
+            ordinaryURLs.append(url)
+            fixture.emitPitch([.init(elapsedTime: 0, pitchHz: 180), .init(elapsedTime: 45, pitchHz: 210)])
+            await waitFor { ordinaryModel.livePitchSamples.last?.elapsedTime == 45 }
+            check(ordinaryModel.livePitchSamples.count == 1 && ordinaryModel.livePitchSamples[0].pitchHz == 210,
+                  "The live chart still retains only its recent 30-second window")
+            ordinaryModel.primaryButtonTapped(modelContext: context)
+            await waitFor { ordinaryModel.hasResult }
+            guard let assessment = ordinaryModel.assessment else { preconditionFailure("History must be saved") }
+            check(ordinaryAssessmentIDs.insert(assessment.id).inserted && assessment.practice == nil &&
+                  assessment.comparedToID == nil && assessment.quality != nil,
+                  "Ordinary recordings save distinct history and quality without an A/B relationship")
+            await waitFor { !FileManager.default.fileExists(atPath: url.path) }
+            check(ordinaryURLs.allSatisfy { !FileManager.default.fileExists(atPath: $0.path) },
+                  "Successful analysis releases every completed temporary WAV")
+        }
+        check(fixture.count("start") == 3 && fixture.count("finish") == 3 && fixture.count("analyze") == 3 &&
+              fixture.count("cancel") == 0,
+              "Repeated ordinary takes each capture, finish and analyze once")
+        check(try context.fetchCount(FetchDescriptor<RecordingAssessment>()) == historyBeforeRetakes + 3,
+              "Re-recording preserves earlier history when its temporary audio is removed")
+
         // An interruption can arrive while detached engine startup is returning.
         let startGate = DispatchSemaphore(value: 0)
         let finishGate = LifecycleAsyncGate()
@@ -179,6 +218,17 @@ enum RecordingLifecycleTests {
               "Drain write failures show an explicit error without analyzing a damaged file")
         check(fixture.lastURL.map { !FileManager.default.fileExists(atPath: $0.path) } == true,
               "A failed WAV is removed only after teardown")
+
+        fixture.reset(failAnalysis: true)
+        let historyBeforeFailure = try context.fetchCount(FetchDescriptor<RecordingAssessment>())
+        let failedAnalysis = try await start(context: context)
+        failedAnalysis.primaryButtonTapped(modelContext: context)
+        await waitFor { failedAnalysis.state == .idle && failedAnalysis.analysisError != nil }
+        check(fixture.count("finish") == 1 && fixture.count("analyze") == 1 &&
+              fixture.lastURL.map { !FileManager.default.fileExists(atPath: $0.path) } == true,
+              "Analysis failure releases the ordinary recording's temporary WAV after closing capture")
+        check(try context.fetchCount(FetchDescriptor<RecordingAssessment>()) == historyBeforeFailure,
+              "A failed analysis never replaces or appends saved history")
 
         fixture.reset()
         let liveFailure = try await start(context: context)

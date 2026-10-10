@@ -129,13 +129,6 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
         scheduleTeardown(discardingPendingWrites: true)
     }
 
-    /// Synchronous compatibility entry point. UI callers use finish/cancel.
-    @discardableResult
-    func stop() -> Error? {
-        requestStop(discardingPendingWrites: false)
-        return lifecycleQueue.sync { stopEngineAndDrain() }
-    }
-
     private func requestStop(discardingPendingWrites: Bool) {
         let state = stateLock.withLock {
             stopRequested = true

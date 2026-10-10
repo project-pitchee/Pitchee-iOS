@@ -76,6 +76,7 @@ public actor PitcheeCoreAnalyzer {
 
     /// Consumes contiguous 16 kHz mono Float32 PCM. Core owns F0 estimation,
     /// voicing decisions and timestamps; all native inference stays serialized.
+    /// The independent HNR module is used only by completed-recording analysis.
     public func processRealtimeF0(samples: [Float]) throws -> [PitcheeF0Frame] {
         try Task.checkCancellation()
         guard let realtimeF0 = resources.realtimeF0 else {
@@ -83,6 +84,9 @@ public actor PitcheeCoreAnalyzer {
         }
         var frames: [PitcheeF0Frame] = []
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
+        // The C API invokes every callback synchronously before returning and
+        // retains neither context nor PCM. Both borrows stay within this scope;
+        // copy the callback's stack-backed frame before it returns as well.
         let status = withUnsafeMutablePointer(to: &frames) { output in
             samples.withUnsafeBufferPointer { buffer in
                 pitchee_realtime_f0_process(
@@ -184,6 +188,9 @@ public actor PitcheeCoreAnalyzer {
         let json = String(cString: output)
         let data = Data(json.utf8)
         do {
+            // Schema v4 carries the external HNR module's independent windows,
+            // gated by the recording's existing VAD intervals. Preserve nils
+            // and timestamps; v3 omits the section and yields voiceQuality nil.
             return try decoder.decode(PitcheeAnalysisResult.self, from: data)
         } catch {
             throw PitcheeCoreError(
