@@ -1,5 +1,5 @@
 // Readiness v0.8 (2026-10-10). Business rules only; no Core, storage, clock or UI.
-// All G-grade numbers are UNCALIBRATED (未校准), including B2 -15 (decision #29).
+// All G-grade numbers are UNCALIBRATED (未校准), including B2 -10 (decision #29, 2026-10-10).
 
 /// The caller supplies a quality-gated, 30-practiceDay baseline (at least five
 /// samples, sample SD with n-1). Only HNR has a specified SD floor: 0.5 dB.
@@ -98,8 +98,10 @@ nonisolated enum ReadinessParameter: String, CaseIterable, Sendable {
         case .initialScore, .coldStartAssessments, .returnAbsenceDays,
              .levelSMinimum, .levelAMinimum, .levelBMinimum:
             "未校准；规格未单列置信度，额外扫描"
-        case .b2Penalty, .b2DropThreshold:
-            "G / 未校准；误伤风险最高，待决策 #29"
+        case .b2Penalty:
+            "G / 未校准；误伤减害，#29 已于 2026-10-10 裁决"
+        case .b2DropThreshold:
+            "G / 未校准；误伤风险最高"
         default:
             "G / 未校准"
         }
@@ -121,7 +123,7 @@ nonisolated enum ReadinessParameter: String, CaseIterable, Sendable {
         case .b1SlopeThreshold: 1
         case .b1Reward: 5
         case .b2DropThreshold: 2
-        case .b2Penalty: -15
+        case .b2Penalty: -10
         case .b3ZThreshold: -1.5
         case .b3Penalty: -5
         case .c1AbsoluteZThreshold: 1

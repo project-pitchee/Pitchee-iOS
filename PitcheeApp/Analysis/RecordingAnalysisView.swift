@@ -10,6 +10,13 @@ import LaTeXSwiftUI
 
 struct RecordingAnalysisView: View {
     @ObservedObject var viewModel: AnalysisViewModel
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
+
+    private var voicePreference: VoicePreference {
+        viewModel.assessment?.recordedTarget
+            ?? VoicePreference(legacyStoredValue: savedVoicePreference)
+            ?? .undecided
+    }
 
     var body: some View {
         Group {
@@ -25,7 +32,8 @@ struct RecordingAnalysisView: View {
                     volumeStatistics: viewModel.volumeStatistics,
                     saveError: viewModel.analysisError,
                     recordingNotice: viewModel.captureNotice,
-                    quality: viewModel.assessment?.quality
+                    quality: viewModel.assessment?.quality,
+                    recordedPreference: viewModel.assessment?.recordedTarget
                 )
             } else {
                 stateScroll {
@@ -49,7 +57,8 @@ struct RecordingAnalysisView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     RecordingExportButton(
                         result: result,
-                        volumeStatistics: viewModel.volumeStatistics
+                        volumeStatistics: viewModel.volumeStatistics,
+                        preference: self.voicePreference
                     )
                         .labelStyle(.iconOnly)
                 }

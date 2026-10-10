@@ -295,8 +295,8 @@ enum ReadinessProviderTests {
             let result = try provider.result(at: now)
             check(result == ReadinessScoring.evaluate(input),
                   "The provider calls the delivered engine with the fetched input without adjusting scores")
-            check(factor(result, "B2").isTriggered && factor(result, "B2").contribution == -15,
-                  "The complete seeded path keeps uncalibrated B2 at -15")
+            check(factor(result, "B2").isTriggered && factor(result, "B2").contribution == -10,
+                  "The complete seeded path keeps uncalibrated B2 at -10")
             check(factor(result, "C1").isTriggered && factor(result, "C2").isTriggered
                   && factor(result, "C3").isTriggered && result.reason == .voiceTired,
                   "Persisted acoustic features and daily baselines reach the anomaly rules")

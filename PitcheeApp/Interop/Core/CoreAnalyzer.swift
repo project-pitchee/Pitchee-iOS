@@ -27,17 +27,16 @@ public actor PitcheeCoreAnalyzer {
 
     public init(modelDirectory: URL? = nil, threads: Int32 = 2) throws {
         let resolvedModelDirectory = try modelDirectory ?? PitcheeCore.bundledModelDirectory()
-        var options = pitchee_analyzer_options_t(
-            intra_op_threads: threads,
-            use_coreml: 1,
-            reserved: 0
-        )
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
         var createdHandle: OpaquePointer?
 
         let status = pitchee_analyzer_create(
             resolvedModelDirectory.path,
-            &options,
+            threads,
+            1,
+            0,
+            0,
+            0,
             &createdHandle,
             &errorBuffer,
             errorBuffer.count
@@ -66,7 +65,7 @@ public actor PitcheeCoreAnalyzer {
         var stream: OpaquePointer?
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
         let status = pitchee_realtime_f0_create(
-            handle, nil, &stream, &errorBuffer, errorBuffer.count
+            handle, 0, 0, &stream, &errorBuffer, errorBuffer.count
         )
         guard status == PITCHEE_SUCCESS, let stream else {
             throw PitcheeCoreError(status: status, message: Self.errorMessage(errorBuffer))
@@ -101,7 +100,7 @@ public actor PitcheeCoreAnalyzer {
                             )
                         )
                     },
-                    UnsafeMutableRawPointer(output), nil,
+                    UnsafeMutableRawPointer(output),
                     &errorBuffer, errorBuffer.count
                 )
             }
@@ -123,7 +122,7 @@ public actor PitcheeCoreAnalyzer {
         var output: UnsafeMutablePointer<CChar>?
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
         let status = samples.withUnsafeBufferPointer { buffer in
-            pitchee_analyzer_analyze_pcm(
+            pitchee_analyze_pcm(
                 handle,
                 buffer.baseAddress,
                 buffer.count,
@@ -153,7 +152,7 @@ public actor PitcheeCoreAnalyzer {
 
         var output: UnsafeMutablePointer<CChar>?
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
-        let status = pitchee_analyzer_analyze_wav_file(
+        let status = pitchee_analyze_wav_file(
             handle,
             wavFile.path,
             scoreProfile.cValue,

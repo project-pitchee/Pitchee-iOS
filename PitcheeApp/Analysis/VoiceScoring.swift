@@ -137,11 +137,11 @@ nonisolated struct VoiceDirectionScore {
         profile: pitchee_score_profile_t,
         standardScore: Double, naturalness: Double, pitchHz: Double?
     ) -> PitcheeAnalysisResult.CompositeScore {
-        var score = pitchee_composite_score_t()
+        var score = pitchee_score_result_t()
         let pitch = pitchHz.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
-        let status = pitchee_composite_score(
+        let status = pitchee_score(
             profile, clamp(standardScore, to: 100), clamp(naturalness, to: 100),
-            pitch ?? 0, pitch == nil ? 0 : 1, &score
+            pitch ?? .nan, &score
         )
         guard status == PITCHEE_SUCCESS else {
             // A native allocation failure must not crash history rendering or

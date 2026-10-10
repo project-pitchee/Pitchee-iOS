@@ -31,6 +31,7 @@ xcrun clang -std=c11 -O2 -Wall -Wextra -Werror \
 xcrun swiftc -parse-as-library -O \
     -I "$project_directory/PitcheeApp/Audio/RealtimeAtomics" \
     -I "$project_directory/Dependencies/PitcheeCore/platform/ios" \
+    -I "$project_directory/Dependencies/PitcheeCore/include" \
     -L "$test_directory/native" -l pitchee_core \
     -F "$framework_directory" -framework onnxruntime \
     -framework CoreML -framework Accelerate -framework CoreGraphics \

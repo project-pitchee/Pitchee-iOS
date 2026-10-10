@@ -121,8 +121,8 @@ enum ReadinessScoringTests {
         expectFactor(fallingOLS, "B1", 0, fired: false)
         let falling = evaluate(input { $0.recentFinalScores = scores([70, 73, 76]) })
         expectFactor(falling, "B1", 0, fired: false)
-        expectFactor(falling, "B2", -15, fired: true)
-        check(falling.score == 55 && falling.reason == nil, "B2 keeps its uncalibrated -15 exactly, without a decision reason")
+        expectFactor(falling, "B2", -10, fired: true)
+        check(falling.score == 60 && falling.reason == nil, "B2 keeps its uncalibrated -10 exactly, without a decision reason")
         for values in [[70.0, 72, 74], [70, 72, 75], [70, 73, 75], [70, 74]] {
             expectFactor(evaluate(input { $0.recentFinalScores = scores(values) }), "B2", 0, fired: false)
         }
@@ -133,7 +133,7 @@ enum ReadinessScoringTests {
         let newerDecline = evaluate(input {
             $0.recentFinalScores = scores([70, 73, 76]) + [.init(finalScore: .nan, canCompare: false)]
         })
-        expectFactor(newerDecline, "B2", -15, fired: true)
+        expectFactor(newerDecline, "B2", -10, fired: true)
         expectFactor(newerDecline, "B1", 0, fired: false)
         for invalidIndex in 0..<3 {
             let result = evaluate(input {
@@ -312,9 +312,9 @@ enum ReadinessScoringTests {
         allRules.vBaselineMean = 100
         let returning = evaluate(allRules)
         check(returning.level == "C" && returning.reason == .welcomeBack, "#7 overrides #4 and #6")
-        check(returning.score == 43, "#7 preserves all computed factor contributions without a lower-priority cap")
+        check(returning.score == 48, "#7 preserves all computed factor contributions without a lower-priority cap")
         check(returning.markHeavyYesterday, "Daily practice and a return override still run A4's next-day flag")
-        for (id, amount) in [("A1", 20.0), ("A2", -10), ("A4", 0), ("B1", 5), ("B2", -15), ("B3", -5), ("C1", -10), ("C2", -6), ("C3", -4), ("C4", -2)] {
+        for (id, amount) in [("A1", 20.0), ("A2", -10), ("A4", 0), ("B1", 5), ("B2", -10), ("B3", -5), ("C1", -10), ("C2", -6), ("C3", -4), ("C4", -2)] {
             expectFactor(returning, id, amount, fired: true)
         }
         expectFactor(returning, "decision.7", 0, fired: true)
@@ -342,7 +342,7 @@ enum ReadinessScoringTests {
         var belowBHeavy = belowB
         belowBHeavy.heavyYesterday = true
         let mappedHeavy = evaluate(belowBHeavy)
-        check(mappedHeavy.score == 30 && mappedHeavy.level == "C" && mappedHeavy.reason == .heavyYesterday, "#6 caps score then uses the ordinary numeric level mapping")
+        check(mappedHeavy.score == 35 && mappedHeavy.level == "C" && mappedHeavy.reason == .heavyYesterday, "#6 caps score then uses the ordinary numeric level mapping")
         expectFactor(mappedHeavy, "decision.6", 0, fired: true)
 
         for count in 0..<3 {

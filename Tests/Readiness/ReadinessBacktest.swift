@@ -285,7 +285,7 @@ nonisolated private enum ReadinessBacktest {
         simultaneous.recentFinalScores = [70, 72.5, 75, 66, 61].map { .init(finalScore: $0, canCompare: true) }
         return [
             .init(name: "进步期偶发 3.2 分双降", input: sparse(3.2), expectedToFire: true),
-            .init(name: "B1 +5 与 B2 −15 同时触发", input: simultaneous, expectedToFire: true),
+            .init(name: "B1 +5 与 B2 −10 同时触发", input: simultaneous, expectedToFire: true),
             .init(name: "边界正控：两次均降 2.01", input: sparse(2.01), expectedToFire: true),
             .init(name: "严格边界负控：两次均降 2.00", input: sparse(2), expectedToFire: false),
             .init(name: "小幅负控：两次均降 1.90", input: sparse(1.9), expectedToFire: false)
@@ -364,25 +364,31 @@ nonisolated private enum ReadinessBacktest {
 
     static func supplementaryChecks(_ profiles: [Profile], experiments: [B2Experiment]) -> [Check] {
         var checks = qualityChecks()
+        let b2Penalty = ReadinessParameter.b2Penalty.currentValue
+        let b2AbsPenalty = abs(b2Penalty)
+        let b2Minus20 = b2Penalty * 0.8
+        let b2Plus20 = b2Penalty * 1.2
         for experiment in experiments {
             let result = ReadinessScoring.evaluate(experiment.input)
             let zero = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: 0]))
             checks.append(.init(name: experiment.name, passed: fired(result, "B2") == experiment.expectedToFire
-                && close(zero.score - result.score, experiment.expectedToFire ? 15 : 0)
+                && close(zero.score - result.score, experiment.expectedToFire ? b2AbsPenalty : 0)
                 && (experiment.expectedToFire || zero.level == result.level),
-                detail: "B2=0 仅为配对反事实；生产 −15 保持原值。"))
+                detail: "B2=0 仅为配对反事实；生产 B2 \(signed(b2Penalty)) 保持 G 未校准。"))
         }
         for experiment in experiments.prefix(2) {
-            let reduced = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: -12]))
-            let increased = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: -18]))
+            let reduced = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: b2Minus20]))
+            let increased = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: b2Plus20]))
             checks.append(.init(name: "B2 ±20% risk: \(experiment.name)", passed:
-                reduced.level == "A" && increased.level == "B" && close(reduced.score - increased.score, 6),
-                detail: "最高优先级误伤组单独扫描，不能被不触发 B2 的普通画像稀释。"))
+                close(reduced.score - increased.score, abs(b2Minus20 - b2Plus20))
+                    && reduced.level == increased.level,
+                detail: "以 B2 \(signed(b2Penalty)) 为基准单独扫描 \(signed(b2Minus20))/\(signed(b2Plus20))，不能被不触发 B2 的普通画像稀释。"))
         }
         let risk = ReadinessScoring.evaluate(experiments[1].input)
-        checks.append(.init(name: "B2 false positive reproduces grade change", passed:
-            delta(risk, "B1") == 5 && delta(risk, "B2") == -15 && risk.score == 64 && risk.level == "B",
-            detail: "同一个最近五次窗口总体进步却被局部双降扣至 64/B。"))
+        checks.append(.init(name: "B2 false positive retains paired score impact", passed:
+            delta(risk, "B1") == 5 && delta(risk, "B2") == b2Penalty
+                && close(risk.score, 70 + 4 + 5 + b2Penalty) && risk.level == "A",
+            detail: "同一个最近五次窗口总体进步仍被局部双降扣除 B2 \(signed(b2Penalty))；B2=0 保留为配对反事实。"))
         let p2 = profiles.first { $0.id == "P2" }!
         checks.append(.init(name: "P2 literal trend is below B1 threshold", passed:
             p2.probes.allSatisfy { !fired(ReadinessScoring.evaluate($0.input), "B1") },
@@ -441,7 +447,7 @@ nonisolated private enum ReadinessBacktest {
             && p1B2Days == [5, 9, 13, 17, 21, 25, 29] && p1ColdDays == [1, 2]
             && p1.enumerated().allSatisfy { index, result in
                 if fired(result, "B2") {
-                    return result.score == 75 && result.level == "A"
+                    return result.score == 80 && result.level == "A"
                         && p1WithoutB2[index].score == 90 && p1WithoutB2[index].level == "S"
                 }
                 return result.score == p1WithoutB2[index].score && result.level == p1WithoutB2[index].level
@@ -533,21 +539,35 @@ nonisolated private enum ReadinessBacktest {
 
     static func report(profiles: [Profile], invariants: [Check], checks: [Check],
                        experiments: [B2Experiment], scans: [ScanRow]) -> String {
-        var lines = ["# Readiness 合成回测报告", "", "规格：readiness v0.8（2026-10-10 修订）；规则证据版本 `readiness-v0.8-r2-uncalibrated`。全部 G 级数值 **未校准**；B2 保持 **−15**，待决策 #29。",
+        let b2Penalty = ReadinessParameter.b2Penalty.currentValue
+        let b2Minus20 = b2Penalty * 0.8
+        let b2Plus20 = b2Penalty * 1.2
+        let b2RiskExperiments = Array(experiments.prefix(2))
+        let b2RiskCurrent = b2RiskExperiments.map { ReadinessScoring.evaluate($0.input) }
+        let b2RiskReduced = b2RiskExperiments.map { ReadinessScoring.evaluate($0.input, parameters: .init(overrides: [.b2Penalty: b2Minus20])) }
+        let b2RiskIncreased = b2RiskExperiments.map { ReadinessScoring.evaluate($0.input, parameters: .init(overrides: [.b2Penalty: b2Plus20])) }
+        let b2ReducedFlips = zip(b2RiskCurrent, b2RiskReduced).filter { $0.0.level != $0.1.level }.count
+        let b2IncreasedFlips = zip(b2RiskCurrent, b2RiskIncreased).filter { $0.0.level != $0.1.level }.count
+        let allB2Reduced = experiments.map { ReadinessScoring.evaluate($0.input, parameters: .init(overrides: [.b2Penalty: b2Minus20])) }
+        let allB2Increased = experiments.map { ReadinessScoring.evaluate($0.input, parameters: .init(overrides: [.b2Penalty: b2Plus20])) }
+        let allCurrent = experiments.map { ReadinessScoring.evaluate($0.input) }
+        let allReducedFlips = zip(allCurrent, allB2Reduced).filter { $0.0.level != $0.1.level }.count
+        let allIncreasedFlips = zip(allCurrent, allB2Increased).filter { $0.0.level != $0.1.level }.count
+        var lines = ["# Readiness 合成回测报告", "", "规格：readiness v0.8（2026-10-10 修订）；规则证据版本 `readiness-v0.8-r2-uncalibrated`。全部 G 级数值 **未校准**；B2 = −10（2026-10-10 #29 裁决，仍 G 未校准）。",
                      "", "复现：`sh Scripts/test-readiness-backtest.sh --report Docs/Readiness-Backtest-Report.md`。Swift 6、完整并发检查、默认 MainActor 隔离、warnings-as-errors；不依赖 Core 或 UI。",
                      "", "## 第一优先级：B2 误伤画像", "",
-                     "B2=0 仅是 harness 内的配对反事实，不改变生产默认。它量化 −15 的独立影响；没有据此调参。总体进步与最近三次连续下滑可以同时存在。",
-                     "", "| 画像/控制 | 最近五次（早→晚） | B1 | B2 | B3 | 当前 −15 | B2=−12 | B2=−18 | B2=0 | 当前 vs 0 分数 / 等级变化 |", "|---|---|---:|---:|---:|---|---|---|---|---|"]
+                     "B2=0 仅是 harness 内的配对反事实，不改变生产默认。它量化 \(signed(b2Penalty)) 的独立影响；没有据此调参。总体进步与最近三次连续下滑可以同时存在。",
+                     "", "| 画像/控制 | 最近五次（早→晚） | B1 | B2 | B3 | 当前 \(signed(b2Penalty)) | B2=\(signed(b2Minus20)) | B2=\(signed(b2Plus20)) | B2=0 | 当前 vs 0 分数 / 等级变化 |", "|---|---|---:|---:|---:|---|---|---|---|---|"]
         for experiment in experiments {
             let current = ReadinessScoring.evaluate(experiment.input)
             let zero = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: 0]))
-            let reduced = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: -12]))
-            let increased = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: -18]))
+            let reduced = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: b2Minus20]))
+            let increased = ReadinessScoring.evaluate(experiment.input, parameters: .init(overrides: [.b2Penalty: b2Plus20]))
             let scores = experiment.input.recentFinalScores.prefix(5).reversed().map { number($0.finalScore) }.joined(separator: " → ")
             lines.append("| \(experiment.name) | \(scores) | \(number(delta(current, "B1"))) | \(number(delta(current, "B2"))) | \(number(delta(current, "B3"))) | \(summary(current)) | \(summary(reduced)) | \(summary(increased)) | \(summary(zero)) | \(number(current.score - zero.score)) / \(zero.level)→\(current.level) |")
         }
         lines += ["", "这组可复现实例证明误伤风险存在，不是人群发生率或临床效果的估计。严格 `>2`：恰好 2.00 与 1.90 的双降不会触发；2.01 会触发。",
-                  "", "**B2 误伤组独立敏感度：**前两行主要风险画像，−12（扣分幅值 −20%）相对 −15 为 2/2 等级翻转（100%，**不稳定**）；−18（幅值 +20%）为 0/2（0%）。包含三组阈值控制的整张表则分别为 2/5（40%）与 0/5（0%）。该风险组不混入下方 P1–P9 的分母。普通画像可能没有 B2，或被高优先级决策封顶遮住；其 B2 等级翻转率为零不能排除误伤。"]
+                  "", "**B2 误伤组独立敏感度：**前两行主要风险画像，\(signed(b2Minus20))（扣分幅值 −20%）相对 \(signed(b2Penalty)) 为 \(b2ReducedFlips)/\(b2RiskExperiments.count) 等级翻转（\(percentage(b2ReducedFlips, b2RiskExperiments.count))）；\(signed(b2Plus20))（幅值 +20%）为 \(b2IncreasedFlips)/\(b2RiskExperiments.count)（\(percentage(b2IncreasedFlips, b2RiskExperiments.count))）。包含三组阈值控制的整张表则分别为 \(allReducedFlips)/\(experiments.count)（\(percentage(allReducedFlips, experiments.count))）与 \(allIncreasedFlips)/\(experiments.count)（\(percentage(allIncreasedFlips, experiments.count))）。该风险组不混入下方 P1–P9 的分母。普通画像可能没有 B2，或被高优先级决策封顶遮住；其 B2 等级翻转率为零不能排除误伤。"]
         let p1Probes = profiles.first { $0.id == "P1" }!.probes
         let p1 = p1Probes.map { ReadinessScoring.evaluate($0.input) }
         let p1WithoutB2 = p1Probes.map {
@@ -561,7 +581,7 @@ nonisolated private enum ReadinessBacktest {
         for index in p1.indices where p1[index].level == "A" {
             lines.append("| \(p1Probes[index].label) | \(p1[index].isColdStart ? "冷启动占位；B2 未参与" : "B2 连续两次下降 3 分") | \(summary(p1[index])) | \(summary(p1WithoutB2[index])) | \(number(p1[index].score - p1WithoutB2[index].score)) |")
         }
-        lines += ["", "P1 的 B2=0 配对结果为 \(distribution(p1WithoutB2))；仅上述 \(p1B2Indices.count) 个 B2 日从 A 变 S，两个冷启动日仍为 70/A。这是噪声触发 −15 的可复现证据，不作为擅自调参依据。",
+        lines += ["", "P1 的 B2=0 配对结果为 \(distribution(p1WithoutB2))；仅上述 \(p1B2Indices.count) 个 B2 日从 A 变 S，两个冷启动日仍为 70/A。这是噪声触发 \(signed(b2Penalty)) 的可复现证据，不作为擅自调参依据。",
                   "", "## 全部画像", "", "9 类画像中 P3 分 a/b，故有 \(profiles.count) 行、\(profiles.reduce(0) { $0 + $1.probes.count }) 次观测；每个参数的两次扫描均覆盖 P1–P9 全部行、全部观测。P9 包含 15 条真实合成录音和 30 次逐日评估。",
                   "", "| 画像 | 观测数 | 等级分布 | 分数范围 | 决策封顶次数 | 结果与解释 |", "|---|---:|---|---|---:|---|"]
         for profile in profiles {
@@ -593,7 +613,11 @@ nonisolated private enum ReadinessBacktest {
         let p9BDays = p9.indices.filter { p9[$0].level == "B" }.map { index in
             "\(p9Probes[index].label)：\(summary(p9[index]))（\(evidence(p9[index]))）"
         }
-        lines += ["", "全体 A 占比 \(percentage(p9.filter { $0.level == "A" }.count, p9.count))，已过冷启动 A 占比 \(percentage(warm.filter { p9[$0].level == "A" }.count, warm.count))。\(p9BDays.joined(separator: "；"))。这些 B 来自普通分数映射，无封顶、无 C；严格保留 B2 −15，不为得到只含 A/S 的结果改动噪声或休息日。"]
+        let p9Summary = p9BDays.isEmpty ? "没有 B 日" : p9BDays.joined(separator: "；")
+        let p9Explanation = p9BDays.isEmpty
+            ? "没有 B 日；这些结果来自普通分数映射，无封顶、无 C"
+            : "\(p9Summary)；这些 B 来自普通分数映射，无封顶、无 C"
+        lines += ["", "全体 A 占比 \(percentage(p9.filter { $0.level == "A" }.count, p9.count))，已过冷启动 A 占比 \(percentage(warm.filter { p9[$0].level == "A" }.count, warm.count))。\(p9Explanation)；严格保留 B2 \(signed(b2Penalty))，不为得到只含 A/S 的结果改动噪声或休息日。"]
         let a1Maximum = ReadinessParameter.a1MaximumDays.currentValue * ReadinessParameter.a1PointsPerDay.currentValue
         let b1Reward = ReadinessParameter.b1Reward.currentValue
         lines += ["", "## 画像预期修正与未校准观察", "",
@@ -638,7 +662,7 @@ nonisolated private enum ReadinessBacktest {
                   "- 基线样本按 canCompare 质量门控；HNR 还要求 w≥10 且值非 nil。基线至少五个样本，SD 使用 n−1；只有 HNR 应用 0.5 dB floor。n/p 不设 floor，零/非有限 SD 传 nil；C4 只需要有效均值。",
                   "- 最近三次保留真实录音的时间槽。质量不合格和旧录音的缺失特征映射为 nil，不补 0、不插值、不用更老记录回填。休息日不凭空创建录音槽；未满三次真实录音时保留不足三次的窗口。HNR floor 的 ±20% 使用原始合成历史重新计算基线，单独列为 caller 参数；其它调用方策略不被冒充为引擎参数。",
                   "- P5 使用固定种子 0x5EED；所有输入、参数枚举与报告均来自同一可执行 harness，无文件取数或随机时钟依赖。冷启动/短路也保留所有因子零贡献行。",
-                  "- 这是合成逻辑验证，尚无真实人群校准；P1 的原始预期问题已通过更新验收口径解决，P2 的已知画像冲突、B2 风险和参数敏感性仍如实保留；没有生产默认参数变更。", ""]
+                  "- 这是合成逻辑验证，尚无真实人群校准；P1 的原始预期问题已通过更新验收口径解决，P2 的已知画像冲突、B2 风险和参数敏感性仍如实保留；除 B2 按 #29 裁决更新外，没有其他生产默认参数变更。", ""]
         return lines.joined(separator: "\n")
     }
 
@@ -709,5 +733,8 @@ nonisolated private enum ReadinessBacktest {
     }
     static func evidence(_ result: ReadinessResult) -> String {
         result.contributions.filter(\.isTriggered).map { "\($0.factorId):\(number($0.contribution))" }.joined(separator: ", ")
+    }
+    static func signed(_ value: Double) -> String {
+        value < 0 ? "−\(number(abs(value)))" : number(value)
     }
 }

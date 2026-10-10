@@ -46,6 +46,7 @@ cmake --build "$test_directory/native" --parallel 4
 
 xcrun swiftc -parse-as-library -O -swift-version 6 -strict-concurrency=complete -warnings-as-errors \
     -I "$core_directory/platform/ios" \
+    -I "$core_directory/include" \
     -L "$test_directory/native" -l pitchee_core \
     -F "$framework_directory" -framework onnxruntime \
     -framework CoreML -framework Accelerate -framework CoreGraphics \

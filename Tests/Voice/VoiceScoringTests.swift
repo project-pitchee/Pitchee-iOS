@@ -89,6 +89,10 @@ enum VoiceScoringTests {
         let switchedToFeminine = VoicePreference.feminine.score(for: coreResult)
         check(close(switchedToFeminine.finalScore, 32) && switchedToFeminine.rule == "low_f0_natural_cap",
               "Switching a masculinization result to feminine recomputes the matching Core profile")
+        let exportScoreAfterSwitch = VoiceDirectionScore(preference: .feminine, result: coreResult)
+        check(exportScoreAfterSwitch.standardScore == switchedToFeminine.standardScore
+                && close(exportScoreAfterSwitch.finalScore, switchedToFeminine.finalScore),
+              "Export and result page share the resolved preference after a recording-time switch")
         let decoded = try JSONDecoder().decode(PitcheeAnalysisResult.self, from: payload)
         check(VoicePreference.masculine.score(for: decoded).finalScore == masculine.finalScore, "Persisted raw results reproduce the displayed score")
 

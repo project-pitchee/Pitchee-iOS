@@ -13,6 +13,7 @@ import UniformTypeIdentifiers
 struct RecordingExportButton: View {
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
+    let preference: VoicePreference
 
     @State private var isPresented = false
 
@@ -23,7 +24,8 @@ struct RecordingExportButton: View {
         .sheet(isPresented: $isPresented) {
             RecordingExportView(
                 result: result,
-                volumeStatistics: volumeStatistics
+                volumeStatistics: volumeStatistics,
+                preference: preference
             )
             .presentationDragIndicator(.visible)
         }
@@ -33,6 +35,7 @@ struct RecordingExportButton: View {
 struct RecordingExportView: View {
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
+    let preference: VoicePreference
 
     @State private var selectedItems = Set(ExportSelectionID.allCases)
     @State private var editMode: EditMode = .active
@@ -165,7 +168,8 @@ struct RecordingExportView: View {
                         ExportReportPagePreview(
                             page: page,
                             result: result,
-                            volumeStatistics: volumeStatistics
+                            volumeStatistics: volumeStatistics,
+                            preference: preference
                         )
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, pageModels.count > 1 ? 32 : 0)
@@ -248,7 +252,8 @@ struct RecordingExportView: View {
         let renderer = ImageRenderer(content: ExportReportPage(
             page: page,
             result: result,
-            volumeStatistics: volumeStatistics
+            volumeStatistics: volumeStatistics,
+            preference: preference
         ))
         renderer.scale = scale
         renderer.isOpaque = true
@@ -474,7 +479,8 @@ private enum ExportMetricOption: String, CaseIterable, Hashable, Identifiable {
     func value(
         in result: PitcheeAnalysisResult,
         volumeStatistics: RecordingVolumeStatistics?,
-        pitchStatistics: RecordingPitchStatistics
+        pitchStatistics: RecordingPitchStatistics,
+        preference: VoicePreference
     ) -> ExportMetricValue {
         switch self {
         case .inputDuration:
@@ -509,12 +515,11 @@ private enum ExportMetricOption: String, CaseIterable, Hashable, Identifiable {
                 String(localized: "common.unit.dbfsPercentileRange")
             )
         case .finalScore:
-            return ExportMetricValue(number(result.composite.finalScore, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
+            let score = VoiceDirectionScore(preference: preference, result: result)
+            return ExportMetricValue(number(score.finalScore, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
         case .standardScore:
-            let standard = result.scoreProfile == "masculinization"
-                ? 100 - min(max(result.vfp.vfpStandardScore, 0), 100)
-                : result.vfp.vfpStandardScore
-            return ExportMetricValue(number(standard, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
+            let score = VoiceDirectionScore(preference: preference, result: result)
+            return ExportMetricValue(number(score.standardScore, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
         case .naturalnessScore:
             return ExportMetricValue(number(result.naturalness.score, fractionDigits: 0), String(localized: "common.unit.pointsOutOf100"))
         case .baseScore:
@@ -673,6 +678,7 @@ private struct ExportReportPagePreview: View {
     let page: ExportReportPageModel
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
+    let preference: VoicePreference
 
     var body: some View {
         GeometryReader { proxy in
@@ -681,7 +687,8 @@ private struct ExportReportPagePreview: View {
             ExportReportPage(
                 page: page,
                 result: result,
-                volumeStatistics: volumeStatistics
+                volumeStatistics: volumeStatistics,
+                preference: preference
             )
             .frame(width: pageSize.width, height: pageSize.height)
             .scaleEffect(scale, anchor: .topLeading)
@@ -704,6 +711,7 @@ private struct ExportReportPage: View {
     let page: ExportReportPageModel
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
+    let preference: VoicePreference
 
     private var pitchStatistics: RecordingPitchStatistics {
         RecordingPitchStatistics(pitch: result.f0)
@@ -820,7 +828,8 @@ private struct ExportReportPage: View {
                                     metric: metric,
                                     result: result,
                                     volumeStatistics: volumeStatistics,
-                                    pitchStatistics: pitchStatistics
+                                    pitchStatistics: pitchStatistics,
+                                    preference: preference
                                 )
                             }
                         }
@@ -847,12 +856,14 @@ private struct ExportMetricValueRow: View {
     let result: PitcheeAnalysisResult
     let volumeStatistics: RecordingVolumeStatistics?
     let pitchStatistics: RecordingPitchStatistics
+    let preference: VoicePreference
 
     var body: some View {
         let value = metric.value(
             in: result,
             volumeStatistics: volumeStatistics,
-            pitchStatistics: pitchStatistics
+            pitchStatistics: pitchStatistics,
+            preference: preference
         )
         HStack(alignment: .firstTextBaseline, spacing: 5) {
             Text(metric.title)
@@ -1162,18 +1173,20 @@ private struct ExportPDFDocument: FileDocument {
 #Preview("Mock - Export Report") {
     RecordingExportView(
         result: DebugPreviewData.result,
-        volumeStatistics: DebugPreviewData.volumeStatistics
+        volumeStatistics: DebugPreviewData.volumeStatistics,
+        preference: .feminine
     )
 }
 
 #Preview("Mock - Report Without Volume") {
-    RecordingExportView(result: DebugPreviewData.result, volumeStatistics: nil)
+    RecordingExportView(result: DebugPreviewData.result, volumeStatistics: nil, preference: .feminine)
 }
 
 #Preview("Debug - Export Button", traits: .sizeThatFitsLayout) {
     RecordingExportButton(
         result: DebugPreviewData.result,
-        volumeStatistics: DebugPreviewData.volumeStatistics
+        volumeStatistics: DebugPreviewData.volumeStatistics,
+        preference: .feminine
     )
     .padding()
 }

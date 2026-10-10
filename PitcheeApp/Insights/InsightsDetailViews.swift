@@ -206,6 +206,13 @@ private struct InsightsRecordingRows: View {
 
 struct RecordingHistoryDetailView: View {
     let assessment: RecordingAssessment
+    @AppStorage(AppStorageKey.voicePreference) private var savedVoicePreference = ""
+
+    private var voicePreference: VoicePreference {
+        assessment.recordedTarget
+            ?? VoicePreference(legacyStoredValue: savedVoicePreference)
+            ?? .undecided
+    }
 
     var body: some View {
         Group {
@@ -220,7 +227,11 @@ struct RecordingHistoryDetailView: View {
                 )
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
-                            RecordingExportButton(result: result, volumeStatistics: nil)
+                            RecordingExportButton(
+                                result: result,
+                                volumeStatistics: nil,
+                                preference: voicePreference
+                            )
                                 .labelStyle(.iconOnly)
                         }
                     }
