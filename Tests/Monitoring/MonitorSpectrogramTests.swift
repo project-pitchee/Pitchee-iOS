@@ -125,6 +125,52 @@ enum MonitorSpectrogramTests {
         let column = MonitorSpectrogramColumn(elapsedTime: 4.25, image: silentImage)
         check(column.id == 4.25 && column.image === silentImage,
               "A stored column preserves its timeline identity and reuses the rendered image")
+        func rgba(_ image: CGImage, x: Int, row: Int) -> [UInt8] {
+            guard let data = image.dataProvider?.data,
+                  let bytes = CFDataGetBytePtr(data) else { return [] }
+            return Array(UnsafeBufferPointer(start: bytes + row * image.bytesPerRow + x * 4, count: 4))
+        }
+        let toneImage = MonitorSpectrogramRasterizer.makeColumn(frame: singleFrame)!
+        let imageColumns = [
+            MonitorSpectrogramColumn(elapsedTime: 0.128, image: toneImage),
+            MonitorSpectrogramColumn(elapsedTime: 0.228, image: silentImage),
+            MonitorSpectrogramColumn(elapsedTime: 0.428, image: toneImage)
+        ]
+        let combined = MonitorSpectrogramRasterizer.makeImage(
+            columns: imageColumns, timeRange: 0.028...0.528, pixelWidth: 10
+        )!
+        check(combined.width == 10 && combined.height == 512,
+              "The visible time window is composed into a single bitmap")
+        for row in [0, peakRow, 511] {
+            check(rgba(combined, x: 0, row: row) == rgba(toneImage, x: 0, row: row)
+                  && rgba(combined, x: 1, row: row) == rgba(toneImage, x: 0, row: row),
+                  "Each hop fills its own pixel columns without flipping frequency rows")
+            check(rgba(combined, x: 2, row: row) == silent[row]
+                  && rgba(combined, x: 3, row: row) == silent[row],
+                  "Adjacent columns preserve their independent amplitudes")
+            check([4, 5, 8, 9].allSatisfy { rgba(combined, x: $0, row: row) == [0, 0, 0, 0] },
+                  "Missing frames and future time remain transparent")
+            check(rgba(combined, x: 6, row: row) == rgba(toneImage, x: 0, row: row)
+                  && rgba(combined, x: 7, row: row) == rgba(toneImage, x: 0, row: row),
+                  "A later tone never stretches across a capture gap")
+        }
+        let cropped = MonitorSpectrogramRasterizer.makeImage(
+            columns: imageColumns, timeRange: 0.078...0.328, pixelWidth: 5
+        )!
+        check(rgba(cropped, x: 0, row: peakRow) == rgba(toneImage, x: 0, row: peakRow)
+              && rgba(cropped, x: 1, row: peakRow) == silent[peakRow]
+              && rgba(cropped, x: 2, row: peakRow) == silent[peakRow]
+              && rgba(cropped, x: 3, row: peakRow) == [0, 0, 0, 0]
+              && rgba(cropped, x: 4, row: peakRow) == [0, 0, 0, 0],
+              "Scrolling clips partial hops and excludes columns beyond the visible window")
+        check(MonitorSpectrogramRasterizer.makeImage(columns: [], timeRange: 0...1, pixelWidth: 0) == nil
+              && MonitorSpectrogramRasterizer.makeImage(columns: [], timeRange: 0...1, pixelWidth: 4_097) == nil
+              && MonitorSpectrogramRasterizer.makeImage(columns: [], timeRange: 1...1, pixelWidth: 10) == nil
+              && MonitorSpectrogramRasterizer.makeImage(columns: [], timeRange: 0...(.infinity), pixelWidth: 10) == nil,
+              "Invalid ranges and unbounded allocations are rejected")
+        let emptyImage = MonitorSpectrogramRasterizer.makeImage(columns: [], timeRange: 0...1, pixelWidth: 10)!
+        check(rgba(emptyImage, x: 5, row: peakRow) == [0, 0, 0, 0],
+              "An empty window clears stale image content")
         print("Monitor spectrogram: \(checks) checks, \(failures) failures")
         if failures > 0 { exit(1) }
     }

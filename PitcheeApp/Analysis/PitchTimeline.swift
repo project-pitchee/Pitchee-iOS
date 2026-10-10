@@ -136,15 +136,15 @@ nonisolated struct ScoringPitchSnapshot: Sendable {
         for bucket in 0..<bucketCount {
             let start = visible.startIndex + bucket * visible.count / bucketCount
             let end = visible.startIndex + (bucket + 1) * visible.count / bucketCount
-            var minimum: Int?
-            var maximum: Int?
+            var minimum: (index: Int, pitch: Double)?
+            var maximum: (index: Int, pitch: Double)?
             for index in start..<end {
-                guard isDrawable(visible[index]) else { continue }
-                if minimum == nil || visible[index].pitchHz! < visible[minimum!].pitchHz! { minimum = index }
-                if maximum == nil || visible[index].pitchHz! > visible[maximum!].pitchHz! { maximum = index }
+                guard isDrawable(visible[index]), let pitch = visible[index].pitchHz else { continue }
+                if minimum.map({ pitch < $0.pitch }) ?? true { minimum = (index, pitch) }
+                if maximum.map({ pitch > $0.pitch }) ?? true { maximum = (index, pitch) }
             }
 
-            let selected = [start, minimum, maximum, end - 1].compactMap { $0 }.sorted()
+            let selected = [start, minimum?.index, maximum?.index, end - 1].compactMap { $0 }.sorted()
             var previous: Int?
             for index in selected where index != previous {
                 if let previous, isDrawable(visible[previous]), isDrawable(visible[index]),
@@ -163,40 +163,6 @@ nonisolated struct ScoringPitchSnapshot: Sendable {
     private static func isDrawable(_ sample: LivePitchSample) -> Bool {
         guard let pitch = sample.pitchHz else { return false }
         return pitch.isFinite && (50...1_000).contains(pitch)
-    }
-}
-
-/// A bounded snapshot for chart exploration. Missing/unvoiced samples stay in
-/// the table and split the audio graph, so silence is never reported as 0 Hz.
-nonisolated struct PitchAccessibilitySnapshot: Identifiable, Sendable {
-    let id = UUID()
-    let range: ClosedRange<TimeInterval>
-    let samples: [LivePitchSample]
-
-    init(samples: [LivePitchSample], elapsedTime: TimeInterval) {
-        let end = max(PitchTimeline.visibleSeconds, elapsedTime.isFinite ? elapsedTime : 0)
-        let range = (end - PitchTimeline.visibleSeconds)...end
-        self.range = range
-        self.samples = samples.filter { $0.elapsedTime.isFinite && range.contains($0.elapsedTime) }
-            .sorted { $0.elapsedTime < $1.elapsedTime }
-    }
-
-    var voicedSegments: [[LivePitchSample]] {
-        var segments: [[LivePitchSample]] = []
-        var current: [LivePitchSample] = []
-        for sample in samples {
-            guard let pitch = sample.pitchHz, pitch.isFinite, pitch > 0 else {
-                if !current.isEmpty { segments.append(current); current = [] }
-                continue
-            }
-            if let last = current.last, sample.elapsedTime - last.elapsedTime > 0.4 {
-                segments.append(current)
-                current = []
-            }
-            current.append(sample)
-        }
-        if !current.isEmpty { segments.append(current) }
-        return segments
     }
 }
 

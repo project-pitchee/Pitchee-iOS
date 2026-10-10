@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// Each FFT frame is rasterized once by the capture worker. Drawing the
-/// retained columns keeps scrolling and replay independent of the FFT size.
+/// Each FFT frame is rasterized once by the capture worker. Retained columns
+/// are composed off the main actor into one visible bitmap.
 struct MonitorSpectrogramPlot: View {
     let columns: [MonitorSpectrogramColumn]
     let timeRange: ClosedRange<TimeInterval>
@@ -34,24 +34,63 @@ private struct MonitorSpectrogramHeatmap: View {
     let columns: [MonitorSpectrogramColumn]
     let timeRange: ClosedRange<TimeInterval>
     @ScaledMetric(relativeTo: .caption2) private var labelSize = 11.0
+    @Environment(\.displayScale) private var displayScale
+    @State private var rendered: RenderedSpectrogram?
 
     var body: some View {
-        Canvas { context, size in
-            let layout = MonitorSpectrogramLayout(size: size, labelSize: labelSize)
-            let hop = Double(MonitorSpectrumAnalyzer.hopSize) / MonitorSpectrumAnalyzer.sampleRate
-            context.clip(to: Path(layout.plot))
-            for column in columns {
-                let start = layout.x(column.elapsedTime - hop, range: timeRange)
-                let end = layout.x(column.elapsedTime, range: timeRange)
+        GeometryReader { geometry in
+            let layout = MonitorSpectrogramLayout(size: geometry.size, labelSize: labelSize)
+            let request = SpectrogramRenderRequest(
+                columns: columns, timeRange: timeRange,
+                pixelWidth: min(4_096, max(1, Int(ceil(layout.plot.width * displayScale))))
+            )
+            Canvas { context, _ in
+                guard !columns.isEmpty, let rendered else { return }
+                context.clip(to: Path(layout.plot))
+                let start = layout.x(rendered.timeRange.lowerBound, range: timeRange)
+                let end = layout.x(rendered.timeRange.upperBound, range: timeRange)
                 let rect = CGRect(x: start, y: layout.plot.minY,
                                   width: end - start, height: layout.plot.height)
-                // A column only covers its own hop. Missing frames remain
-                // background instead of stretching a tone across a gap.
-                // Filter vertically when a compact plot has fewer display
-                // pixels than FFT rows, so narrow harmonics are not skipped.
-                context.draw(Image(decorative: column.image, scale: 1).interpolation(.medium), in: rect)
+                // One draw call, with vertical filtering for narrow harmonics.
+                context.draw(Image(decorative: rendered.image, scale: 1).interpolation(.medium), in: rect)
+            }
+            .task(id: request) {
+                let worker = Task.detached(priority: .userInitiated) {
+                    MonitorSpectrogramRasterizer.makeImage(
+                        columns: request.columns, timeRange: request.timeRange,
+                        pixelWidth: request.pixelWidth
+                    )
+                }
+                let image = await withTaskCancellationHandler {
+                    await worker.value
+                } onCancel: {
+                    worker.cancel()
+                }
+                guard !Task.isCancelled else { return }
+                rendered = image.map { RenderedSpectrogram(image: $0, timeRange: request.timeRange) }
             }
         }
+    }
+}
+
+private struct RenderedSpectrogram {
+    let image: CGImage
+    let timeRange: ClosedRange<TimeInterval>
+}
+
+/// Cursor-only redraws reuse the bitmap. Replacing a frame at an existing
+/// timestamp still invalidates the cache because its image identity changed.
+nonisolated private struct SpectrogramRenderRequest: Equatable, Sendable {
+    let columns: [MonitorSpectrogramColumn]
+    let timeRange: ClosedRange<TimeInterval>
+    let pixelWidth: Int
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.timeRange == rhs.timeRange && lhs.pixelWidth == rhs.pixelWidth
+            && lhs.columns.count == rhs.columns.count
+            && zip(lhs.columns, rhs.columns).allSatisfy {
+                $0.elapsedTime == $1.elapsedTime && $0.image === $1.image
+            }
     }
 }
 

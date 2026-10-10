@@ -22,8 +22,7 @@ public enum PitcheeScoreProfile: Sendable {
 
 /// Owns one native analyzer and serializes access to its C++ inference sessions.
 public actor PitcheeCoreAnalyzer {
-    private var handle: OpaquePointer?
-    private var realtimeF0: OpaquePointer?
+    private let resources: NativeAnalyzerResources
     private let decoder: JSONDecoder
 
     public init(modelDirectory: URL? = nil, threads: Int32 = 2) throws {
@@ -46,34 +45,23 @@ public actor PitcheeCoreAnalyzer {
         guard status == PITCHEE_SUCCESS, let createdHandle else {
             throw PitcheeCoreError(
                 status: status,
-                message: String(cString: errorBuffer)
+                message: Self.errorMessage(errorBuffer)
             )
         }
 
-        handle = createdHandle
+        resources = NativeAnalyzerResources(handle: createdHandle)
         decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-    }
-
-    deinit {
-        if let realtimeF0 {
-            pitchee_realtime_f0_destroy(realtimeF0)
-        }
-        if let handle {
-            pitchee_analyzer_destroy(handle)
-        }
     }
 
     /// Starts a new microphone timeline while reusing the loaded SwiftF0 model.
     public func resetRealtimeF0() throws {
         try Task.checkCancellation()
-        if let realtimeF0 {
+        if let realtimeF0 = resources.realtimeF0 {
             pitchee_realtime_f0_reset(realtimeF0)
             return
         }
-        guard let handle else {
-            throw PitcheeCoreError(message: "The PitcheeCore analyzer is unavailable.")
-        }
+        let handle = resources.handle
 
         var stream: OpaquePointer?
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
@@ -81,16 +69,16 @@ public actor PitcheeCoreAnalyzer {
             handle, nil, &stream, &errorBuffer, errorBuffer.count
         )
         guard status == PITCHEE_SUCCESS, let stream else {
-            throw PitcheeCoreError(status: status, message: String(cString: errorBuffer))
+            throw PitcheeCoreError(status: status, message: Self.errorMessage(errorBuffer))
         }
-        realtimeF0 = stream
+        resources.realtimeF0 = stream
     }
 
     /// Consumes contiguous 16 kHz mono Float32 PCM. Core owns F0 estimation,
     /// voicing decisions and timestamps; all native inference stays serialized.
     public func processRealtimeF0(samples: [Float]) throws -> [PitcheeF0Frame] {
         try Task.checkCancellation()
-        guard let realtimeF0 else {
+        guard let realtimeF0 = resources.realtimeF0 else {
             throw PitcheeCoreError(message: "The realtime F0 stream has not been started.")
         }
         var frames: [PitcheeF0Frame] = []
@@ -115,7 +103,7 @@ public actor PitcheeCoreAnalyzer {
             }
         }
         guard status == PITCHEE_SUCCESS else {
-            throw PitcheeCoreError(status: status, message: String(cString: errorBuffer))
+            throw PitcheeCoreError(status: status, message: Self.errorMessage(errorBuffer))
         }
         return frames
     }
@@ -126,9 +114,7 @@ public actor PitcheeCoreAnalyzer {
         channels: Int32,
         scoreProfile: PitcheeScoreProfile = .feminization
     ) throws -> PitcheeAnalysisResult {
-        guard let handle else {
-            throw PitcheeCoreError(message: "The PitcheeCore analyzer is unavailable.")
-        }
+        let handle = resources.handle
 
         var output: UnsafeMutablePointer<CChar>?
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
@@ -151,7 +137,7 @@ public actor PitcheeCoreAnalyzer {
         return try decodeOutput(
             status: status,
             output: output,
-            errorMessage: String(cString: errorBuffer)
+            errorMessage: Self.errorMessage(errorBuffer)
         )
     }
 
@@ -159,9 +145,7 @@ public actor PitcheeCoreAnalyzer {
         wavFile: URL,
         scoreProfile: PitcheeScoreProfile = .feminization
     ) throws -> PitcheeAnalysisResult {
-        guard let handle else {
-            throw PitcheeCoreError(message: "The PitcheeCore analyzer is unavailable.")
-        }
+        let handle = resources.handle
 
         var output: UnsafeMutablePointer<CChar>?
         var errorBuffer = [CChar](repeating: 0, count: 1_024)
@@ -179,8 +163,12 @@ public actor PitcheeCoreAnalyzer {
         return try decodeOutput(
             status: status,
             output: output,
-            errorMessage: String(cString: errorBuffer)
+            errorMessage: Self.errorMessage(errorBuffer)
         )
+    }
+
+    nonisolated private static func errorMessage(_ buffer: [CChar]) -> String {
+        String(decoding: buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
     }
 
     private func decodeOutput(
@@ -208,4 +196,22 @@ public actor PitcheeCoreAnalyzer {
 nonisolated public struct PitcheeF0Frame: Sendable {
     public let elapsedTime: TimeInterval
     public let pitchHz: Double?
+}
+
+/// Actor-confined ownership. This object never escapes PitcheeCoreAnalyzer;
+/// regular class destruction can release the non-Sendable C pointers without
+/// accessing actor-isolated state from the actor's nonisolated deinitializer.
+nonisolated private final class NativeAnalyzerResources {
+    let handle: OpaquePointer
+    var realtimeF0: OpaquePointer?
+
+    init(handle: OpaquePointer) {
+        self.handle = handle
+    }
+
+    deinit {
+        // The realtime stream borrows the analyzer's model, so release it first.
+        if let realtimeF0 { pitchee_realtime_f0_destroy(realtimeF0) }
+        pitchee_analyzer_destroy(handle)
+    }
 }

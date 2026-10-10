@@ -45,6 +45,15 @@ enum MonitorAudioCaptureTests {
         check(activeEngine.events.count("stop") == 1, "repeated cancellation tears down the engine once")
         check(activeEngine.events.count("main-thread") == 0, "engine calls run off the main thread")
 
+        let orphanEngine = TestMonitorEngine()
+        var orphan: MonitorAudioCapture? = MonitorAudioCapture { orphanEngine }
+        let weakOrphan = CaptureWeakReference(orphan)
+        try await start(orphan!)
+        orphan = nil
+        check(await waitFor { orphanEngine.events.count("stop") == 1 },
+              "releasing an owner without explicit cancellation still stops its microphone")
+        check(weakOrphan.value == nil, "the polling worker never keeps an abandoned capture alive")
+
         for cancelTask in [false, true] {
             let gate = CaptureThreadGate()
             let engine = TestMonitorEngine(prepareGate: gate)
@@ -206,6 +215,11 @@ enum MonitorAudioCaptureTests {
 }
 
 private enum CaptureTestError: Error { case startFailed }
+
+private final class CaptureWeakReference<Value: AnyObject>: @unchecked Sendable {
+    weak var value: Value?
+    init(_ value: Value?) { self.value = value }
+}
 
 private final class CaptureEvents: @unchecked Sendable {
     private let lock = NSLock()

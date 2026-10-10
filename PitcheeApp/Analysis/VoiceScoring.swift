@@ -5,6 +5,7 @@
 //  Created by Ryo on 2026/9/30.
 //
 
+import CPitcheeCore
 import Foundation
 
 nonisolated enum VoicePreference: String, Codable, CaseIterable, Identifiable, Sendable {
@@ -71,9 +72,9 @@ nonisolated struct VoiceAnalysisSummary: Decodable, Sendable {
 
 /// A presentation of the immutable engine result for the current practice goal.
 /// VFP remains a feminine reference score in storage and in the two-sided chart.
-/// New analyses request Core's explicit masculinization profile. The local
-/// formula remains as a compatibility path for older stored results that do not
-/// contain `score_profile` in their JSON payload.
+/// New analyses request Core's explicit masculinization profile. The stateless
+/// Core scoring API also provides the compatibility path for older stored
+/// results that do not contain `score_profile` in their JSON payload.
 nonisolated struct VoiceDirectionScore {
     static let rulesVersion = "core-score-profile-v1"
     let standardScore: Double
@@ -119,86 +120,45 @@ nonisolated struct VoiceDirectionScore {
     static func masculineComposite(
         feminineScore: Double, naturalness: Double, pitchHz: Double?
     ) -> PitcheeAnalysisResult.CompositeScore {
-        _ = naturalness // The Core masculinization profile intentionally ignores it.
-        let vfpDeviation = clamp((50 - clamp(feminineScore, to: 100)) / 50, lower: -1, upper: 1)
-        let f0Deviation: Double
-        if let pitchHz, pitchHz.isFinite, pitchHz > 0 {
-            f0Deviation = clamp((165 - pitchHz) / 75, lower: -1, upper: 1)
-        } else {
-            f0Deviation = 0
-        }
-        let score = clamp(60 + 25 * f0Deviation + 15 * vfpDeviation, to: 100)
-        return .init(baseScore: score, finalScore: score, cap: nil,
-                     rule: "continuous", limited: false, boosted: false)
+        coreComposite(profile: PITCHEE_SCORE_PROFILE_MASCULINIZATION,
+                      standardScore: feminineScore, naturalness: naturalness, pitchHz: pitchHz)
     }
 
-    /// Reconstruct the feminine profile when a masculine-profile recording is
-    /// viewed after the user switches direction. New analyses already carry
-    /// the matching Core composite; this path keeps direction switching local
-    /// and does not rewrite the stored result payload.
+    /// Recompute a stored recording for the current direction without loading
+    /// models or changing the immutable persisted analysis.
     static func feminineComposite(
         standardScore: Double, naturalness: Double, pitchHz: Double?
     ) -> PitcheeAnalysisResult.CompositeScore {
-        let standard = clamp(standardScore, to: 100)
-        let naturalness = clamp(naturalness, to: 100)
-        guard let pitchHz, pitchHz.isFinite, pitchHz > 0 else {
-            return .init(baseScore: standard, finalScore: standard, cap: nil,
-                         rule: "f0_unavailable", limited: false, boosted: false)
-        }
+        coreComposite(profile: PITCHEE_SCORE_PROFILE_FEMINIZATION,
+                      standardScore: standardScore, naturalness: naturalness, pitchHz: pitchHz)
+    }
 
-        let standardRatio = standard / 100
-        let naturalnessRatio = clamp((naturalness - 40) / 50, to: 1)
-        let f0Ratio = clamp((pitchHz - 110) / 90, to: 1)
-        let base = 100 * (
-            0.50 * standardRatio
-                + 0.20 * naturalnessRatio
-                + 0.15 * f0Ratio
-                + 0.15 * standardRatio * naturalnessRatio * f0Ratio
+    private static func coreComposite(
+        profile: pitchee_score_profile_t,
+        standardScore: Double, naturalness: Double, pitchHz: Double?
+    ) -> PitcheeAnalysisResult.CompositeScore {
+        var score = pitchee_composite_score_t()
+        let pitch = pitchHz.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
+        let status = pitchee_composite_score(
+            profile, clamp(standardScore, to: 100), clamp(naturalness, to: 100),
+            pitch ?? 0, pitch == nil ? 0 : 1, &score
         )
-
-        var score = base
-        var cap: Double?
-        var rule = "continuous"
-        var boosted = false
-        if pitchHz > 165 && naturalness > 80 && standard > 50 {
-            let strength = min(
-                (pitchHz - 165) / 25,
-                (naturalness - 80) / 20,
-                (standard - 50) / 30,
-                1
-            )
-            let promoted = 60 + 40 * strength
-            if promoted > score {
-                score = promoted
-                boosted = true
-            }
-            rule = "pass_boost"
-        } else if pitchHz > 165 && naturalness < 50 {
-            cap = 30
-            rule = "high_f0_stylized_cap"
-        } else if pitchHz <= 165 && naturalness >= 50 {
-            cap = 59
-            rule = "low_f0_natural_cap"
-        } else if pitchHz <= 165 && naturalness < 50 {
-            cap = 20
-            rule = "low_f0_stylized_cap"
-        } else if pitchHz > 165 && naturalness >= 50 && standard < 50 {
-            cap = 59
-            rule = "high_f0_male_cap"
+        guard status == PITCHEE_SUCCESS else {
+            // A native allocation failure must not crash history rendering or
+            // silently reuse a score calculated for the opposite direction.
+            return .init(baseScore: 0, finalScore: 0, cap: nil,
+                         rule: "score_unavailable", limited: false, boosted: false)
         }
-
-        let final = clamp(cap.map { min(score, $0) } ?? score, to: 100)
-        return .init(baseScore: base, finalScore: final, cap: cap, rule: rule,
-                     limited: cap != nil && final < score, boosted: boosted)
+        let rule = withUnsafeBytes(of: score.score_rule) { bytes in
+            String(decoding: bytes.prefix { $0 != 0 }, as: UTF8.self)
+        }
+        return .init(baseScore: score.base_score, finalScore: score.final_score,
+                     cap: score.has_score_cap == 0 ? nil : score.score_cap,
+                     rule: rule, limited: score.score_limited != 0, boosted: score.score_boosted != 0)
     }
 
     private static func clamp(_ value: Double, to upper: Double) -> Double {
         guard value.isFinite else { return 0 }
         return min(max(value, 0), upper)
-    }
-
-    private static func clamp(_ value: Double, lower: Double, upper: Double) -> Double {
-        guard value.isFinite else { return 0 }
-        return min(max(value, lower), upper)
     }
 }

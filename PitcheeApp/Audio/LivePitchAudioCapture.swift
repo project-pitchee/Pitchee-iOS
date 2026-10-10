@@ -92,6 +92,7 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
         let run = try LivePitchRecordingRun(
             file: file,
             sampleRate: inputFormat.sampleRate,
+            inputFormat: inputFormat,
             processPitch: { try await analyzer.processRealtimeF0(samples: $0) },
             onPitch: onPitch,
             onError: onError,
@@ -171,20 +172,17 @@ nonisolated final class LivePitchAudioCapture: @unchecked Sendable {
         return teardownError
     }
 
-    static func copyBuffer(_ buffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
-        guard let copy = AVAudioPCMBuffer(pcmFormat: buffer.format, frameCapacity: buffer.frameLength) else {
-            return nil
+    deinit {
+        let engine = audioEngine
+        let run = run
+        let removeTap = hasInputTap
+        let stopEngine = hasStarted && !didTeardown
+        run?.close(discardingPendingWrites: true)
+        lifecycleQueue.async {
+            if removeTap { engine.inputNode.removeTap(onBus: 0) }
+            if stopEngine { engine.stop(); engine.reset() }
+            _ = run?.drainAndCloseFile()
         }
-        copy.frameLength = buffer.frameLength
-        let source = UnsafeMutableAudioBufferListPointer(buffer.mutableAudioBufferList)
-        let destination = UnsafeMutableAudioBufferListPointer(copy.mutableAudioBufferList)
-        guard source.count == destination.count else { return nil }
-        for index in source.indices {
-            guard let input = source[index].mData, let output = destination[index].mData,
-                  destination[index].mDataByteSize >= source[index].mDataByteSize else { return nil }
-            memcpy(output, input, Int(source[index].mDataByteSize))
-        }
-        return copy
     }
 
     static func monoSamples(from buffer: AVAudioPCMBuffer) -> [Float]? {
@@ -275,12 +273,6 @@ nonisolated final class AudioCaptureBufferBudget: @unchecked Sendable {
     }
 
     var retainedFrames: Int { lock.withLock { retainedFrameCount } }
-}
-
-/// Owns a copy of the tap's temporary PCM. Exactly one background worker may
-/// access this buffer; the original audio callback never touches the copy.
-nonisolated struct CapturedAudioBuffer: @unchecked Sendable {
-    let buffer: AVAudioPCMBuffer
 }
 
 /// Uses wall-clock time rather than detector timestamps: inference may replay
@@ -375,9 +367,9 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
     typealias PitchProcessor = @Sendable ([Float]) async throws -> [PitcheeF0Frame]
 
     private let writerQueue = DispatchQueue(label: "com.lvyzhan.Pitchee.live-pitch", qos: .userInitiated)
-    private let pendingAdmissions = DispatchGroup()
     private let lock = NSLock()
-    private let rawBudget: AudioCaptureBufferBudget
+    private let rawInput: RealtimeAudioBufferRing
+    private var writerTimer: DispatchSourceTimer?
     private let pitchBudget = AudioCaptureBufferBudget(maximumFrameCount: 32_000)
     private let converter: LivePitchPCMConverter
     private let pitchInput: AsyncStream<[Float]>.Continuation
@@ -385,7 +377,6 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
     private let onError: LivePitchAudioCapture.ErrorHandler
     private let onRecordingError: LivePitchAudioCapture.ErrorHandler?
     private var pitchTask: Task<Void, Never>?
-    private var accepting = true
     private var cancelled = false
     private var pitchActive = true
     private var recordingError: Error?
@@ -395,6 +386,7 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
     init(
         file: AVAudioFile,
         sampleRate: Double,
+        inputFormat: AVAudioFormat? = nil,
         processPitch: @escaping PitchProcessor,
         onPitch: @escaping LivePitchAudioCapture.PitchHandler,
         onError: @escaping LivePitchAudioCapture.ErrorHandler,
@@ -402,7 +394,9 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
     ) throws {
         self.file = file
         converter = try LivePitchPCMConverter(sampleRate: sampleRate)
-        rawBudget = AudioCaptureBufferBudget(maximumFrameCount: Int(ceil(sampleRate * 2)))
+        guard sampleRate <= 384_000 else { throw LivePitchAudioCaptureError.inputUnavailable }
+        rawInput = try RealtimeAudioBufferRing(format: inputFormat ?? file.processingFormat,
+                                              maximumFrameCount: Int(ceil(sampleRate * 2)))
         self.onError = onError
         self.onRecordingError = onRecordingError
         let delivery = LivePitchFrameDelivery(onPitch: onPitch)
@@ -424,49 +418,34 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
                 self?.stopPitch(reporting: error)
             }
         }
+        // The worker polls a preallocated ring; the audio callback never needs
+        // to wake a queue, allocate a block, or enter an AsyncStream lock.
+        let timer = DispatchSource.makeTimerSource(queue: writerQueue)
+        timer.schedule(deadline: .now(), repeating: .milliseconds(5), leeway: .milliseconds(1))
+        timer.setEventHandler { [weak self] in self?.consumePendingBuffers() }
+        writerTimer = timer
+        timer.resume()
     }
 
     private var isPitchActive: Bool { lock.withLock { pitchActive } }
-    var pendingWriteFrameCount: Int { rawBudget.retainedFrames }
+    var pendingWriteFrameCount: Int { rawInput.pendingFrameCount }
 
     func enqueue(_ buffer: AVAudioPCMBuffer) {
-        let frameCount = Int(buffer.frameLength)
-        guard frameCount > 0 else { return }
-        lock.lock()
-        guard accepting else { lock.unlock(); return }
-        let admission = rawBudget.reserve(frameCount: frameCount)
-        // A rejected tap must publish its failure before graceful teardown can
-        // return, just as an accepted tap must finish copying/submission.
-        if admission != .closed { pendingAdmissions.enter() }
-        lock.unlock()
-        defer { if admission != .closed { pendingAdmissions.leave() } }
-        switch admission {
-        case .closed: return
-        case .overrun:
-            failRecording(LivePitchAudioCaptureError.recordingOverrun)
-            return
-        case .accepted: break
+        rawInput.enqueue(buffer)
+    }
+
+    private func consumePendingBuffers() {
+        while let buffer = rawInput.nextBuffer() {
+            write(buffer)
+            rawInput.releaseBuffer()
         }
-        guard let copy = LivePitchAudioCapture.copyBuffer(buffer) else {
-            rawBudget.release(frameCount: frameCount)
-            failRecording(LivePitchAudioCaptureError.copyFailed)
-            return
+        if rawInput.isDrained, let failure = rawInput.failure {
+            failRecording(failure == .overrun ? LivePitchAudioCaptureError.recordingOverrun :
+                          LivePitchAudioCaptureError.copyFailed)
         }
-        lock.lock()
-        guard !cancelled, recordingError == nil else {
-            lock.unlock()
-            rawBudget.release(frameCount: frameCount)
-            return
-        }
-        // A graceful stop still writes a tap accepted before closing. Drain
-        // waits for its copy to be submitted before closing the WAV.
-        let captured = CapturedAudioBuffer(buffer: copy)
-        writerQueue.async { self.write(captured.buffer) }
-        lock.unlock()
     }
 
     private func write(_ buffer: AVAudioPCMBuffer) {
-        defer { rawBudget.release(frameCount: Int(buffer.frameLength)) }
         guard lock.withLock({ !cancelled && recordingError == nil }) else { return }
         do {
             try file?.write(from: buffer)
@@ -524,11 +503,10 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
         let shouldReport = lock.withLock {
             guard recordingError == nil, !cancelled else { return false }
             recordingError = error
-            accepting = false
             return true
         }
         guard shouldReport else { return }
-        rawBudget.close()
+        rawInput.close()
         stopPitch(reporting: nil)
         if let handler = onRecordingError {
             Task.detached { handler(error) }
@@ -536,20 +514,37 @@ nonisolated final class LivePitchRecordingRun: @unchecked Sendable {
     }
 
     func close(discardingPendingWrites: Bool) {
+        rawInput.close()
         lock.withLock {
-            accepting = false
             cancelled = cancelled || discardingPendingWrites
         }
-        rawBudget.close()
         stopPitch(reporting: nil)
     }
 
     /// Call only after close. The queue still owns the file until all accepted
     /// writes either complete or observe terminal cancellation.
     func drainAndCloseFile() -> Error? {
-        pendingAdmissions.wait()
-        writerQueue.sync { file = nil }
+        writerQueue.sync {
+            repeat {
+                consumePendingBuffers()
+                if rawInput.isDrained { break }
+                // Only an already admitted callback can still be copying.
+                // Waiting is confined to this disk worker, never the tap.
+                Thread.sleep(forTimeInterval: 0.001)
+            } while true
+            writerTimer?.cancel()
+            writerTimer = nil
+            file = nil
+        }
         return lock.withLock { recordingError }
+    }
+
+    deinit {
+        rawInput.close()
+        writerTimer?.cancel()
+        pitchDelivery.cancel()
+        pitchInput.finish()
+        pitchTask?.cancel()
     }
 }
 
@@ -584,8 +579,10 @@ nonisolated final class LivePitchPCMConverter {
         guard !samples.isEmpty else { return [] }
         guard let converter else { return samples }
         let input = try prepareInput(frameCount: samples.count)
-        samples.withUnsafeBufferPointer { source in
-            input.floatChannelData![0].update(from: source.baseAddress!, count: source.count)
+        guard let channels = input.floatChannelData else { throw LivePitchAudioCaptureError.conversionFailed }
+        try samples.withUnsafeBufferPointer { source in
+            guard let baseAddress = source.baseAddress else { throw LivePitchAudioCaptureError.conversionFailed }
+            channels[0].update(from: baseAddress, count: source.count)
         }
         return try resample(input, using: converter)
     }
@@ -602,9 +599,9 @@ nonisolated final class LivePitchPCMConverter {
             return samples
         }
         let input = try prepareInput(frameCount: Int(buffer.frameLength))
-        guard LivePitchAudioCapture.copyMonoSamples(
+        guard let channels = input.floatChannelData, LivePitchAudioCapture.copyMonoSamples(
             from: buffer,
-            to: UnsafeMutableBufferPointer(start: input.floatChannelData![0], count: Int(input.frameLength))
+            to: UnsafeMutableBufferPointer(start: channels[0], count: Int(input.frameLength))
         ) else {
             throw LivePitchAudioCaptureError.conversionFailed
         }
@@ -615,7 +612,7 @@ nonisolated final class LivePitchPCMConverter {
     /// can grow for larger taps and be reused for all smaller subsequent taps.
     private func prepareInput(frameCount: Int) throws -> AVAudioPCMBuffer {
         let capacity = AVAudioFrameCount(frameCount)
-        if inputBuffer == nil || inputBuffer!.frameCapacity < capacity {
+        if (inputBuffer?.frameCapacity ?? 0) < capacity {
             inputBuffer = AVAudioPCMBuffer(pcmFormat: inputFormat, frameCapacity: capacity)
         }
         guard let inputBuffer else { throw LivePitchAudioCaptureError.conversionFailed }
@@ -625,7 +622,7 @@ nonisolated final class LivePitchPCMConverter {
 
     private func resample(_ input: AVAudioPCMBuffer, using converter: AVAudioConverter) throws -> [Float] {
         let capacity = AVAudioFrameCount(ceil(Double(input.frameLength) * 16_000 / inputFormat.sampleRate)) + 256
-        if outputBuffer == nil || outputBuffer!.frameCapacity < capacity {
+        if (outputBuffer?.frameCapacity ?? 0) < capacity {
             outputBuffer = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: capacity)
         }
         guard let output = outputBuffer else {

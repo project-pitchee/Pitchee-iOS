@@ -157,12 +157,64 @@ enum LivePitchTests {
             check(LivePitchAudioCapture.monoSamples(from: buffer) == [1, 2, 3, 4],
                   "stereo extraction, interleaved=\(interleaved)")
 
-            let copy = LivePitchAudioCapture.copyBuffer(buffer)!
+            let ring = try RealtimeAudioBufferRing(format: format, maximumFrameCount: 7, maximumBufferCount: 2)
+            ring.enqueue(buffer)
             buffer.floatChannelData![0][0] = 99
-            check(copy.frameLength == 4 && copy.format == format &&
+            let copy = ring.nextBuffer()!
+            check(copy.frameLength == 4 && copy.format.channelCount == 2 &&
                   LivePitchAudioCapture.monoSamples(from: copy) == [1, 2, 3, 4],
-                  "tap copy owns independent PCM storage, interleaved=\(interleaved)")
+                  "the ring owns independent PCM storage, interleaved=\(interleaved)")
+            check(ring.pendingFrameCount == 4, "an in-flight consumer retains its ring capacity")
+            ring.releaseBuffer()
+            buffer.floatChannelData![0][0] = 0
+            // Seven frames of storage forces every subsequent four-frame
+            // buffer across different wrap positions in both PCM layouts.
+            var scratchIDs = Set<ObjectIdentifier>()
+            for _ in 0..<20 {
+                ring.enqueue(buffer)
+                let wrapped = ring.nextBuffer()!
+                scratchIDs.insert(ObjectIdentifier(wrapped))
+                check(LivePitchAudioCapture.monoSamples(from: wrapped) == [1, 2, 3, 4],
+                      "wrapped ring samples retain channel order, interleaved=\(interleaved)")
+                ring.releaseBuffer()
+            }
+            ring.close()
+            ring.enqueue(buffer)
+            check(ring.isDrained && ring.pendingFrameCount == 0 && ring.failure == nil,
+                  "closed ring rejects later taps and drains ownership")
+            check(scratchIDs.count == 1, "the consumer reuses its preallocated PCM buffer")
         }
+
+        let ringFormat = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 1)!
+        let retainedRing = try RealtimeAudioBufferRing(format: ringFormat, maximumFrameCount: 8, maximumBufferCount: 2)
+        let retainedBuffer = AVAudioPCMBuffer(pcmFormat: ringFormat, frameCapacity: 4)!
+        retainedBuffer.frameLength = 4
+        retainedBuffer.floatChannelData![0].update(repeating: 0.5, count: 4)
+        retainedRing.enqueue(retainedBuffer)
+        let heldPCM = retainedRing.nextBuffer()!
+        retainedBuffer.floatChannelData![0].update(repeating: 0.25, count: 4)
+        retainedRing.enqueue(retainedBuffer)
+        check(LivePitchAudioCapture.monoSamples(from: heldPCM) == [0.5, 0.5, 0.5, 0.5],
+              "a producer cannot overwrite the PCM currently being consumed")
+        retainedRing.enqueue(retainedBuffer)
+        check(retainedRing.failure == .overrun && retainedRing.pendingFrameCount == 8,
+              "ring overrun includes the buffer held by its consumer")
+        retainedRing.releaseBuffer()
+        check(LivePitchAudioCapture.monoSamples(from: retainedRing.nextBuffer()!) == [0.25, 0.25, 0.25, 0.25],
+              "overrun preserves already accepted PCM")
+        retainedRing.releaseBuffer()
+        retainedRing.enqueue(retainedBuffer)
+        check(retainedRing.isDrained && retainedRing.pendingFrameCount == 0,
+              "an overrun is terminal even after capacity becomes available")
+        let wrongFormat = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 2)!
+        let invalidRing = try RealtimeAudioBufferRing(format: wrongFormat, maximumFrameCount: 8)
+        invalidRing.enqueue(retainedBuffer)
+        check(invalidRing.failure == .invalidBuffer && invalidRing.isDrained,
+              "an incompatible channel layout fails without publishing partial PCM")
+        let concurrentResult = try await concurrentRingSamples()
+        check(concurrentResult.frames == 128_000 && concurrentResult.ordered,
+              "concurrent production and consumption preserve all 128,000 samples across ring wraps")
+        check(concurrentResult.drained, "concurrent ring closure releases every accepted frame")
 
         // Hardware taps can vary in size. Reusing scratch storage must not
         // replay a previous buffer's tail, change channel mixing, or mutate
@@ -287,20 +339,20 @@ enum LivePitchTests {
         let deliveryEvents = CaptureTestPitchDeliveries()
         let frameDelivery = LivePitchFrameDelivery { deliveryEvents.record($0) }
         frameDelivery.append([PitcheeF0Frame(elapsedTime: 0, pitchHz: 220)])
-        check(await waitFor { deliveryEvents.batches.count == 1 },
+        check(await waitFor { deliveryEvents.count == 1 },
               "the presentation scheduler delivers its first batch")
         frameDelivery.append([PitcheeF0Frame(elapsedTime: 0.01, pitchHz: nil)])
-        check(await waitFor { deliveryEvents.batches.count == 2 },
+        check(await waitFor { deliveryEvents.count == 2 },
               "a trailing silent frame is delivered without any subsequent detector batch")
         check(deliveryEvents.batches.flatMap { $0 }.map(\.elapsedTime) == [0, 0.01] &&
               deliveryEvents.batches.last?.last?.pitchHz == nil,
               "scheduled delivery retains the last silent frame exactly once")
         frameDelivery.append([PitcheeF0Frame(elapsedTime: 0.02, pitchHz: 330)])
         frameDelivery.cancel()
-        let deliveriesAtCancellation = deliveryEvents.batches.count
+        let deliveriesAtCancellation = deliveryEvents.count
         frameDelivery.append([PitcheeF0Frame(elapsedTime: 0.03, pitchHz: 440)])
         try await Task.sleep(for: .milliseconds(60))
-        check(deliveryEvents.batches.count == deliveriesAtCancellation,
+        check(deliveryEvents.count == deliveriesAtCancellation,
               "cancelled presentation neither flushes queued frames nor admits later ones")
 
         let temporaryDirectory = FileManager.default.temporaryDirectory
@@ -345,9 +397,8 @@ enum LivePitchTests {
         let copyingBuffer = BlockingCopyCaptureBuffer(pcmFormat: monoFormat, frameCapacity: 1_024)!
         copyingBuffer.frameLength = 1_024
         copyingBuffer.floatChannelData![0].update(repeating: 0.25, count: 1_024)
-        copyingBuffer.holdNextFormatRead()
-        let ownedCopySource = CapturedAudioBuffer(buffer: copyingBuffer)
-        let enqueueTask = Task.detached { copyingRun.enqueue(ownedCopySource.buffer) }
+        copyingBuffer.holdNextDataRead()
+        let enqueueTask = Task.detached { copyingRun.enqueue(copyingBuffer) }
         check(await waitFor { copyingBuffer.events.count("copyStarted") == 1 },
               "test tap is reserved before copying finishes")
         copyingRun.close(discardingPendingWrites: false)
@@ -461,6 +512,32 @@ enum LivePitchTests {
         check(try AVAudioFile(forReading: abandonedURL).length == 1_024,
               "cancellation skips queued writes after completing the write already in progress")
 
+        let fullURL = temporaryDirectory.appendingPathComponent("accepted-before-overrun.wav")
+        var fullFile: BlockingCaptureAudioFile? = try BlockingCaptureAudioFile(forWriting: fullURL,
+                                                                              settings: monoFormat.settings)
+        let fullGate = fullFile!.gate
+        let fullEvents = fullFile!.events
+        let fullRun = try LivePitchRecordingRun(file: fullFile!, sampleRate: 16_000,
+                                               processPitch: { _ in [] }, onPitch: { _ in }, onError: { _ in })
+        fullFile = nil
+        fullRun.enqueue(buffer(1_024))
+        check(await waitFor { fullEvents.count("started") == 1 }, "the overrun test holds the first WAV write")
+        fullRun.enqueue(buffer(30_976))
+        fullRun.enqueue(buffer(1))
+        fullRun.close(discardingPendingWrites: false)
+        fullGate.signal()
+        fullGate.signal()
+        if case .recordingOverrun? = fullRun.drainAndCloseFile() as? LivePitchAudioCaptureError {
+            check(true, "drain reports a fatal overrun after preserving earlier accepted writes")
+        } else { check(false, "drain reports a fatal overrun after preserving earlier accepted writes") }
+        check(try AVAudioFile(forReading: fullURL).length == 32_000 && fullRun.pendingWriteFrameCount == 0,
+              "an overloaded recording drains its accepted prefix without dropping or compressing samples")
+
+        var orphanedRun: LivePitchRecordingRun? = try run("orphaned-run", events: CaptureTestEvents()).0
+        let weakRun = CaptureWeakReference(orphanedRun)
+        orphanedRun = nil
+        check(await waitFor { weakRun.value == nil }, "the polling writer and pitch task do not retain an abandoned run")
+
         let cancelledCapture = LivePitchAudioCapture()
         let cancellation = cancelledCapture.cancel()
         let cancelledURL = temporaryDirectory.appendingPathComponent("cancelled-before-start.wav")
@@ -490,9 +567,52 @@ enum LivePitchTests {
         }
         return condition()
     }
+
+    private static func concurrentRingSamples() async throws -> (frames: Int, ordered: Bool, drained: Bool) {
+        let format = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 1)!
+        let ring = try RealtimeAudioBufferRing(format: format, maximumFrameCount: 8_192)
+        let deadline = ProcessInfo.processInfo.systemUptime + 5
+        let producer = Task.detached {
+            let format = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 1)!
+            let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 64)!
+            buffer.frameLength = 64
+            for batch in 0..<2_000 {
+                while ring.pendingFrameCount > 4_096 && ProcessInfo.processInfo.systemUptime < deadline {
+                    try? await Task.sleep(for: .microseconds(100))
+                }
+                if ProcessInfo.processInfo.systemUptime >= deadline { break }
+                for index in 0..<64 { buffer.floatChannelData![0][index] = Float(batch * 64 + index) }
+                ring.enqueue(buffer)
+            }
+            ring.close()
+        }
+        let consumer = Task.detached {
+            var frames = 0
+            var ordered = true
+            while !ring.isDrained && ProcessInfo.processInfo.systemUptime < deadline {
+                if let buffer = ring.nextBuffer() {
+                    for index in 0..<Int(buffer.frameLength) {
+                        if buffer.floatChannelData![0][index] != Float(frames) { ordered = false }
+                        frames += 1
+                    }
+                    ring.releaseBuffer()
+                } else {
+                    try? await Task.sleep(for: .microseconds(100))
+                }
+            }
+            return (frames, ordered, ring.isDrained && ring.pendingFrameCount == 0 && ring.failure == nil)
+        }
+        await producer.value
+        return await consumer.value
+    }
 }
 
 private enum CaptureTestError: Error { case detectorFailed, writeFailed }
+
+private final class CaptureWeakReference<Value: AnyObject>: @unchecked Sendable {
+    weak var value: Value?
+    init(_ value: Value?) { self.value = value }
+}
 
 private final class FailingCaptureAudioFile: AVAudioFile, @unchecked Sendable {
     override func write(from buffer: AVAudioPCMBuffer) throws {
@@ -515,8 +635,8 @@ private final class BlockingCopyCaptureBuffer: AVAudioPCMBuffer, @unchecked Send
     let events = CaptureTestEvents()
     private let lock = NSLock()
     private var holdsNextRead = false
-    func holdNextFormatRead() { lock.withLock { holdsNextRead = true } }
-    override var format: AVAudioFormat {
+    func holdNextDataRead() { lock.withLock { holdsNextRead = true } }
+    override var audioBufferList: UnsafePointer<AudioBufferList> {
         let shouldWait = lock.withLock {
             let held = holdsNextRead
             holdsNextRead = false
@@ -526,7 +646,7 @@ private final class BlockingCopyCaptureBuffer: AVAudioPCMBuffer, @unchecked Send
             events.record("copyStarted")
             _ = gate.wait(timeout: .now() + 5)
         }
-        return super.format
+        return super.audioBufferList
     }
 }
 
@@ -540,6 +660,7 @@ private nonisolated final class CaptureTestEvents: @unchecked Sendable {
 private nonisolated final class CaptureTestPitchDeliveries: @unchecked Sendable {
     private let lock = NSLock()
     private var deliveredBatches: [[PitcheeF0Frame]] = []
+    var count: Int { lock.withLock { deliveredBatches.count } }
     var batches: [[PitcheeF0Frame]] { lock.withLock { deliveredBatches } }
     func record(_ frames: [PitcheeF0Frame]) {
         lock.withLock { deliveredBatches.append(frames) }

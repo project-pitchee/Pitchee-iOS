@@ -18,7 +18,8 @@ enum PracticeRoute: Hashable {
 /// Live tools and library topics share one native, searchable navigation list.
 struct PracticeHubView: View {
     @State private var searchText = ""
-    private let store = VoiceTrainingLibraryStore.shared
+    @ObservedObject private var library = VoiceTrainingLibraryLoader.shared
+    private var store: VoiceTrainingLibraryStore { library.store }
 
     private var isSearching: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -56,6 +57,9 @@ struct PracticeHubView: View {
                     .accessibilityIdentifier("practice.openSpectrogram")
                 }
                 Section("voiceLibrary.title") {
+                    if store.articles.isEmpty {
+                        VoiceTrainingLibraryLoadStatusView(loader: library)
+                    }
                     ForEach(store.categories, id: \.id) { category in
                         NavigationLink {
                             VoiceTrainingLibraryContentView(initialCategory: category.id)
@@ -71,8 +75,11 @@ struct PracticeHubView: View {
         .navigationTitle("practice.hub.tab")
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic),
                     prompt: Text("practice.hub.search"))
+        .task { await library.load() }
         .overlay {
-            if isSearching && results.isEmpty {
+            if isSearching && store.articles.isEmpty {
+                VoiceTrainingLibraryLoadStatusView(loader: library)
+            } else if isSearching && results.isEmpty {
                 ContentUnavailableView.search(text: searchText)
             }
         }

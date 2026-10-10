@@ -142,6 +142,7 @@ private struct MainTabView: View {
         })
         .tint(selectedTab == .trends ? dashboardTint : themeColor)
         .environment(\.monitorAccessoryState, monitorAccessoryState)
+        .task { await VoiceTrainingLibraryLoader.shared.load() }
         .onChange(of: selectedTab) { _, tab in
             if tab != .practice {
                 monitorAccessoryState.leavePractice()

@@ -59,15 +59,6 @@ nonisolated struct VoiceArticle: Identifiable, Codable, Sendable, Hashable {
             if let icon, !icon.isEmpty {
                 return icon
             }
-            if heading.contains("理解这项主题") || heading.contains("机制") || heading.contains("原理") {
-                return "gearshape.2.fill"
-            } else if heading.contains("练习前的观察") || heading.contains("自查") || heading.contains("排查") || heading.contains("症状") {
-                return "stethoscope"
-            } else if heading.contains("可尝试的方法") || heading.contains("训练") || heading.contains("动作") || heading.contains("实操") || heading.contains("指南") {
-                return "figure.run"
-            } else if heading.contains("依据与延伸阅读") || heading.contains("文献") || heading.contains("参考") || heading.contains("循证") {
-                return "books.vertical.fill"
-            }
             return "doc.text.fill"
         }
 
@@ -266,7 +257,8 @@ nonisolated struct VoiceTrainingRecommendation: Sendable {
 
 /// Storage and access layer for the Voice Training Library.
 nonisolated final class VoiceTrainingLibraryStore: Sendable {
-    static let shared = VoiceTrainingLibraryStore()
+    /// Empty data is safe for advice while the library is loading. It performs no I/O.
+    static let empty = VoiceTrainingLibraryStore(articles: [], ruleMatrix: [:])
 
     nonisolated struct Category: Identifiable, Sendable {
         let id: String
@@ -289,95 +281,91 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
     private let categoryMap: [String: Category]
     let ruleMatrix: [String: [String]]
 
-    init(bundle: Bundle = Bundle.main) {
-        var loadedArticles: [VoiceArticle] = []
-        var loadedMatrix: [String: [String]] = [:]
+    enum LoadError: Error, LocalizedError, Sendable {
+        case missingResource(String)
+        case invalidResource(String, String)
 
-        // 1. Try standard Bundle paths
-        let candidateURLs = [
-            bundle.url(forResource: "voice-training-library", withExtension: "json"),
-            bundle.url(forResource: "voice-training-library", withExtension: "json", subdirectory: "VoiceTrainingLibrary"),
-            bundle.url(forResource: "voice-training-library", withExtension: "json", subdirectory: "Resources/VoiceTrainingLibrary"),
-            Bundle(for: VoiceTrainingLibraryStore.self).url(forResource: "voice-training-library", withExtension: "json"),
-            Bundle(for: VoiceTrainingLibraryStore.self).url(forResource: "voice-training-library", withExtension: "json", subdirectory: "VoiceTrainingLibrary")
-        ].compactMap { $0 }
-
-        for url in candidateURLs {
-            if let data = try? Data(contentsOf: url),
-               let container = try? JSONDecoder().decode(Container.self, from: data) {
-                loadedArticles = container.articles
-                break
+        var errorDescription: String? {
+            switch self {
+            case .missingResource(let name): "Missing bundled voice library resource: \(name).json"
+            case .invalidResource(let name, let reason): "Invalid voice library resource \(name): \(reason)"
             }
         }
+    }
 
-        let candidateMatrixURLs = [
-            bundle.url(forResource: "voice-rule-matching-matrix", withExtension: "json"),
-            bundle.url(forResource: "voice-rule-matching-matrix", withExtension: "json", subdirectory: "VoiceTrainingLibrary"),
-            bundle.url(forResource: "voice-rule-matching-matrix", withExtension: "json", subdirectory: "Resources/VoiceTrainingLibrary"),
-            Bundle(for: VoiceTrainingLibraryStore.self).url(forResource: "voice-rule-matching-matrix", withExtension: "json"),
-            Bundle(for: VoiceTrainingLibraryStore.self).url(forResource: "voice-rule-matching-matrix", withExtension: "json", subdirectory: "VoiceTrainingLibrary")
-        ].compactMap { $0 }
+    /// Bundle lookup, file reads, decoding and indexing all run outside the UI actor.
+    /// Tests can explicitly supply a resource directory instead of relying on a source path.
+    static func load(bundle: Bundle = .main) async throws -> VoiceTrainingLibraryStore {
+        try await Task.detached(priority: .utility) {
+            let libraryURL = try resourceURL(named: "voice-training-library", in: bundle)
+            let matrixURL = try resourceURL(named: "voice-rule-matching-matrix", in: bundle)
+            return try read(libraryURL: libraryURL, matrixURL: matrixURL)
+        }.value
+    }
 
-        for url in candidateMatrixURLs {
-            if let data = try? Data(contentsOf: url),
-               let matrix = try? JSONDecoder().decode([String: [String]].self, from: data) {
-                loadedMatrix = matrix
-                break
+    static func load(directory: URL) async throws -> VoiceTrainingLibraryStore {
+        try await Task.detached(priority: .utility) {
+            try read(
+                libraryURL: directory.appendingPathComponent("voice-training-library.json"),
+                matrixURL: directory.appendingPathComponent("voice-rule-matching-matrix.json")
+            )
+        }.value
+    }
+
+    private static func resourceURL(named name: String, in bundle: Bundle) throws -> URL {
+        for subdirectory in [nil, "VoiceTrainingLibrary", "Resources/VoiceTrainingLibrary"] as [String?] {
+            if let url = bundle.url(forResource: name, withExtension: "json", subdirectory: subdirectory) {
+                return url
             }
         }
+        throw LoadError.missingResource(name)
+    }
 
-        // 2. Fallback for testing/development harness: locate relative to this source file
-        let sourceFileURL = URL(fileURLWithPath: #filePath)
-        // Navigate up from PitcheeApp/Practice/VoiceTrainingLibrary.swift to project root
-        let projectRoot = sourceFileURL
-            .deletingLastPathComponent() // Practice
-            .deletingLastPathComponent() // PitcheeApp
-            .deletingLastPathComponent() // Repo root
-
-        if loadedArticles.isEmpty {
-            let devPaths = [
-                projectRoot.appendingPathComponent("Resources/VoiceTrainingLibrary/voice-training-library.json"),
-                projectRoot.appendingPathComponent("Docs/Voice-Training-Library/voice-training-library.json"),
-                projectRoot.appendingPathComponent("Resources/voice-training-library.json"),
-                projectRoot.deletingLastPathComponent().appendingPathComponent("Articles/voice-training-library.json")
-            ]
-
-            for path in devPaths {
-                if let data = try? Data(contentsOf: path),
-                   let container = try? JSONDecoder().decode(Container.self, from: data) {
-                    loadedArticles = container.articles
-                    break
-                }
-            }
+    private static func read(libraryURL: URL, matrixURL: URL) throws -> VoiceTrainingLibraryStore {
+        func readData(at url: URL) throws -> Data {
+            do { return try Data(contentsOf: url) }
+            catch { throw LoadError.invalidResource(url.lastPathComponent, error.localizedDescription) }
         }
+        return try VoiceTrainingLibraryStore(
+            libraryData: readData(at: libraryURL), matrixData: readData(at: matrixURL)
+        )
+    }
 
-        if loadedMatrix.isEmpty {
-            let devMatrixPaths = [
-                projectRoot.appendingPathComponent("Resources/VoiceTrainingLibrary/voice-rule-matching-matrix.json"),
-                projectRoot.appendingPathComponent("Docs/Voice-Training-Library/voice-rule-matching-matrix.json"),
-                projectRoot.appendingPathComponent("Resources/voice-rule-matching-matrix.json"),
-                projectRoot.deletingLastPathComponent().appendingPathComponent("Articles/voice-rule-matching-matrix.json")
-            ]
-
-            for path in devMatrixPaths {
-                if let data = try? Data(contentsOf: path),
-                   let matrix = try? JSONDecoder().decode([String: [String]].self, from: data) {
-                    loadedMatrix = matrix
-                    break
-                }
-            }
+    init(libraryData: Data, matrixData: Data) throws {
+        let container: Container
+        let matrix: [String: [String]]
+        do {
+            container = try JSONDecoder().decode(Container.self, from: libraryData)
+            matrix = try JSONDecoder().decode([String: [String]].self, from: matrixData)
+        } catch {
+            throw LoadError.invalidResource("JSON", error.localizedDescription)
         }
-
-        self.articles = loadedArticles
-        var map: [String: VoiceArticle] = [:]
-        for article in loadedArticles {
-            map[article.id] = article
+        guard container.schemaVersion == "1.0.0", !container.articles.isEmpty,
+              container.totalArticles == container.articles.count else {
+            throw LoadError.invalidResource("voice-training-library", "Unsupported schema or article count")
         }
-        self.articleMap = map
-        let groups = Dictionary(grouping: loadedArticles, by: \.category)
+        let ids = Set(container.articles.map(\.id))
+        guard ids.count == container.articles.count,
+              container.articles.allSatisfy({ !$0.id.isEmpty && !$0.title.isEmpty && !$0.sections.isEmpty }) else {
+            throw LoadError.invalidResource("voice-training-library", "Missing article content or duplicate IDs")
+        }
+        guard !matrix.isEmpty, matrix.values.allSatisfy({ !$0.isEmpty && $0.allSatisfy(ids.contains) }) else {
+            throw LoadError.invalidResource("voice-rule-matching-matrix", "Empty rules or unknown article IDs")
+        }
+        self.articles = container.articles
+        self.articleMap = Dictionary(uniqueKeysWithValues: articles.map { ($0.id, $0) })
+        let groups = Dictionary(grouping: articles, by: \.category)
         self.categories = groups.keys.sorted().map { Category(id: $0, articles: groups[$0] ?? []) }
         self.categoryMap = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
-        self.ruleMatrix = loadedMatrix
+        self.ruleMatrix = matrix
+    }
+
+    private init(articles: [VoiceArticle], ruleMatrix: [String: [String]]) {
+        self.articles = articles
+        self.articleMap = [:]
+        self.categories = []
+        self.categoryMap = [:]
+        self.ruleMatrix = ruleMatrix
     }
 
     func articleIDs(forMatrixKey key: String) -> [String] {
@@ -435,6 +423,71 @@ nonisolated final class VoiceTrainingLibraryStore: Sendable {
     }
 }
 
+/// Shares one asynchronous load across browsing and result views. The immutable
+/// snapshot can also be passed to the nonisolated recommendation engine.
+@MainActor
+final class VoiceTrainingLibraryLoader: ObservableObject {
+    static let shared = VoiceTrainingLibraryLoader()
+
+    @Published private(set) var store = VoiceTrainingLibraryStore.empty
+    @Published private(set) var isLoading = false
+    @Published private(set) var error: String?
+    private var hasLoaded = false
+    private var loadingTask: Task<Void, Never>?
+    private let loadStore: @Sendable () async throws -> VoiceTrainingLibraryStore
+
+    init(loadStore: @escaping @Sendable () async throws -> VoiceTrainingLibraryStore = {
+        try await VoiceTrainingLibraryStore.load()
+    }) {
+        self.loadStore = loadStore
+    }
+
+    func load() async {
+        guard !hasLoaded else { return }
+        if let loadingTask {
+            await loadingTask.value
+            return
+        }
+        isLoading = true
+        error = nil
+        let task = Task {
+            defer {
+                isLoading = false
+                loadingTask = nil
+            }
+            do {
+                store = try await loadStore()
+                hasLoaded = true
+            } catch {
+                self.error = error.localizedDescription
+            }
+        }
+        loadingTask = task
+        await task.value
+    }
+
+}
+
+/// Loading and resource failures are distinct from a search with no matches.
+struct VoiceTrainingLibraryLoadStatusView: View {
+    @ObservedObject var loader: VoiceTrainingLibraryLoader
+
+    var body: some View {
+        if loader.error != nil {
+            ContentUnavailableView {
+                Label("voiceLibrary.load.errorTitle", systemImage: "book.closed")
+            } description: {
+                Text("common.error.tryAgainLater")
+            } actions: {
+                Button("voiceLibrary.load.retry") { Task { await loader.load() } }
+                    .buttonStyle(.bordered)
+            }
+        } else {
+            ProgressView("voiceLibrary.title")
+        }
+    }
+}
+
 /// Chooses at most two useful next steps. Capture reliability comes before
 /// acoustic interpretation, and an uncertain goal never inherits a binary rule.
 nonisolated enum VoiceLibraryMatcher {
@@ -443,7 +496,7 @@ nonisolated enum VoiceLibraryMatcher {
         preference: VoicePreference,
         quality: RecordingQuality? = nil,
         volumeStatistics: RecordingVolumeStatistics? = nil,
-        store: VoiceTrainingLibraryStore = .shared
+        store: VoiceTrainingLibraryStore = .empty
     ) -> VoiceTrainingRecommendation {
         if let capture = captureRecommendation(
             for: result, quality: quality, volumeStatistics: volumeStatistics, store: store
@@ -517,7 +570,7 @@ nonisolated enum VoiceLibraryMatcher {
         scoreA: Double,
         scoreB: Double,
         feedback: PracticeFeedback? = nil,
-        store: VoiceTrainingLibraryStore = .shared
+        store: VoiceTrainingLibraryStore = .empty
     ) -> VoiceTrainingRecommendation {
         guard scoreA.isFinite, scoreB.isFinite,
               (0...100).contains(scoreA), (0...100).contains(scoreB) else {
@@ -541,7 +594,7 @@ nonisolated enum VoiceLibraryMatcher {
         qualityA: RecordingQuality? = nil,
         qualityB: RecordingQuality? = nil,
         feedback: PracticeFeedback? = nil,
-        store: VoiceTrainingLibraryStore = .shared
+        store: VoiceTrainingLibraryStore = .empty
     ) -> VoiceTrainingRecommendation {
         for (result, quality) in [(resultA, qualityA), (resultB, qualityB)] {
             if let capture = captureRecommendation(for: result, quality: quality, volumeStatistics: nil, store: store) {
@@ -927,7 +980,8 @@ struct VoiceTrainingLibraryContentView: View {
         _selectedCategory = State(initialValue: initialCategory)
     }
 
-    private let store = VoiceTrainingLibraryStore.shared
+    @ObservedObject private var library = VoiceTrainingLibraryLoader.shared
+    private var store: VoiceTrainingLibraryStore { library.store }
 
     var body: some View {
         let groups = store.categories(matching: searchText, category: selectedCategory)
@@ -960,7 +1014,9 @@ struct VoiceTrainingLibraryContentView: View {
         .listStyle(.inset)
         #endif
         .overlay {
-            if articleCount == 0 {
+            if store.articles.isEmpty {
+                VoiceTrainingLibraryLoadStatusView(loader: library)
+            } else if articleCount == 0 {
                 emptyStateView
             }
         }
@@ -994,6 +1050,7 @@ struct VoiceTrainingLibraryContentView: View {
                 .accessibilityIdentifier("voiceLibrary.categoryFilter")
             }
         }
+        .task { await library.load() }
         .accessibilityIdentifier("voiceLibrary.browser")
     }
 
@@ -1069,72 +1126,6 @@ private struct AdaptiveRowStack<Content: View>: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: spacing))
             : AnyLayout(HStackLayout(alignment: .top, spacing: spacing))
         layout { content() }
-    }
-}
-
-/// Reusable card row for displaying a voice article in lists or recommendation panels.
-struct VoiceArticleRowView: View {
-    let article: VoiceArticle
-
-    init(article: VoiceArticle) {
-        self.article = article
-    }
-
-    var body: some View {
-        AdaptiveRowStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(article.themeColor.opacity(0.12))
-                    .frame(width: 48, height: 48)
-                Image(systemName: article.iconName)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(article.themeColor)
-            }
-            .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Text(article.categoryDisplayTitle)
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(article.themeColor)
-
-                    Text(verbatim: "·")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .accessibilityHidden(true)
-
-                    Text(String(localized: "voiceLibrary.article.readingTime", defaultValue: "约 \(article.readingTimeMinutes) 分钟阅读"))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-
-                Text(article.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                if !article.summary.isEmpty {
-                    Text(article.summary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
-            Spacer(minLength: 4)
-
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.tertiary)
-                .padding(.top, 14)
-                .accessibilityHidden(true)
-        }
-        .padding(14)
-        .background(LibraryTheme.secondaryGroupedBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("voiceLibrary.article.summary.a11y \(article.title) \(article.categoryDisplayTitle) \(article.readingTimeMinutes)"))
-        .accessibilityHint(Text("voiceLibrary.article.openHint"))
     }
 }
 

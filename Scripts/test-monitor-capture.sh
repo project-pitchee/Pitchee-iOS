@@ -24,7 +24,12 @@ cmake -S "$project_directory/Dependencies/PitcheeCore" -B "$test_directory/nativ
     -DPITCHEE_ORT_LIBRARY="$framework_directory/onnxruntime.framework/onnxruntime"
 cmake --build "$test_directory/native" --parallel 4
 
+xcrun clang -std=c11 -O2 -Wall -Wextra -Werror \
+    -c "$project_directory/PitcheeApp/Audio/RealtimeAtomics/RealtimeAtomics.c" \
+    -o "$test_directory/realtime-atomics.o"
+
 xcrun swiftc -parse-as-library -O -swift-version 5 -strict-concurrency=complete \
+    -I "$project_directory/PitcheeApp/Audio/RealtimeAtomics" \
     -I "$project_directory/Dependencies/PitcheeCore/platform/ios" \
     -L "$test_directory/native" -l pitchee_core \
     -F "$framework_directory" -framework onnxruntime \
@@ -32,11 +37,13 @@ xcrun swiftc -parse-as-library -O -swift-version 5 -strict-concurrency=complete 
     -Xlinker -lc++ \
     "$project_directory"/PitcheeApp/Interop/Core/*.swift \
     "$project_directory/PitcheeApp/Audio/LivePitchAudioCapture.swift" \
+    "$project_directory/PitcheeApp/Audio/RealtimeAudioBufferRing.swift" \
     "$project_directory/PitcheeApp/Analysis/PitchTimeline.swift" \
     "$project_directory/PitcheeApp/Monitoring/MonitorTimeline.swift" \
     "$project_directory/PitcheeApp/Monitoring/MonitorSpectrumAnalyzer.swift" \
     "$project_directory/PitcheeApp/Monitoring/MonitorAudioCapture.swift" \
     "$project_directory/Tests/Monitoring/MonitorAudioCaptureTests.swift" \
+    "$test_directory/realtime-atomics.o" \
     -o "$test_directory/monitor-capture-tests"
 
 "$test_directory/monitor-capture-tests"

@@ -20,7 +20,11 @@ nonisolated final class MonitorSpectrumAnalyzer {
     private let log2WindowSize: vDSP_Length = 11
     private let window: [Float]
     private let windowSum: Float
-    private var pendingSamples: [Float] = []
+    // Fixed-capacity overlap ring: every input sample is copied once. Advancing
+    // a window changes indices instead of moving retained PCM with removeFirst.
+    private var pendingSamples = [Float](repeating: 0, count: windowSize)
+    private var pendingStart = 0
+    private var pendingCount = 0
     private var windowStartSample: Int64 = 0
     private var windowedSamples = [Float](repeating: 0, count: windowSize)
     private var real = [Float](repeating: 0, count: windowSize / 2)
@@ -35,7 +39,6 @@ nonisolated final class MonitorSpectrumAnalyzer {
         vDSP_hann_window(&coefficients, vDSP_Length(Self.windowSize), Int32(vDSP_HANN_NORM))
         window = coefficients
         windowSum = coefficients.reduce(0, +)
-        pendingSamples.reserveCapacity(Self.windowSize + Self.hopSize)
     }
 
     deinit {
@@ -47,42 +50,63 @@ nonisolated final class MonitorSpectrumAnalyzer {
     /// samples rather than being padded, so batching never changes the result.
     func process(_ samples: [Float]) -> [MonitorSpectrumFrame] {
         guard !samples.isEmpty else { return [] }
-        pendingSamples.append(contentsOf: samples)
         var consumed = 0
         var frames: [MonitorSpectrumFrame] = []
+        frames.reserveCapacity((pendingCount + samples.count) / Self.hopSize)
 
-        while pendingSamples.count - consumed >= Self.windowSize {
-            pendingSamples.withUnsafeBufferPointer { source in
-                window.withUnsafeBufferPointer { coefficients in
-                    windowedSamples.withUnsafeMutableBufferPointer { destination in
-                        vDSP_vmul(
-                            source.baseAddress! + consumed, 1,
-                            coefficients.baseAddress!, 1,
-                            destination.baseAddress!, 1,
-                            vDSP_Length(Self.windowSize)
-                        )
+        samples.withUnsafeBufferPointer { source in
+            guard let sourceBase = source.baseAddress else { return }
+            while consumed < samples.count {
+                let writeIndex = (pendingStart + pendingCount) % Self.windowSize
+                let count = min(samples.count - consumed,
+                                Self.windowSize - pendingCount, Self.windowSize - writeIndex)
+                pendingSamples.withUnsafeMutableBufferPointer { destination in
+                    destination.baseAddress?.advanced(by: writeIndex)
+                        .update(from: sourceBase + consumed, count: count)
+                }
+                consumed += count
+                pendingCount += count
+                guard pendingCount == Self.windowSize else { continue }
+
+                applyWindow()
+                frames.append(MonitorSpectrumFrame(
+                    elapsedTime: Double(windowStartSample + Int64(Self.windowSize)) / Self.sampleRate,
+                    magnitudesDB: transformWindow(),
+                    binWidthHz: Self.sampleRate / Double(Self.windowSize)
+                ))
+                pendingStart = (pendingStart + Self.hopSize) % Self.windowSize
+                pendingCount -= Self.hopSize
+                windowStartSample += Int64(Self.hopSize)
+            }
+        }
+        return frames
+    }
+
+    private func applyWindow() {
+        pendingSamples.withUnsafeBufferPointer { source in
+            window.withUnsafeBufferPointer { coefficients in
+                windowedSamples.withUnsafeMutableBufferPointer { destination in
+                    guard let source = source.baseAddress,
+                          let coefficients = coefficients.baseAddress,
+                          let destination = destination.baseAddress else { return }
+                    let firstCount = Self.windowSize - pendingStart
+                    vDSP_vmul(source + pendingStart, 1, coefficients, 1,
+                              destination, 1, vDSP_Length(firstCount))
+                    if pendingStart > 0 {
+                        vDSP_vmul(source, 1, coefficients + firstCount, 1,
+                                  destination + firstCount, 1, vDSP_Length(pendingStart))
                     }
                 }
             }
-            let magnitudes = transformWindow()
-            frames.append(MonitorSpectrumFrame(
-                elapsedTime: Double(windowStartSample + Int64(Self.windowSize)) / Self.sampleRate,
-                magnitudesDB: magnitudes,
-                binWidthHz: Self.sampleRate / Double(Self.windowSize)
-            ))
-            consumed += Self.hopSize
-            windowStartSample += Int64(Self.hopSize)
         }
-
-        if consumed > 0 {
-            pendingSamples.removeFirst(consumed)
-        }
-        return frames
     }
 
     private func transformWindow() -> [Float] {
         let halfSize = Self.windowSize / 2
         var decibels = [Float](repeating: Self.minimumDecibels, count: halfSize + 1)
+        var absoluteSum: Float = 0
+        vDSP_svemg(windowedSamples, 1, &absoluteSum, vDSP_Length(Self.windowSize))
+        guard absoluteSum.isFinite else { return decibels }
         real.withUnsafeMutableBufferPointer { realBuffer in
             imaginary.withUnsafeMutableBufferPointer { imaginaryBuffer in
                 var split = DSPSplitComplex(
@@ -99,20 +123,23 @@ nonisolated final class MonitorSpectrumAnalyzer {
                 // vDSP's real FFT returns twice the conventional DFT. Hann's
                 // coherent gain is its coefficient sum; DC/Nyquist are packed
                 // into bin zero and do not receive the interior-bin doubling.
-                decibels[0] = Self.decibels(abs(split.realp[0]) / (2 * windowSum))
-                decibels[halfSize] = Self.decibels(abs(split.imagp[0]) / (2 * windowSum))
-                for index in 1..<halfSize {
-                    let magnitude = hypotf(split.realp[index], split.imagp[index]) / windowSum
-                    decibels[index] = Self.decibels(magnitude)
+                decibels.withUnsafeMutableBufferPointer { output in
+                    guard let values = output.baseAddress else { return }
+                    vDSP_zvabs(&split, 1, values, 1, vDSP_Length(halfSize))
+                    values[0] = abs(split.realp[0]) / 2
+                    values[halfSize] = abs(split.imagp[0]) / 2
+                    var reference = windowSum
+                    var floorAmplitude = windowSum * powf(10, Self.minimumDecibels / 20)
+                    let length = vDSP_Length(halfSize + 1)
+                    // Threshold before log conversion so zero stays finite.
+                    vDSP_vthr(values, 1, &floorAmplitude, values, 1, length)
+                    vDSP_vdbcon(values, 1, &reference, values, 1, length, 1)
+                    var floorDB = Self.minimumDecibels
+                    vDSP_vthr(values, 1, &floorDB, values, 1, length)
                 }
             }
         }
         return decibels
-    }
-
-    private static func decibels(_ amplitude: Float) -> Float {
-        guard amplitude.isFinite, amplitude > 0 else { return minimumDecibels }
-        return max(minimumDecibels, 20 * log10f(amplitude))
     }
 }
 

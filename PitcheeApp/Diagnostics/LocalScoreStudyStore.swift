@@ -111,8 +111,9 @@ final class LocalScoreStudyStore: ObservableObject {
 
     func respond(_ token: Attempt, feedback: ScoreStudyFeedback) {
         refresh()
-        guard active?.token == token, active?.feedback == nil, !storageUnavailable else { return }
-        let accepted = uptime() >= active!.deadline ? ScoreStudyFeedback.timedOut : feedback
+        guard let attempt = active, attempt.token == token, attempt.feedback == nil,
+              !storageUnavailable else { return }
+        let accepted = uptime() >= attempt.deadline ? ScoreStudyFeedback.timedOut : feedback
         active?.feedback = accepted
         state.respond(direction: token.direction, response: accepted.response)
         persist()

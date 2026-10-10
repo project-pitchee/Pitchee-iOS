@@ -1,40 +1,89 @@
-//
-//  LivePitchChartView.swift
-//  Pitchee
-//
-//  Created by Ryo on 2026/9/18.
-//
-
+// Legacy export and accessibility adapters retained only for timeline regression tests.
+// The application uses MonitorPitchPlot and RecordingExportView.
+import Foundation
 import SwiftUI
+import Accessibility
 
-struct LivePitchChartView: View {
+nonisolated struct PitchAccessibilitySnapshot: Identifiable, Sendable {
+    let id = UUID()
+    let range: ClosedRange<TimeInterval>
     let samples: [LivePitchSample]
-    let elapsedTime: TimeInterval
-    let isRecording: Bool
 
-    private var currentPitch: Double? {
-        guard isRecording, let sample = samples.last,
-              elapsedTime - sample.elapsedTime < 0.6,
-              let pitch = sample.pitchHz, pitch.isFinite, pitch > 0 else { return nil }
-        return pitch
+    init(samples: [LivePitchSample], elapsedTime: TimeInterval) {
+        let end = max(PitchTimeline.visibleSeconds, elapsedTime.isFinite ? elapsedTime : 0)
+        let range = (end - PitchTimeline.visibleSeconds)...end
+        self.range = range
+        self.samples = samples.filter { $0.elapsedTime.isFinite && range.contains($0.elapsedTime) }
+            .sorted { $0.elapsedTime < $1.elapsedTime }
     }
 
-    private var accessibilityValue: String {
-        if let currentPitch {
-            return String(localized: "recording.timeline.currentPitch.a11y \(Int(currentPitch))")
+    var voicedSegments: [[LivePitchSample]] {
+        var segments: [[LivePitchSample]] = []
+        var current: [LivePitchSample] = []
+        for sample in samples {
+            guard let pitch = sample.pitchHz, pitch.isFinite, pitch > 0 else {
+                if !current.isEmpty { segments.append(current); current = [] }
+                continue
+            }
+            if let last = current.last, sample.elapsedTime - last.elapsedTime > 0.4 {
+                segments.append(current)
+                current = []
+            }
+            current.append(sample)
         }
-        return isRecording
-            ? String(localized: "recording.timeline.noPitchDetected.a11y")
-            : String(localized: "recording.timeline.notRecording.a11y")
+        if !current.isEmpty { segments.append(current) }
+        return segments
+    }
+}
+
+struct PitchChartDescriptor {
+    let snapshot: PitchAccessibilitySnapshot
+
+    func makeChartDescriptor() -> AXChartDescriptor {
+        AXChartDescriptor(
+            __title: String(localized: "recording.timeline.a11y"),
+            summary: nil,
+            xAxisDescriptor: xAxis,
+            yAxisDescriptor: yAxis,
+            series: series
+        )
     }
 
-    var body: some View {
-        let end = max(PitchTimeline.visibleSeconds, elapsedTime, samples.last?.elapsedTime ?? 0)
-        PitchPlot(samples: samples, timeRange: (end - PitchTimeline.visibleSeconds)...end)
-            .frame(height: 210)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("recording.timeline.a11y")
-            .accessibilityValue(accessibilityValue)
+    func updateChartDescriptor(_ descriptor: AXChartDescriptor) {
+        descriptor.xAxis = xAxis
+        descriptor.yAxis = yAxis
+        descriptor.series = series
+    }
+
+    private var xAxis: AXNumericDataAxisDescriptor {
+        AXNumericDataAxisDescriptor(
+            title: String(localized: "recording.timeline.timeAxis"), range: snapshot.range,
+            gridlinePositions: [], valueDescriptionProvider: { value in
+                value.formatted(.number.precision(.fractionLength(1)))
+            }
+        )
+    }
+
+    private var yAxis: AXNumericDataAxisDescriptor {
+        AXNumericDataAxisDescriptor(
+            title: String(localized: "recording.timeline.pitchAxis"), range: 75...600,
+            gridlinePositions: [75, 150, 300, 600], valueDescriptionProvider: { value in
+                value.formatted(.number.precision(.fractionLength(0)))
+            }
+        )
+    }
+
+    private var series: [AXDataSeriesDescriptor] {
+        snapshot.voicedSegments.map { segment in
+            AXDataSeriesDescriptor(
+                name: String(localized: "recording.timeline.series"),
+                isContinuous: segment.count > 1,
+                dataPoints: segment.compactMap { sample in
+                    guard let pitch = sample.pitchHz, pitch.isFinite, pitch > 0 else { return nil }
+                    return AXDataPoint(x: sample.elapsedTime, y: pitch)
+                }
+            )
+        }
     }
 }
 
@@ -107,7 +156,6 @@ struct PitchPlot: View {
     }
 }
 
-/// A dedicated image layout includes every row, independent of the on-screen viewport.
 struct PitchTimelineImage: View {
     let timeline: PitchTimeline
 
@@ -137,23 +185,3 @@ struct PitchTimelineImage: View {
         .tint(Color.pitcheeAccent)
     }
 }
-
-#if DEBUG
-#Preview("Mock - Live Pitch", traits: .sizeThatFitsLayout) {
-    LivePitchChartView(
-        samples: DebugPreviewData.liveSamples,
-        elapsedTime: 3.5,
-        isRecording: true
-    )
-    .padding()
-}
-
-#Preview("Debug - Empty Pitch", traits: .sizeThatFitsLayout) {
-    LivePitchChartView(samples: [], elapsedTime: 0, isRecording: false)
-        .padding()
-}
-
-#Preview("Mock - Timeline Image", traits: .sizeThatFitsLayout) {
-    PitchTimelineImage(timeline: PitchTimeline(result: DebugPreviewData.result))
-}
-#endif

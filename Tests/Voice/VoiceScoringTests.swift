@@ -18,30 +18,35 @@ enum VoiceScoringTests {
         func close(_ left: Double, _ right: Double) -> Bool {
             abs(left - right) < 0.000_001
         }
-        let rules = [
-            "continuous": "continuous"
+        // Golden contract cases cover every rule and all flags. The app now
+        // invokes Core directly, so comparing two copies of its formula is no
+        // longer useful; validate the bridge and immutable-history behavior.
+        let cases: [(Double, Double, Double?, Double, String, Double?, Bool, Bool)] = [
+            (90, 100, 200, 100, "pass_boost", nil, false, true),
+            (70, 20, 180, 30, "high_f0_stylized_cap", 30, true, false),
+            (100, 100, 165, 59, "low_f0_natural_cap", 59, true, false),
+            (70, 20, 120, 20, "low_f0_stylized_cap", 20, true, false),
+            (49, 80, 200, 59, "high_f0_male_cap", 59, true, false),
+            (50, 50, 180, 41.83333333333333, "continuous", nil, false, false),
+            (63, 90, nil, 63, "f0_unavailable", nil, false, false)
         ]
-        let reference = try String(contentsOfFile: CommandLine.arguments[1], encoding: .utf8)
-        var observedRules = Set<String>()
-        let rows = reference.split(separator: "\n")
-        check(rows.count == 1530, "The full reference grid must be present")
-        for row in rows {
-            let cells = row.split(separator: "\t").map(String.init)
-            check(cells.count == 9, "Reference row has all fields")
-            let pitch = Double(cells[2])!
-            let score = VoiceDirectionScore.masculineComposite(
-                feminineScore: Double(cells[0])!, naturalness: Double(cells[1])!,
-                pitchHz: pitch == 0 ? nil : pitch
+        for (standard, naturalness, pitch, final, rule, cap, limited, boosted) in cases {
+            let score = VoiceDirectionScore.feminineComposite(
+                standardScore: standard, naturalness: naturalness, pitchHz: pitch
             )
-            check(close(score.baseScore, Double(cells[3])!), "Base matches Core: \(row)")
-            check(close(score.finalScore, Double(cells[4])!), "Final matches Core: \(row)")
-            check(score.cap == (Double(cells[5])! < 0 ? nil : Double(cells[5])), "Cap matches Core: \(row)")
-            check(score.limited == (cells[6] == "1"), "Limited flag matches Core: \(row)")
-            check(score.boosted == (cells[7] == "1"), "Boost flag matches Core: \(row)")
-            check(score.rule == rules[cells[8]], "Rule matches Core: \(row)")
-            observedRules.insert(score.rule)
+            check(close(score.finalScore, final), "Feminine golden score: \(rule)")
+            check(score.rule == rule && score.cap == cap, "C string and optional cap: \(rule)")
+            check(score.limited == limited && score.boosted == boosted, "C flags: \(rule)")
         }
-        check(observedRules == Set(rules.values), "Exercise every rule, including missing pitch")
+        for (standard, pitch, expected) in [(50.0, 165.0, 60.0), (30, 120, 81), (0, 40, 100), (100, 400, 20)] {
+            let score = VoiceDirectionScore.masculineComposite(
+                feminineScore: standard, naturalness: 0, pitchHz: pitch
+            )
+            check(close(score.finalScore, expected) && score.baseScore == score.finalScore,
+                  "Masculine golden score and base")
+            check(score.rule == "continuous" && score.cap == nil && !score.boosted && !score.limited,
+                  "Masculine bridge preserves flags")
+        }
 
         func result(
             pitch: Double? = 120,
@@ -112,12 +117,40 @@ enum VoiceScoringTests {
             check(score.finalScore == 69 && score.baseScore == 69, "Missing or invalid pitch removes only the F0 contribution")
             check(score.rule == "continuous" && score.composite.cap == nil, "Fallback uses Core's continuous masculinization rule")
         }
+        for value in [Double.nan, .infinity, -.infinity] {
+            let missingMetrics = VoiceDirectionScore.feminineComposite(
+                standardScore: value, naturalness: value, pitchHz: nil
+            )
+            check(missingMetrics.finalScore == 0 && missingMetrics.rule == "f0_unavailable",
+                  "Nonfinite scores retain the legacy zero-value normalization")
+            let feminine = VoiceDirectionScore.feminineComposite(
+                standardScore: 63, naturalness: 90, pitchHz: value
+            )
+            check(feminine.finalScore == 63 && feminine.rule == "f0_unavailable",
+                  "Nonfinite feminine pitch retains the missing-pitch fallback")
+        }
+        let atBoundary = VoiceDirectionScore.feminineComposite(
+            standardScore: 70, naturalness: 80, pitchHz: 165
+        )
+        let pastBoundary = VoiceDirectionScore.feminineComposite(
+            standardScore: 70, naturalness: 80, pitchHz: 165.001
+        )
+        check(atBoundary.rule == "low_f0_natural_cap" && pastBoundary.rule == "continuous",
+              "The 165 Hz boundary keeps its inclusive lower-pitch rule")
+        let belowNaturalness = VoiceDirectionScore.feminineComposite(
+            standardScore: 70, naturalness: 49.999, pitchHz: 180
+        )
+        let atNaturalness = VoiceDirectionScore.feminineComposite(
+            standardScore: 70, naturalness: 50, pitchHz: 180
+        )
+        check(belowNaturalness.rule == "high_f0_stylized_cap" && atNaturalness.rule == "continuous",
+              "The naturalness 50 boundary does not apply the stylized cap")
         let naturalnessIndependent = VoicePreference.masculine.score(for: result(naturalness: 0)).finalScore
         check(naturalnessIndependent == masculine.finalScore, "Masculinization ignores naturalness")
         for (stored, expected) in [("男性向声音", VoicePreference.masculine), ("女性向声音", .feminine), ("暂不确定", .undecided), ("masculine", .masculine), ("feminine", .feminine), ("undecided", .undecided)] {
             check(VoicePreference(legacyStoredValue: stored) == expected, "Restore both legacy and semantic preferences")
         }
         check(VoicePreference(legacyStoredValue: "invalid") == nil, "Unknown preferences are rejected")
-        print("Voice scoring: \(checks) checks passed across \(rows.count) Core reference cases")
+        print("Voice scoring: \(checks) checks passed using the stateless Core C API")
     }
 }

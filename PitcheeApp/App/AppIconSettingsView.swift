@@ -67,55 +67,6 @@ enum AppIconOption: String, CaseIterable, Identifiable {
     }
 }
 
-struct AppIconSettingsView: View {
-    @State private var selectedIconName = UIApplication.shared.alternateIconName
-    @State private var isChangingIcon = false
-
-    private var supportsAlternateIcons: Bool {
-        UIApplication.shared.supportsAlternateIcons
-    }
-
-    var body: some View {
-        List {
-            Section {
-                ForEach(AppIconOption.allCases) { option in
-                    Button {
-                        select(option)
-                    } label: {
-                        AppIconOptionRow(
-                            option: option,
-                            isSelected: selectedIconName == option.alternateIconName
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isChangingIcon || !supportsAlternateIcons)
-                    .accessibilityIdentifier("settings.appIcon.\(option.id)")
-                }
-            } footer: {
-                Text("about.appIcon.footer")
-            }
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("about.appIcon.title")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func select(_ option: AppIconOption) {
-        guard selectedIconName != option.alternateIconName,
-              supportsAlternateIcons else { return }
-
-        isChangingIcon = true
-        UIApplication.shared.setAlternateIconName(option.alternateIconName) { error in
-            Task { @MainActor in
-                isChangingIcon = false
-                if error == nil {
-                    selectedIconName = option.alternateIconName
-                }
-            }
-        }
-    }
-}
-
 /// Combined appearance picker used by Settings. Theme families and app icons
 /// intentionally share the same selectable row treatment, while the theme
 /// rows preview their background instead of an image asset.
@@ -313,7 +264,7 @@ struct AppIconThumbnail: View {
 }
 
 #if DEBUG
-#Preview("Debug - App Icon Settings") {
-    NavigationStack { AppIconSettingsView() }
+#Preview("Personalization Settings") {
+    NavigationStack { PersonalizationSettingsView() }
 }
 #endif

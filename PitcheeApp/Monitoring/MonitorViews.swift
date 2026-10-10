@@ -7,26 +7,6 @@
 
 import SwiftUI
 
-struct MonitoringHubView: View {
-    var body: some View {
-        List {
-            Section {
-                NavigationLink { PitchMonitorView() } label: {
-                    Label(LocalizedStringKey(MonitorKind.pitch.titleKey), systemImage: MonitorKind.pitch.symbol)
-                }
-                .accessibilityIdentifier("monitor.openPitch")
-                NavigationLink { SpectrumMonitorView() } label: {
-                    Label(LocalizedStringKey(MonitorKind.spectrum.titleKey), systemImage: MonitorKind.spectrum.symbol)
-                }
-                .accessibilityIdentifier("monitor.openSpectrum")
-            } footer: {
-                Text("monitor.hub.description")
-            }
-        }
-        .navigationTitle("monitor.screen.title")
-    }
-}
-
 struct SpectrumMonitorView: View {
     @State private var model = makeMonitorModel(kind: .spectrum)
     var body: some View { MonitorPage(model: model) }

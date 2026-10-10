@@ -52,125 +52,6 @@ enum PageGradientStyle: String, CaseIterable, Identifiable {
     }
 }
 
-/// The light appearance of the concept gradient.
-///
-/// Its paired dark appearance is `DawnGradient`. Both names resolve to the
-/// same `PageGradientStyle.twiltDawn` design when a page switches appearance.
-struct TwiltGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .light
-
-    var body: some View {
-        PageGradient(
-            style: .twiltDawn,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The dark appearance paired with `TwiltGradient`.
-struct DawnGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .dark
-
-    var body: some View {
-        PageGradient(
-            style: .twiltDawn,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The light appearance of the pink gradient, paired with `RoseGradient`.
-struct BlushGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .light
-
-    var body: some View {
-        PageGradient(
-            style: .blushRose,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The dark appearance paired with `BlushGradient`.
-struct RoseGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .dark
-
-    var body: some View {
-        PageGradient(
-            style: .blushRose,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The light appearance of the pale-blue gradient, paired with `MidnightGradient`.
-struct NoonGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .light
-
-    var body: some View {
-        PageGradient(
-            style: .noonMidnight,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The dark appearance paired with `NoonGradient`.
-struct MidnightGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .dark
-
-    var body: some View {
-        PageGradient(
-            style: .noonMidnight,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The light appearance of the blue-pink gradient, paired with `DuskGradient`.
-struct TwilightGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .light
-
-    var body: some View {
-        PageGradient(
-            style: .twilightDusk,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// The dark appearance paired with `TwilightGradient`.
-struct DuskGradient: View {
-    var intensity: CGFloat = 1
-    var appearance: GradientAppearance = .dark
-
-    var body: some View {
-        PageGradient(
-            style: .twilightDusk,
-            appearance: appearance,
-            intensity: intensity
-        )
-    }
-}
-
-/// Compatibility name for the earlier neutral concept wrapper.
-@available(*, deprecated, renamed: "TwiltGradient")
-typealias EveningGradient = TwiltGradient
-
 /// Shared renderer for all gradient families. The positions and layer weights
 /// stay the same between light and dark, which keeps each pair one-to-one while
 /// allowing the colors to carry the visual difference.
@@ -445,48 +326,15 @@ private struct AtmosphericGradientPalette {
 }
 
 #if DEBUG
-#Preview("Twilt") {
-    TwiltGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Dawn") {
-    DawnGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Blush") {
-    BlushGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Rose") {
-    RoseGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Noon") {
-    NoonGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Midnight") {
-    MidnightGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Twilight") {
-    TwilightGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Dusk") {
-    DuskGradient()
-        .frame(width: 390, height: 844)
-}
-
-#Preview("Twilt — Soft") {
-    TwiltGradient(intensity: 0.72)
-        .frame(width: 390, height: 844)
+#Preview("Page Gradients") {
+    ScrollView {
+        ForEach(PageGradientStyle.allCases) { style in
+            HStack {
+                PageGradient(style: style, appearance: .light)
+                PageGradient(style: style, appearance: .dark)
+            }
+            .frame(height: 280)
+        }
+    }
 }
 #endif

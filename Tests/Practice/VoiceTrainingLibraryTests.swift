@@ -9,8 +9,17 @@ import Foundation
 
 @main
 enum VoiceTrainingLibraryTests {
-    static func main() throws {
-        let store = VoiceTrainingLibraryStore.shared
+    @MainActor
+    static func main() async throws {
+        guard CommandLine.arguments.count == 2 else { fatalError("Pass the test resource directory explicitly") }
+        let directory = URL(fileURLWithPath: CommandLine.arguments[1])
+        let store = try await VoiceTrainingLibraryStore.load(directory: directory)
+        await testLoading(store: store)
+        try testInvalidResources(directory: directory)
+        for heading in ["机制", "Understanding", "Comprendre", "الفهم"] {
+            assert(VoiceArticle.Section(heading: heading, body: "Body").iconName == "doc.text.fill")
+            assert(VoiceArticle.Section(heading: heading, icon: "figure.run", body: "Body").iconName == "figure.run")
+        }
         assert(store.articles.count == 49)
         for article in store.articles {
             assert(article.sections.map(\.iconName) == ["gearshape.2.fill", "stethoscope", "figure.run", "books.vertical.fill"])
@@ -263,4 +272,81 @@ enum VoiceTrainingLibraryTests {
         assert(store.articles(inCategory: "Module-01").count == 15)
         print("All Voice Training Library tests passed.")
     }
+
+    @MainActor
+    private static func testLoading(store: VoiceTrainingLibraryStore) async {
+        actor Attempts {
+            private var count = 0
+            let failFirst: Bool
+            init(failFirst: Bool = false) { self.failFirst = failFirst }
+            func load(_ store: VoiceTrainingLibraryStore) async throws -> VoiceTrainingLibraryStore {
+                count += 1
+                if failFirst && count == 1 {
+                    throw VoiceTrainingLibraryStore.LoadError.missingResource("test")
+                }
+                // Yield so overlapping callers can join the same load.
+                await Task.yield()
+                return store
+            }
+            func total() -> Int { count }
+        }
+        let attempts = Attempts()
+        let loader = VoiceTrainingLibraryLoader { try await attempts.load(store) }
+        assert(loader.store.articles.isEmpty && !loader.isLoading && loader.error == nil)
+        let initialAttempts = await attempts.total()
+        assert(initialAttempts == 0, "Initializing a view's shared loader must not start disk I/O")
+        async let first: Void = loader.load()
+        async let second: Void = loader.load()
+        _ = await (first, second)
+        assert(loader.store.articles.count == 49 && !loader.isLoading && loader.error == nil)
+        await loader.load()
+        let loadedAttempts = await attempts.total()
+        assert(loadedAttempts == 1, "Concurrent and later callers must reuse the loaded snapshot")
+
+        let failing = Attempts(failFirst: true)
+        let retryLoader = VoiceTrainingLibraryLoader { try await failing.load(store) }
+        await retryLoader.load()
+        assert(retryLoader.error != nil && retryLoader.store.articles.isEmpty && !retryLoader.isLoading)
+        await retryLoader.load()
+        assert(retryLoader.error == nil && retryLoader.store.articles.count == 49)
+        let retryAttempts = await failing.total()
+        assert(retryAttempts == 2, "A failed load must allow an explicit retry")
+
+        do {
+            _ = try await VoiceTrainingLibraryStore.load(bundle: .main)
+            assertionFailure("The standalone test bundle has no JSON resources; source-path fallback must not occur")
+        } catch {
+            assert(error is VoiceTrainingLibraryStore.LoadError)
+        }
+        print("✓ Loading is asynchronous, shared, explicit about missing resources, and retryable")
+    }
+
+    private static func testInvalidResources(directory: URL) throws {
+        let library = try Data(contentsOf: directory.appendingPathComponent("voice-training-library.json"))
+        let matrix = try Data(contentsOf: directory.appendingPathComponent("voice-rule-matching-matrix.json"))
+        func rejects(_ libraryData: Data, _ matrixData: Data) {
+            do {
+                _ = try VoiceTrainingLibraryStore(libraryData: libraryData, matrixData: matrixData)
+                assertionFailure("Malformed library data must report a load failure")
+            } catch {
+                assert(error is VoiceTrainingLibraryStore.LoadError)
+            }
+        }
+        rejects(Data("broken JSON".utf8), matrix)
+        rejects(library, Data("{}".utf8))
+        rejects(library, Data(#"{"missing": ["UNKNOWN-ARTICLE"]}"#.utf8))
+        var payload = try JSONSerialization.jsonObject(with: library) as! [String: Any]
+        payload["schemaVersion"] = "unsupported"
+        rejects(try JSONSerialization.data(withJSONObject: payload), matrix)
+        payload["schemaVersion"] = "1.0.0"
+        payload["totalArticles"] = 0
+        rejects(try JSONSerialization.data(withJSONObject: payload), matrix)
+        var articles = payload["articles"] as! [[String: Any]]
+        payload["totalArticles"] = articles.count
+        articles[1]["id"] = articles[0]["id"]
+        payload["articles"] = articles
+        rejects(try JSONSerialization.data(withJSONObject: payload), matrix)
+        print("✓ Invalid JSON, schema, counts, duplicate IDs and broken article references are rejected")
+    }
+
 }

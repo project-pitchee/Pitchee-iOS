@@ -107,6 +107,7 @@ struct RecordingResultView: View {
     private let showsBackground: Bool
     private let pitchStatistics: RecordingPitchStatistics
 
+    @ObservedObject private var library = VoiceTrainingLibraryLoader.shared
     @State private var showsVoiceDetails = false
     @State private var selectedVoiceArticle: VoiceArticle?
     @State private var showsAllTrainingArticles = false
@@ -125,7 +126,8 @@ struct RecordingResultView: View {
             for: result,
             preference: voicePreference,
             quality: quality,
-            volumeStatistics: volumeStatistics
+            volumeStatistics: volumeStatistics,
+            store: library.store
         )
     }
 
@@ -159,6 +161,7 @@ struct RecordingResultView: View {
                 Color(uiColor: .systemGroupedBackground)
             }
         }
+        .task { await library.load() }
         .sheet(isPresented: $showsVoiceDetails) {
             voiceDetailsSheet
         }

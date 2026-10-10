@@ -97,6 +97,61 @@ nonisolated enum MonitorSpectrogramRasterizer {
         )
     }
 
+    /// Assemble the visible time window into one bitmap on the render worker.
+    /// Pixel centers select each column's own hop interval; uncovered intervals
+    /// remain transparent, including pauses and a partially filled live window.
+    static func makeImage(
+        columns: [MonitorSpectrogramColumn],
+        timeRange: ClosedRange<TimeInterval>,
+        pixelWidth: Int
+    ) -> CGImage? {
+        let duration = timeRange.upperBound - timeRange.lowerBound
+        guard pixelWidth > 0, pixelWidth <= 4_096,
+              timeRange.lowerBound.isFinite, timeRange.upperBound.isFinite,
+              duration.isFinite, duration > 0 else { return nil }
+        let scale = Double(pixelWidth) / duration
+        guard scale.isFinite else { return nil }
+        let hop = Double(MonitorSpectrumAnalyzer.hopSize) / MonitorSpectrumAnalyzer.sampleRate
+        var pixels = [UInt32](repeating: 0, count: pixelWidth * rowCount)
+        pixels.withUnsafeMutableBufferPointer { destination in
+            guard let output = destination.baseAddress else { return }
+            for column in columns {
+                if Task.isCancelled { return }
+                guard column.elapsedTime.isFinite,
+                      column.elapsedTime > timeRange.lowerBound,
+                      column.elapsedTime - hop < timeRange.upperBound,
+                      column.image.width == 1, column.image.height == rowCount,
+                      column.image.bitsPerPixel == 32, column.image.bitsPerComponent == 8,
+                      let data = column.image.dataProvider?.data,
+                      CFDataGetLength(data) >= rowCount * column.image.bytesPerRow,
+                      let source = CFDataGetBytePtr(data) else { continue }
+                let start = Int(max(0, min(Double(pixelWidth),
+                    ceil((column.elapsedTime - hop - timeRange.lowerBound) * scale - 0.5))))
+                let end = Int(max(0, min(Double(pixelWidth),
+                    ceil((column.elapsedTime - timeRange.lowerBound) * scale - 0.5))))
+                guard start < end else { continue }
+                for row in 0..<rowCount {
+                    let pixel = UnsafeRawPointer(source).loadUnaligned(
+                        fromByteOffset: row * column.image.bytesPerRow, as: UInt32.self
+                    )
+                    (output + row * pixelWidth + start).update(repeating: pixel, count: end - start)
+                }
+            }
+        }
+        guard !Task.isCancelled else { return nil }
+        let data = pixels.withUnsafeBytes { Data($0) }
+        guard let provider = CGDataProvider(data: data as CFData),
+              let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
+        return CGImage(
+            width: pixelWidth, height: rowCount,
+            bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: pixelWidth * 4,
+            space: colorSpace,
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+                .union(.byteOrder32Big),
+            provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent
+        )
+    }
+
     private static func color(for decibels: Float) -> (red: UInt8, green: UInt8, blue: UInt8) {
         let level = Double(min(maximumDecibels, max(minimumDecibels, decibels)) - minimumDecibels)
             / Double(maximumDecibels - minimumDecibels)

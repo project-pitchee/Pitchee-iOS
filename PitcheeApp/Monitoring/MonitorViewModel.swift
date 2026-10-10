@@ -485,13 +485,16 @@ final class MonitorViewModel {
                 if notification.name == AVAudioSession.routeChangeNotification {
                     let value = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
                     guard value == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
-                        || value == AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue else { return }
+                        || value == AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                        || value == AVAudioSession.RouteChangeReason.noSuitableRouteForCategory.rawValue else { return }
                 }
                 if notification.name == AVAudioSession.interruptionNotification {
                     let value = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
                     guard value == AVAudioSession.InterruptionType.began.rawValue else { return }
                 }
-                Task { @MainActor [weak self] in self?.pause() }
+                // Delivery is already on .main. Deferring this could pause a
+                // new capture started after the interruption was handled.
+                MainActor.assumeIsolated { self?.pause() }
             }
             observers.append(observer)
         }

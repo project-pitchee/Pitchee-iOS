@@ -5,6 +5,8 @@ project_directory=$(dirname "$script_directory")
 test_directory=$(mktemp -d "${TMPDIR:-/tmp}/pitchee-recording-lifecycle.XXXXXX")
 trap 'rm -rf "$test_directory"' EXIT HUP INT TERM
 
+. "$script_directory/core-scoring-test-support.sh"
+
 xcrun swiftc -parse-as-library -swift-version 6 -strict-concurrency=complete -warnings-as-errors \
     "$project_directory/PitcheeApp/Audio/AudioSessionCoordinator.swift" \
     "$project_directory/Tests/Recording/AudioSessionCoordinatorTests.swift" \
@@ -19,6 +21,7 @@ xcrun swiftc -parse-as-library -swift-version 5 -default-isolation MainActor \
     -I "$project_directory/Dependencies/PitcheeCore/platform/ios" \
     "$project_directory/PitcheeApp/Interop/Core/AnalysisResult.swift" \
     "$project_directory/PitcheeApp/Interop/Core/CoreError.swift" \
+    -I "$core_scoring_module_directory" "$core_scoring_object" -lc++ \
     "$project_directory/PitcheeApp/Analysis/VoiceScoring.swift" \
     "$project_directory/PitcheeApp/Analysis/PitchTimeline.swift" \
     "$project_directory/PitcheeApp/Analysis/RecordingStatistics.swift" \

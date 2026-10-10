@@ -8,6 +8,8 @@ python3 -m unittest discover -s Tests/Localization -p 'test_*.py'
 
 test_directory=$(mktemp -d "${TMPDIR:-/tmp}/pitchee-localizations.XXXXXX")
 trap 'rm -rf "$test_directory"' EXIT HUP INT TERM
+
+. "$script_directory/core-scoring-test-support.sh"
 test_app="$test_directory/LocalizationRuntime.app"
 mkdir -p "$test_app/Contents/MacOS" "$test_app/Contents/Resources"
 cat > "$test_app/Contents/Info.plist" <<'PLIST'
@@ -24,6 +26,7 @@ xcrun xcstringstool compile Resources/InfoPlist.xcstrings --output-directory "$t
 xcrun swiftc -parse-as-library -swift-version 5 \
     -default-isolation MainActor -strict-concurrency=complete -warnings-as-errors \
     PitcheeApp/Interop/Core/AnalysisResult.swift \
+    -I "$core_scoring_module_directory" "$core_scoring_object" -lc++ \
     PitcheeApp/Analysis/VoiceScoring.swift \
     PitcheeApp/Practice/PracticeData.swift \
     Tests/Localization/LocalizationRuntimeTests.swift \

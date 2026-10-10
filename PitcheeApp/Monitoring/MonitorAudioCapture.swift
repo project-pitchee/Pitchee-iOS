@@ -86,19 +86,24 @@ nonisolated final class MonitorAudioCapture: @unchecked Sendable {
         }
         let converter = try LivePitchPCMConverter(sampleRate: format.sampleRate)
         let spectrum = try needsSpectrum ? MonitorSpectrumAnalyzer() : nil
-        let (stream, continuation) = AsyncThrowingStream<CapturedAudioBuffer, Error>.makeStream(
-            bufferingPolicy: .bufferingOldest(128)
-        )
-        let run = MonitorCaptureIngress(
-            continuation: continuation,
-            maximumFrameCount: Int(ceil(format.sampleRate * 2))
-        )
+        guard format.sampleRate <= 384_000 else { throw MonitorAudioCaptureError.inputUnavailable }
+        let run = try MonitorCaptureIngress(format: format,
+                                            maximumFrameCount: Int(ceil(format.sampleRate * 2)))
         let worker = Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                for try await captured in stream {
-                    defer { run.release(frameCount: Int(captured.buffer.frameLength)) }
-                    guard !Task.isCancelled, run.isActive else { return }
-                    let samples = try converter.convert(captured.buffer)
+                while !Task.isCancelled, run.isActive {
+                    guard let buffer = run.nextBuffer() else {
+                        if run.isDrained {
+                            if let error = run.error { throw error }
+                            return
+                        }
+                        // Polling is worker-only: no GCD dispatch, locks, or
+                        // AsyncStream.yield is required from the audio tap.
+                        try await Task.sleep(for: .milliseconds(2))
+                        continue
+                    }
+                    defer { run.releaseBuffer() }
+                    let samples = try converter.convert(buffer)
                     guard !samples.isEmpty else { continue }
                     let spectrumFrames = spectrum?.process(samples) ?? []
                     let pitchFrames: [PitcheeF0Frame]
@@ -259,17 +264,11 @@ private nonisolated final class MonitorMicrophoneEngine: MonitorCaptureEngine, @
 /// the run; discarded input can never silently compress the monitoring clock.
 private nonisolated final class MonitorCaptureIngress: @unchecked Sendable {
     private let lock = NSLock()
-    private let continuation: AsyncThrowingStream<CapturedAudioBuffer, Error>.Continuation
-    private let budget: AudioCaptureBufferBudget
+    private let ring: RealtimeAudioBufferRing
     private var active = true
-    private var accepting = true
 
-    init(
-        continuation: AsyncThrowingStream<CapturedAudioBuffer, Error>.Continuation,
-        maximumFrameCount: Int
-    ) {
-        self.continuation = continuation
-        budget = AudioCaptureBufferBudget(maximumFrameCount: maximumFrameCount)
+    init(format: AVAudioFormat, maximumFrameCount: Int) throws {
+        ring = try RealtimeAudioBufferRing(format: format, maximumFrameCount: maximumFrameCount)
     }
 
     var isActive: Bool {
@@ -277,75 +276,23 @@ private nonisolated final class MonitorCaptureIngress: @unchecked Sendable {
     }
 
     func enqueue(_ buffer: AVAudioPCMBuffer) {
-        let frameCount = Int(buffer.frameLength)
-        guard frameCount > 0 else { return }
-        lock.lock()
-        guard active, accepting else {
-            lock.unlock()
-            return
-        }
-        switch budget.reserve(frameCount: frameCount) {
-        case .accepted: break
-        case .closed:
-            lock.unlock()
-            return
-        case .overrun:
-            accepting = false
-            lock.unlock()
-            continuation.finish(throwing: MonitorAudioCaptureError.processingOverrun)
-            return
-        }
-        lock.unlock()
-
-        guard let copy = LivePitchAudioCapture.copyBuffer(buffer) else {
-            release(frameCount: frameCount)
-            fail(MonitorAudioCaptureError.copyFailed)
-            return
-        }
-        lock.lock()
-        guard active, accepting else {
-            budget.release(frameCount: frameCount)
-            lock.unlock()
-            return
-        }
-        let result = continuation.yield(CapturedAudioBuffer(buffer: copy))
-        switch result {
-        case .enqueued:
-            lock.unlock()
-        case .dropped:
-            budget.release(frameCount: frameCount)
-            accepting = false
-            lock.unlock()
-            continuation.finish(throwing: MonitorAudioCaptureError.processingOverrun)
-        case .terminated:
-            budget.release(frameCount: frameCount)
-            accepting = false
-            lock.unlock()
-        @unknown default:
-            budget.release(frameCount: frameCount)
-            accepting = false
-            lock.unlock()
-            continuation.finish(throwing: MonitorAudioCaptureError.processingOverrun)
-        }
+        ring.enqueue(buffer)
     }
 
-    func release(frameCount: Int) {
-        budget.release(frameCount: frameCount)
+    func nextBuffer() -> AVAudioPCMBuffer? { ring.nextBuffer() }
+    func releaseBuffer() { ring.releaseBuffer() }
+    var isDrained: Bool { ring.isDrained }
+    var error: MonitorAudioCaptureError? {
+        switch ring.failure {
+        case .overrun: return .processingOverrun
+        case .invalidBuffer: return .copyFailed
+        case nil: return nil
+        }
     }
 
     func cancel() {
-        lock.withLock {
-            active = false
-            accepting = false
-        }
-        budget.close()
-        continuation.finish()
-    }
-
-    private func fail(_ error: Error) {
-        lock.withLock { accepting = false }
-        budget.close()
-        continuation.finish(throwing: error)
+        ring.close()
+        lock.withLock { active = false }
     }
 }
 

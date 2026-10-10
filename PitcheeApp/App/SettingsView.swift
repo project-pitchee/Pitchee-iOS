@@ -240,12 +240,6 @@ struct VoicePreferenceSettingsView: View {
     }
 }
 
-struct ThemeSettingsView: View {
-    var body: some View {
-        PersonalizationSettingsView()
-    }
-}
-
 struct PrivacySettingsView: View {
     @ScaledMetric(relativeTo: .body) private var iconSize = 22
 

@@ -112,6 +112,13 @@ enum MonitorSpectrumTests {
             }, "batch size \(batchSize) preserves overlap, time, and every spectrum bin")
         }
 
+        for invalid: Float in [.nan, .infinity, -.infinity] {
+            var invalidWindow = [Float](repeating: 0, count: 2_048)
+            invalidWindow[100] = invalid
+            let invalidFrame = try MonitorSpectrumAnalyzer().process(invalidWindow)[0]
+            check(invalidFrame.magnitudesDB.allSatisfy { $0 == -120 },
+                  "Nonfinite input cannot propagate NaN or infinity into displayed FFT bins")
+        }
         let restarted = try MonitorSpectrumAnalyzer().process(signal)
         check(restarted[0].elapsedTime == 0.128,
               "a fresh capture starts a fresh spectrum timeline")

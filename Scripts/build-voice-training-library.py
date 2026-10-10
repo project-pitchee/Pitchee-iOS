@@ -2,14 +2,16 @@
 """
 build-voice-training-library.py
 Builds the machine-readable voice-training-library.json and voice-rule-matching-matrix.json
-from Documents/Articles / Docs/Voice-Training-Library markdown files for Pitchee iOS App integration.
+from the explicitly selected Markdown source into the sole app resource directory.
+Use --check to validate resources and detect source drift without writing files.
 """
 
 import os
 import re
 import json
 import glob
-from datetime import datetime, timezone
+import argparse
+import hashlib
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if os.path.exists(os.path.join(SCRIPT_DIR, "Module-01-Engine-Rules")):
@@ -26,27 +28,15 @@ else:
     LIBRARY_DOCS_DIR = os.path.abspath(os.environ.get("ARTICLES_DIR") or LOCAL_DOCS_DIR)
 
     RESOURCES_DIR = os.path.join(REPO_ROOT, "Resources", "VoiceTrainingLibrary")
-    os.makedirs(RESOURCES_DIR, exist_ok=True)
 
-SECTION_ICON_MAP = {
-    "一、理解这项主题": "gearshape.2.fill",
-    "二、练习前的观察": "stethoscope",
-    "三、可尝试的方法": "figure.run",
-    "四、依据与延伸阅读": "books.vertical.fill"
-}
-
-def icon_for_heading(heading):
-    if heading in SECTION_ICON_MAP:
-        return SECTION_ICON_MAP[heading]
-    if "机制" in heading or "原理" in heading:
-        return "gearshape.2.fill"
-    if "自查" in heading or "排查" in heading or "症状" in heading:
-        return "stethoscope"
-    if "训练" in heading or "动作" in heading or "实操" in heading or "指南" in heading:
-        return "figure.run"
-    if "文献" in heading or "参考" in heading or "循证" in heading:
-        return "books.vertical.fill"
-    return "doc.text.fill"
+# The library schema defines four ordered roles: understand, observe, practice,
+# references. Display headings are translated copy, never classification keys.
+SECTION_ICONS = (
+    "gearshape.2.fill",
+    "stethoscope",
+    "figure.run",
+    "books.vertical.fill",
+)
 
 def parse_markdown(filepath):
     rel_path = os.path.relpath(filepath, LIBRARY_DOCS_DIR)
@@ -202,11 +192,13 @@ def parse_markdown(filepath):
     if current_sec:
         sections.append(current_sec)
 
+    if len(sections) != len(SECTION_ICONS):
+        raise ValueError(f"Expected four ordered sections in {filepath}, found {len(sections)}")
     clean_sections = []
-    for s in sections:
+    for index, s in enumerate(sections):
         clean_sections.append({
             "heading": s["heading"],
-            "icon": icon_for_heading(s["heading"]),
+            "icon": SECTION_ICONS[index],
             "body": "\n".join(s["content"]).strip()
         })
 
@@ -226,6 +218,14 @@ def parse_markdown(filepath):
     }
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="Validate generated resources without rewriting any checkout")
+    args = parser.parse_args()
+    validate_resources_only = args.check and not os.environ.get("ARTICLES_DIR") and not os.path.isdir(LIBRARY_DOCS_DIR)
+    if validate_resources_only:
+        validate_resources()
+        print("Validated bundled resources; Markdown source checkout is not installed.")
+        return
     md_files = sorted([f for f in glob.glob(os.path.join(LIBRARY_DOCS_DIR, "**", "*.md"), recursive=True) if not f.endswith("README.md")])
     if len(md_files) != 49:
         raise ValueError(f"Expected 49 articles in {LIBRARY_DOCS_DIR}, found {len(md_files)}")
@@ -235,19 +235,20 @@ def main():
 
     print(f"Parsed {len(articles)} articles from {LIBRARY_DOCS_DIR}.")
 
+    digest = hashlib.sha256()
+    for path in md_files:
+        digest.update(os.path.relpath(path, LIBRARY_DOCS_DIR).encode("utf-8"))
+        digest.update(b"\0")
+        with open(path, "rb") as source:
+            digest.update(source.read())
+        digest.update(b"\0")
     output_payload = {
         "schemaVersion": "1.0.0",
-        "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "sourceSHA256": digest.hexdigest(),
         "description": "Pitchee iOS App Embedded Voice Training Text Resource Library",
         "totalArticles": len(articles),
         "articles": articles
     }
-
-    # Write structured library to Resources/VoiceTrainingLibrary
-    lib_path = os.path.join(RESOURCES_DIR, "voice-training-library.json")
-    with open(lib_path, "w", encoding="utf-8") as f:
-        json.dump(output_payload, f, ensure_ascii=False, indent=2)
-    print(f"Wrote structured library to {lib_path}")
 
     # Build rule matching matrix
     rule_matrix = {
@@ -270,25 +271,51 @@ def main():
         "acoustic_metrics": [a["id"] for a in articles if a["id"].startswith("METRIC")]
     }
 
-    matrix_path = os.path.join(RESOURCES_DIR, "voice-rule-matching-matrix.json")
-    with open(matrix_path, "w", encoding="utf-8") as f:
-        json.dump(rule_matrix, f, ensure_ascii=False, indent=2)
-    print(f"Wrote matching matrix to {matrix_path}")
+    outputs = {
+        "voice-training-library.json": output_payload,
+        "voice-rule-matching-matrix.json": rule_matrix,
+    }
+    if args.check:
+        for name, payload in outputs.items():
+            with open(os.path.join(RESOURCES_DIR, name), encoding="utf-8") as source:
+                actual = json.load(source)
+            if actual != payload:
+                raise ValueError(f"{name} differs from Markdown source; run Scripts/build-voice-training-library.py")
+        validate_resources()
+        print("Bundled JSON matches the Markdown source and generator.")
+    else:
+        os.makedirs(RESOURCES_DIR, exist_ok=True)
+        for name, payload in outputs.items():
+            path = os.path.join(RESOURCES_DIR, name)
+            with open(path, "w", encoding="utf-8") as output:
+                json.dump(payload, output, ensure_ascii=False, indent=2)
+                output.write("\n")
+            print(f"Wrote {path}")
+        validate_resources()
 
-    # Mirror only into the source actually used for this build.
-    target_mirror_dirs = []
-    if os.path.abspath(LIBRARY_DOCS_DIR) != os.path.abspath(RESOURCES_DIR):
-        target_mirror_dirs.append(LIBRARY_DOCS_DIR)
 
-    for mdir in target_mirror_dirs:
-        if os.path.exists(mdir):
-            m_lib_path = os.path.join(mdir, "voice-training-library.json")
-            with open(m_lib_path, "w", encoding="utf-8") as f:
-                json.dump(output_payload, f, ensure_ascii=False, indent=2)
-            m_mat_path = os.path.join(mdir, "voice-rule-matching-matrix.json")
-            with open(m_mat_path, "w", encoding="utf-8") as f:
-                json.dump(rule_matrix, f, ensure_ascii=False, indent=2)
-            print(f"Wrote mirror JSON copies to {mdir}")
+def validate_resources():
+    with open(os.path.join(RESOURCES_DIR, "voice-training-library.json"), encoding="utf-8") as source:
+        library = json.load(source)
+    with open(os.path.join(RESOURCES_DIR, "voice-rule-matching-matrix.json"), encoding="utf-8") as source:
+        matrix = json.load(source)
+    articles = library["articles"]
+    if library["schemaVersion"] != "1.0.0" or library["totalArticles"] != len(articles) or len(articles) != 49:
+        raise ValueError("Invalid library schema or article count")
+    ids = {article["id"] for article in articles}
+    if len(ids) != len(articles):
+        raise ValueError("Duplicate article IDs")
+    for article in articles:
+        for field in ["id", "title", "summary", "userPersona", "coreGoal"]:
+            if not article[field]:
+                raise ValueError(f"Missing {field} in {article['id']}")
+        if tuple(section.get("icon") for section in article["sections"]) != SECTION_ICONS:
+            raise ValueError(f"Invalid section roles in {article['id']}")
+        if any(len(section["body"].strip()) < 80 for section in article["sections"]):
+            raise ValueError(f"Incomplete section body in {article['id']}")
+    if not matrix or any(not values or not set(values) <= ids for values in matrix.values()):
+        raise ValueError("Empty rules or unknown article IDs in matching matrix")
+
 
 if __name__ == "__main__":
     main()

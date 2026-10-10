@@ -6,83 +6,58 @@ cd "$REPO_ROOT"
 
 echo "=== Testing Voice Training Library & Matching Engine ==="
 
-# 1. Run Python validation on Markdown articles and JSON output
-python3 -c '
-import json, os, glob
+# Validate the sole generated app resources and, when installed, their Markdown source.
+python3 Scripts/build-voice-training-library.py --check
+python3 - <<'PYTHON'
+import importlib.util
+import json
+import pathlib
+import tempfile
+import sys
 
-expected_headings = [
-    "## 一、理解这项主题",
-    "## 二、练习前的观察",
-    "## 三、可尝试的方法",
-    "## 四、依据与延伸阅读"
-]
-
-expected_icons = [
-    "gearshape.2.fill",
-    "stethoscope",
-    "figure.run",
-    "books.vertical.fill"
-]
-
-# Validate the source chosen by the builder, not an unrelated sibling checkout.
-docs_dir = os.environ.get("ARTICLES_DIR") or "Docs/Voice-Training-Library"
-md_files = [f for f in glob.glob(os.path.join(docs_dir, "**", "*.md"), recursive=True) if not f.endswith("README.md")]
-assert len(md_files) == 49, f"Expected 49 articles in {docs_dir}, found {len(md_files)}"
-for f in md_files:
-    with open(f, "r", encoding="utf-8") as fp:
-        text = fp.read()
-        assert not ("---\n\n\n---" in text or "---\n\n---" in text), f"Double divider in {f}"
-        h2s = [l.strip() for l in text.splitlines() if l.startswith("## ")]
-        assert h2s == expected_headings, f"Article {f} has non-standard headings: {h2s}"
-print(f"✓ Validated all {len(md_files)} articles in {docs_dir} with standard 4-section architecture & clean dividers")
-
-# Check compiled JSON in Resources/VoiceTrainingLibrary
-json_path = "Resources/VoiceTrainingLibrary/voice-training-library.json"
-assert os.path.exists(json_path), "JSON library missing"
-with open(json_path, "r", encoding="utf-8") as fp:
-    data = json.load(fp)
-
-assert data["schemaVersion"] == "1.0.0"
-assert len(data["articles"]) == 49
-for art in data["articles"]:
-    aid = art.get("id")
-    assert aid, f"Missing id: {art}"
-    assert art["title"], f"Missing title in {aid}"
-    assert art["summary"], f"Missing summary in {aid}"
-    assert art["userPersona"], f"Missing userPersona in {aid}"
-    assert art["coreGoal"], f"Missing coreGoal in {aid}"
-    assert len(art["sections"]) == 4, f"Expected 4 sections in {aid}, got {len(art['sections'])}"
-    icons = [s.get("icon") for s in art["sections"]]
-    assert icons == expected_icons, f"Unexpected icons in {aid}: {icons}"
-    for s_idx, sec in enumerate(art["sections"]):
-        assert len(sec.get("body", "").strip()) >= 80, f"Section {s_idx+1} in {aid} too short: {sec.get('body')}"
-
-print(f"✓ Validated 49 articles in JSON with complete metadata, substantial content in all 4 sections, and 100% SF Symbol mapping")
-
-matrix_path = "Resources/VoiceTrainingLibrary/voice-rule-matching-matrix.json"
-assert os.path.exists(matrix_path), "Matrix JSON missing"
-with open(matrix_path, "r", encoding="utf-8") as f:
-    matrix = json.load(f)
-
-required_keys = [
+sys.dont_write_bytecode = True
+spec = importlib.util.spec_from_file_location("voice_library_builder", "Scripts/build-voice-training-library.py")
+builder = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(builder)
+with open("Resources/VoiceTrainingLibrary/voice-training-library.json", encoding="utf-8") as source:
+    library = json.load(source)
+with open("Resources/VoiceTrainingLibrary/voice-rule-matching-matrix.json", encoding="utf-8") as source:
+    matrix = json.load(source)
+required_keys = {
     "pass_boost", "high_f0_stylized_cap", "high_f0_male_cap",
     "low_f0_natural_cap", "low_f0_stylized_cap", "f0_unavailable",
     "continuous", "score_starter", "score_mid", "score_advanced",
     "score_master", "masculine_specialization", "nonbinary_exploration",
-    "guided_practice", "recording_quality", "health_safety", "acoustic_metrics"
-]
-for k in required_keys:
-    assert k in matrix and len(matrix[k]) > 0, f"Missing or empty matrix category: {k}"
-print(f"✓ Validated rule matching matrix with all {len(required_keys)} categories")
-'
+    "guided_practice", "recording_quality", "health_safety", "acoustic_metrics",
+}
+assert set(matrix) == required_keys
+# Translating every heading must preserve roles and icons, including non-Latin copy.
+for headings in [
+    ["Understanding", "Before practice", "Methods", "References"],
+    ["Comprendre", "Observer", "Pratiquer", "Références"],
+    ["الفهم", "الملاحظة", "التدريب", "المراجع"],
+]:
+    markdown = "# Test article\n" + "\n".join("## " + heading + "\nBody" for heading in headings)
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / "TEST-01-localized.md"
+        path.write_text(markdown, encoding="utf-8")
+        article = builder.parse_markdown(str(path))
+    assert [section["heading"] for section in article["sections"]] == headings
+    assert tuple(section["icon"] for section in article["sections"]) == builder.SECTION_ICONS
+print(f"✓ Validated {len(library['articles'])} articles, {len(matrix)} rules and language-independent section roles")
+PYTHON
 
 # 2. Compile and run Swift test for VoiceLibraryMatcher and Section Icons
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
+project_directory="$REPO_ROOT"
+test_directory="$TMP_DIR"
+. "$REPO_ROOT/Scripts/core-scoring-test-support.sh"
 
 xcrun swiftc -parse-as-library -swift-version 5 \
     -default-isolation MainActor -strict-concurrency=complete -warnings-as-errors \
     -target "$(uname -m)-apple-macosx14.0" \
+    -I "$core_scoring_module_directory" "$core_scoring_object" -lc++ \
     PitcheeApp/Interop/Core/AnalysisResult.swift \
     PitcheeApp/Analysis/VoiceScoring.swift \
     PitcheeApp/Analysis/RecordingStatistics.swift \
@@ -91,6 +66,6 @@ xcrun swiftc -parse-as-library -swift-version 5 \
     Tests/Practice/VoiceTrainingLibraryTests.swift \
     -o "$TMP_DIR/matcher-test-bin"
 
-"$TMP_DIR/matcher-test-bin"
+"$TMP_DIR/matcher-test-bin" "$REPO_ROOT/Resources/VoiceTrainingLibrary"
 
 echo "=== Voice Training Library verification 100% SUCCESS ==="
